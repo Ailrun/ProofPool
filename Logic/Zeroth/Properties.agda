@@ -50,13 +50,13 @@ open import Logic.Zeroth.SCC
 ⟶₀⇒⊢₀ (→ₚ₀L A→B∈ ⟶A B⟶) = ⊢₀-subst {[]} (⟶₀⇒⊢₀ B⟶) (→ₚ₀E (pre₀ A→B∈) (⟶₀⇒⊢₀ ⟶A))
 ⟶₀⇒⊢₀ (cut₀ ⟶A A⟶)      = ∨ₚ₀E (∨ₚ₀I₁ (⟶₀⇒⊢₀ ⟶A)) (⟶₀⇒⊢₀ A⟶) (⟶₀⇒⊢₀ A⟶)
 
-⟶₀₋-consistent : [] ⟶₀₋ ⊥ₚ₀ → ⊥
-⟶₀₋-consistent (init₀₋ ())
-⟶₀₋-consistent (⊥ₚ₀₋L ())
-⟶₀₋-consistent (∧ₚ₀₋L₁ () _)
-⟶₀₋-consistent (∧ₚ₀₋L₂ () _)
-⟶₀₋-consistent (∨ₚ₀₋L () _ _)
-⟶₀₋-consistent (→ₚ₀₋L () _ _)
+⟶₀₋-consistency : [] ⟶₀₋ ⊥ₚ₀ → ⊥
+⟶₀₋-consistency (init₀₋ ())
+⟶₀₋-consistency (⊥ₚ₀₋L ())
+⟶₀₋-consistency (∧ₚ₀₋L₁ () _)
+⟶₀₋-consistency (∧ₚ₀₋L₂ () _)
+⟶₀₋-consistency (∨ₚ₀₋L () _ _)
+⟶₀₋-consistency (→ₚ₀₋L () _ _)
 
 ⟶₀₋⇒⟶₀ : Γ ⟶₀₋ A → Γ ⟶₀ A
 ⟶₀₋⇒⟶₀ (init₀₋ A∈)        = init₀ A∈
@@ -90,85 +90,89 @@ module _ where
       sz′ ≡ size-⟶₀₋ Seq′ → 
       Γ ⟶₀₋ E
 
-    module CutRec where
-      cut-elimination-helper′ : ∀ trip (rec : ∀ {A Γ B Γ′ C} (Seq : Γ ⟶₀₋ B) (Seq′ : Γ′ ⟶₀₋ C) → (A , size-⟶₀₋ Seq , size-⟶₀₋ Seq′) <ₗₑₓ trip → cut-goal (A , size-⟶₀₋ Seq , size-⟶₀₋ Seq′)) → cut-goal trip
-      cut-elimination-helper′ (A , _) rec (init₀₋ A∈)        A⟶                         refl refl = ⟶₀₋-resp-∈⇒∈ ∈⇒∈ A⟶
+    module _ trip (rec : ∀ {A Γ B Γ′ C} (Seq : Γ ⟶₀₋ B) (Seq′ : Γ′ ⟶₀₋ C) → (A , size-⟶₀₋ Seq , size-⟶₀₋ Seq′) <ₗₑₓ trip → cut-goal (A , size-⟶₀₋ Seq , size-⟶₀₋ Seq′)) where
+      rec-structural : ∀ {Γ A E} → (Seq : Γ ⟶₀₋ A) (Seq′ : A ∷ Γ ⟶₀₋ E) → (A , size-⟶₀₋ Seq , size-⟶₀₋ Seq′) <ₗₑₓ trip → Γ ⟶₀₋ E
+      rec-structural Seq Seq′ ord = rec Seq Seq′ ord Seq Seq′ refl refl
+
+      rec-wk/ex      : ∀ {Γ A B E} → (Seq : Γ ⟶₀₋ A) (Seq′ : B ∷ A ∷ Γ ⟶₀₋ E) → (A , size-⟶₀₋ Seq , size-⟶₀₋ Seq′) <ₗₑₓ trip → B ∷ Γ ⟶₀₋ E
+      rec-wk/ex      Seq Seq′ ord = rec Seq Seq′ ord (⟶₀₋wk {[]} Seq) (⟶₀₋ex {[]} Seq′) (⟶₀₋wk-preserves-size-⟶₀₋ {[]} Seq) (⟶₀₋ex-preserves-size-⟶₀₋ {[]} Seq′)
+
+      cut-elimination₀-gen : cut-goal trip
+      cut-elimination₀-gen (init₀₋ A∈)        A⟶                         refl refl = ⟶₀₋-resp-∈⇒∈ ∈⇒∈ A⟶
         where
-          ∈⇒∈ : ∀ {B} → B ∈ A ∷ _ → B ∈ _
+          ∈⇒∈ : ∀ {B} → B ∈ proj₁ trip ∷ _ → B ∈ _
           ∈⇒∈ (here refl) = ∈-++⁺ʳ _ A∈
           ∈⇒∈ (there B∈)  = ∈-++⁺ʳ _ B∈
-      cut-elimination-helper′ _       rec (⊥ₚ₀₋L ⊥∈)         A⟶                         refl refl = ⊥ₚ₀₋L ⊥∈
-      cut-elimination-helper′ _       rec (∧ₚ₀₋L₁ A∧B∈ A⟶)   C⟶                         refl refl = ∧ₚ₀₋L₁ A∧B∈ (rec A⟶ (⟶₀₋wk {_ ∷ []} C⟶) (<ₗₑₓ-of₁ ≤-refl) A⟶ (⟶₀₋wk {_ ∷ []} C⟶) refl refl)
-      cut-elimination-helper′ _       rec (∧ₚ₀₋L₂ A∧B∈ B⟶)   C⟶                         refl refl = ∧ₚ₀₋L₂ A∧B∈ (rec B⟶ (⟶₀₋wk {_ ∷ []} C⟶) (<ₗₑₓ-of₁ ≤-refl) B⟶ (⟶₀₋wk {_ ∷ []} C⟶) refl refl)
-      cut-elimination-helper′ _       rec (∨ₚ₀₋L A∨B∈ A⟶ B⟶) C⟶                         refl refl = ∨ₚ₀₋L A∨B∈ (rec A⟶ (⟶₀₋wk {_ ∷ []} C⟶) (<ₗₑₓ-of₁ (m≤m+n _ _)) A⟶ (⟶₀₋wk {_ ∷ []} C⟶) refl refl) (rec B⟶ (⟶₀₋wk {_ ∷ []} C⟶) (<ₗₑₓ-of₁ (s≤s (m≤n+m _ _))) B⟶ (⟶₀₋wk {_ ∷ []} C⟶) refl refl)
-      cut-elimination-helper′ _       rec (→ₚ₀₋L A→B∈ ⟶A B⟶) C⟶                         refl refl = →ₚ₀₋L A→B∈ ⟶A (rec B⟶ (⟶₀₋wk {_ ∷ []} C⟶) (<ₗₑₓ-of₁ (s≤s (m≤n+m _ _))) B⟶ (⟶₀₋wk {_ ∷ []} C⟶) refl refl)
-      cut-elimination-helper′ trip    rec ⟶A∧B@(∧ₚ₀₋R ⟶A ⟶B) (∧ₚ₀₋L₁ (here refl) A⟶)    refl refl = rec ⟶A A⟶E (<ₗₑₓ-of₀ (m≤m+n _ _)) ⟶A A⟶E refl refl
+      cut-elimination₀-gen (⊥ₚ₀₋L ⊥∈)         A⟶                         refl refl = ⊥ₚ₀₋L ⊥∈
+      cut-elimination₀-gen (∧ₚ₀₋L₁ A∧B∈ A⟶)   C⟶                         refl refl = ∧ₚ₀₋L₁ A∧B∈ (rec-structural A⟶ (⟶₀₋wk {_ ∷ []} C⟶) (<ₗₑₓ-of₁ ≤-refl))
+      cut-elimination₀-gen (∧ₚ₀₋L₂ A∧B∈ B⟶)   C⟶                         refl refl = ∧ₚ₀₋L₂ A∧B∈ (rec-structural B⟶ (⟶₀₋wk {_ ∷ []} C⟶) (<ₗₑₓ-of₁ ≤-refl))
+      cut-elimination₀-gen (∨ₚ₀₋L A∨B∈ A⟶ B⟶) C⟶                         refl refl = ∨ₚ₀₋L A∨B∈
+                                                                                       (rec-structural A⟶ (⟶₀₋wk {_ ∷ []} C⟶) (<ₗₑₓ-of₁ (m≤m+n _ _)))
+                                                                                       (rec-structural B⟶ (⟶₀₋wk {_ ∷ []} C⟶) (<ₗₑₓ-of₁ (s≤s (m≤n+m _ _))))
+      cut-elimination₀-gen (→ₚ₀₋L A→B∈ ⟶A B⟶) C⟶                         refl refl = →ₚ₀₋L A→B∈ ⟶A (rec-structural B⟶ (⟶₀₋wk {_ ∷ []} C⟶) (<ₗₑₓ-of₁ (s≤s (m≤n+m _ _))))
+      cut-elimination₀-gen ⟶A∧B@(∧ₚ₀₋R ⟶A ⟶B) (∧ₚ₀₋L₁ (here refl) A⟶)    refl refl = rec-structural ⟶A A⟶E (<ₗₑₓ-of₀ (m≤m+n _ _))
         where
-          A⟶E = rec ⟶A∧B A⟶ (<ₗₑₓ-of₂ ≤-refl) (⟶₀₋wk {[]} ⟶A∧B) (⟶₀₋ex {[]} A⟶) (⟶₀₋wk-preserves-size-⟶₀₋ {[]} ⟶A∧B) (⟶₀₋ex-preserves-size-⟶₀₋ {[]} A⟶)
-      cut-elimination-helper′ trip    rec ⟶A∧B@(∧ₚ₀₋R _  _)  (∧ₚ₀₋L₁ (there C∧D∈) C⟶)   refl refl = ∧ₚ₀₋L₁ C∧D∈ (rec ⟶A∧B C⟶ (<ₗₑₓ-of₂ ≤-refl) (⟶₀₋wk {[]} ⟶A∧B) (⟶₀₋ex {[]} C⟶) (⟶₀₋wk-preserves-size-⟶₀₋ {[]} ⟶A∧B) (⟶₀₋ex-preserves-size-⟶₀₋ {[]} C⟶))
-      cut-elimination-helper′ trip    rec ⟶A∧B@(∧ₚ₀₋R ⟶A ⟶B) (∧ₚ₀₋L₂ (here refl) B⟶)    refl refl = rec ⟶B B⟶E (<ₗₑₓ-of₀ (s≤s (m≤n+m _ _))) ⟶B B⟶E refl refl
+          A⟶E = rec-wk/ex ⟶A∧B A⟶ (<ₗₑₓ-of₂ ≤-refl)
+      cut-elimination₀-gen ⟶A∧B@(∧ₚ₀₋R _  _)  (∧ₚ₀₋L₁ (there C∧D∈) C⟶)   refl refl = ∧ₚ₀₋L₁ C∧D∈ (rec-wk/ex ⟶A∧B C⟶ (<ₗₑₓ-of₂ ≤-refl))
+      cut-elimination₀-gen ⟶A∧B@(∧ₚ₀₋R ⟶A ⟶B) (∧ₚ₀₋L₂ (here refl) B⟶)    refl refl = rec-structural ⟶B B⟶E (<ₗₑₓ-of₀ (s≤s (m≤n+m _ _)))
         where
-          B⟶E = rec ⟶A∧B B⟶ (<ₗₑₓ-of₂ ≤-refl) (⟶₀₋wk {[]} ⟶A∧B) (⟶₀₋ex {[]} B⟶) (⟶₀₋wk-preserves-size-⟶₀₋ {[]} ⟶A∧B) (⟶₀₋ex-preserves-size-⟶₀₋ {[]} B⟶)
-      cut-elimination-helper′ trip    rec ⟶A∧B@(∧ₚ₀₋R _  _)  (∧ₚ₀₋L₂ (there C∧D∈) D⟶)   refl refl = ∧ₚ₀₋L₂ C∧D∈ (rec ⟶A∧B D⟶ (<ₗₑₓ-of₂ ≤-refl) (⟶₀₋wk {[]} ⟶A∧B) (⟶₀₋ex {[]} D⟶) (⟶₀₋wk-preserves-size-⟶₀₋ {[]} ⟶A∧B) (⟶₀₋ex-preserves-size-⟶₀₋ {[]} D⟶))
-      cut-elimination-helper′ trip    rec ⟶A∧B@(∧ₚ₀₋R _  _)  (∨ₚ₀₋L (there C∨D∈) C⟶ D⟶) refl refl = ∨ₚ₀₋L C∨D∈
-                                                                                                     (rec ⟶A∧B C⟶ (<ₗₑₓ-of₂ (m≤m+n _ _)) (⟶₀₋wk {[]} ⟶A∧B) (⟶₀₋ex {[]} C⟶) (⟶₀₋wk-preserves-size-⟶₀₋ {[]} ⟶A∧B) (⟶₀₋ex-preserves-size-⟶₀₋ {[]} C⟶))
-                                                                                                     (rec ⟶A∧B D⟶ (<ₗₑₓ-of₂ (s≤s (m≤n+m _ _))) (⟶₀₋wk {[]} ⟶A∧B) (⟶₀₋ex {[]} D⟶) (⟶₀₋wk-preserves-size-⟶₀₋ {[]} ⟶A∧B) (⟶₀₋ex-preserves-size-⟶₀₋ {[]} D⟶))
-      cut-elimination-helper′ trip    rec ⟶A∧B@(∧ₚ₀₋R _  _)  (→ₚ₀₋L (there C→D∈) ⟶C D⟶) refl refl = →ₚ₀₋L C→D∈
-                                                                                                     (rec ⟶A∧B ⟶C (<ₗₑₓ-of₂ (m≤m+n _ _)) ⟶A∧B ⟶C refl refl)
-                                                                                                     (rec ⟶A∧B D⟶ (<ₗₑₓ-of₂ (s≤s (m≤n+m _ _))) (⟶₀₋wk {[]} ⟶A∧B) (⟶₀₋ex {[]} D⟶) (⟶₀₋wk-preserves-size-⟶₀₋ {[]} ⟶A∧B) (⟶₀₋ex-preserves-size-⟶₀₋ {[]} D⟶))
-      cut-elimination-helper′ trip    rec ⟶A∨B@(∨ₚ₀₋R₁ _)    (∧ₚ₀₋L₁ (there C∧D∈) C⟶)   refl refl = ∧ₚ₀₋L₁ C∧D∈ (rec ⟶A∨B C⟶ (<ₗₑₓ-of₂ ≤-refl) (⟶₀₋wk {[]} ⟶A∨B) (⟶₀₋ex {[]} C⟶) (⟶₀₋wk-preserves-size-⟶₀₋ {[]} ⟶A∨B) (⟶₀₋ex-preserves-size-⟶₀₋ {[]} C⟶))
-      cut-elimination-helper′ trip    rec ⟶A∨B@(∨ₚ₀₋R₁ _)    (∧ₚ₀₋L₂ (there C∧D∈) D⟶)   refl refl = ∧ₚ₀₋L₂ C∧D∈ (rec ⟶A∨B D⟶ (<ₗₑₓ-of₂ ≤-refl) (⟶₀₋wk {[]} ⟶A∨B) (⟶₀₋ex {[]} D⟶) (⟶₀₋wk-preserves-size-⟶₀₋ {[]} ⟶A∨B) (⟶₀₋ex-preserves-size-⟶₀₋ {[]} D⟶))
-      cut-elimination-helper′ trip    rec ⟶A∨B@(∨ₚ₀₋R₁ ⟶A)   (∨ₚ₀₋L (here refl) A⟶ B⟶)  refl refl = rec ⟶A A⟶E (<ₗₑₓ-of₀ (m≤m+n _ _)) ⟶A A⟶E refl refl
+          B⟶E = rec-wk/ex ⟶A∧B B⟶ (<ₗₑₓ-of₂ ≤-refl)
+      cut-elimination₀-gen ⟶A∧B@(∧ₚ₀₋R _  _)  (∧ₚ₀₋L₂ (there C∧D∈) D⟶)   refl refl = ∧ₚ₀₋L₂ C∧D∈ (rec-wk/ex ⟶A∧B D⟶ (<ₗₑₓ-of₂ ≤-refl))
+      cut-elimination₀-gen ⟶A∧B@(∧ₚ₀₋R _  _)  (∨ₚ₀₋L (there C∨D∈) C⟶ D⟶) refl refl = ∨ₚ₀₋L C∨D∈
+                                                                                       (rec-wk/ex ⟶A∧B C⟶ (<ₗₑₓ-of₂ (m≤m+n _ _)))
+                                                                                       (rec-wk/ex ⟶A∧B D⟶ (<ₗₑₓ-of₂ (s≤s (m≤n+m _ _))))
+      cut-elimination₀-gen ⟶A∧B@(∧ₚ₀₋R _  _)  (→ₚ₀₋L (there C→D∈) ⟶C D⟶) refl refl = →ₚ₀₋L C→D∈
+                                                                                       (rec-structural ⟶A∧B ⟶C (<ₗₑₓ-of₂ (m≤m+n _ _)))
+                                                                                       (rec-wk/ex ⟶A∧B D⟶ (<ₗₑₓ-of₂ (s≤s (m≤n+m _ _))))
+      cut-elimination₀-gen ⟶A∨B@(∨ₚ₀₋R₁ _)    (∧ₚ₀₋L₁ (there C∧D∈) C⟶)   refl refl = ∧ₚ₀₋L₁ C∧D∈ (rec-wk/ex ⟶A∨B C⟶ (<ₗₑₓ-of₂ ≤-refl))
+      cut-elimination₀-gen ⟶A∨B@(∨ₚ₀₋R₁ _)    (∧ₚ₀₋L₂ (there C∧D∈) D⟶)   refl refl = ∧ₚ₀₋L₂ C∧D∈ (rec-wk/ex ⟶A∨B D⟶ (<ₗₑₓ-of₂ ≤-refl))
+      cut-elimination₀-gen ⟶A∨B@(∨ₚ₀₋R₁ ⟶A)   (∨ₚ₀₋L (here refl) A⟶ B⟶)  refl refl = rec-structural ⟶A A⟶E (<ₗₑₓ-of₀ (m≤m+n _ _))
         where
-          A⟶E = rec ⟶A∨B A⟶ (<ₗₑₓ-of₂ (m≤m+n _ _)) (⟶₀₋wk {[]} ⟶A∨B) (⟶₀₋ex {[]} A⟶) (⟶₀₋wk-preserves-size-⟶₀₋ {[]} ⟶A∨B) (⟶₀₋ex-preserves-size-⟶₀₋ {[]} A⟶)
-      cut-elimination-helper′ trip    rec ⟶A∨B@(∨ₚ₀₋R₁ _)    (∨ₚ₀₋L (there C∨D∈) C⟶ D⟶) refl refl = ∨ₚ₀₋L C∨D∈
-                                                                                                     (rec ⟶A∨B C⟶ (<ₗₑₓ-of₂ (m≤m+n _ _)) (⟶₀₋wk {[]} ⟶A∨B) (⟶₀₋ex {[]} C⟶) (⟶₀₋wk-preserves-size-⟶₀₋ {[]} ⟶A∨B) (⟶₀₋ex-preserves-size-⟶₀₋ {[]} C⟶))
-                                                                                                     (rec ⟶A∨B D⟶ (<ₗₑₓ-of₂ (s≤s (m≤n+m _ _))) (⟶₀₋wk {[]} ⟶A∨B) (⟶₀₋ex {[]} D⟶) (⟶₀₋wk-preserves-size-⟶₀₋ {[]} ⟶A∨B) (⟶₀₋ex-preserves-size-⟶₀₋ {[]} D⟶))
-      cut-elimination-helper′ trip    rec ⟶A∨B@(∨ₚ₀₋R₁ _)    (→ₚ₀₋L (there C→D∈) ⟶C D⟶) refl refl = →ₚ₀₋L C→D∈
-                                                                                                     (rec ⟶A∨B ⟶C (<ₗₑₓ-of₂ (m≤m+n _ _)) ⟶A∨B ⟶C refl refl)
-                                                                                                     (rec ⟶A∨B D⟶ (<ₗₑₓ-of₂ (s≤s (m≤n+m _ _))) (⟶₀₋wk {[]} ⟶A∨B) (⟶₀₋ex {[]} D⟶) (⟶₀₋wk-preserves-size-⟶₀₋ {[]} ⟶A∨B) (⟶₀₋ex-preserves-size-⟶₀₋ {[]} D⟶))
-      cut-elimination-helper′ trip    rec ⟶A∨B@(∨ₚ₀₋R₂ _)    (∧ₚ₀₋L₁ (there C∧D∈) C⟶)   refl refl = ∧ₚ₀₋L₁ C∧D∈ (rec ⟶A∨B C⟶ (<ₗₑₓ-of₂ ≤-refl) (⟶₀₋wk {[]} ⟶A∨B) (⟶₀₋ex {[]} C⟶) (⟶₀₋wk-preserves-size-⟶₀₋ {[]} ⟶A∨B) (⟶₀₋ex-preserves-size-⟶₀₋ {[]} C⟶))
-      cut-elimination-helper′ trip    rec ⟶A∨B@(∨ₚ₀₋R₂ _)    (∧ₚ₀₋L₂ (there C∧D∈) D⟶)   refl refl = ∧ₚ₀₋L₂ C∧D∈ (rec ⟶A∨B D⟶ (<ₗₑₓ-of₂ ≤-refl) (⟶₀₋wk {[]} ⟶A∨B) (⟶₀₋ex {[]} D⟶) (⟶₀₋wk-preserves-size-⟶₀₋ {[]} ⟶A∨B) (⟶₀₋ex-preserves-size-⟶₀₋ {[]} D⟶))
-      cut-elimination-helper′ trip    rec ⟶A∨B@(∨ₚ₀₋R₂ ⟶B)   (∨ₚ₀₋L (here refl) A⟶ B⟶)  refl refl = rec ⟶B B⟶E (<ₗₑₓ-of₀ (s≤s (m≤n+m _ _))) ⟶B B⟶E refl refl
+          A⟶E = rec-wk/ex ⟶A∨B A⟶ (<ₗₑₓ-of₂ (m≤m+n _ _))
+      cut-elimination₀-gen ⟶A∨B@(∨ₚ₀₋R₁ _)    (∨ₚ₀₋L (there C∨D∈) C⟶ D⟶) refl refl = ∨ₚ₀₋L C∨D∈
+                                                                                       (rec-wk/ex ⟶A∨B C⟶ (<ₗₑₓ-of₂ (m≤m+n _ _)))
+                                                                                       (rec-wk/ex ⟶A∨B D⟶ (<ₗₑₓ-of₂ (s≤s (m≤n+m _ _))))
+      cut-elimination₀-gen ⟶A∨B@(∨ₚ₀₋R₁ _)    (→ₚ₀₋L (there C→D∈) ⟶C D⟶) refl refl = →ₚ₀₋L C→D∈
+                                                                                       (rec-structural ⟶A∨B ⟶C (<ₗₑₓ-of₂ (m≤m+n _ _)))
+                                                                                       (rec-wk/ex ⟶A∨B D⟶ (<ₗₑₓ-of₂ (s≤s (m≤n+m _ _))))
+      cut-elimination₀-gen ⟶A∨B@(∨ₚ₀₋R₂ _)    (∧ₚ₀₋L₁ (there C∧D∈) C⟶)   refl refl = ∧ₚ₀₋L₁ C∧D∈ (rec-wk/ex ⟶A∨B C⟶ (<ₗₑₓ-of₂ ≤-refl))
+      cut-elimination₀-gen ⟶A∨B@(∨ₚ₀₋R₂ _)    (∧ₚ₀₋L₂ (there C∧D∈) D⟶)   refl refl = ∧ₚ₀₋L₂ C∧D∈ (rec-wk/ex ⟶A∨B D⟶ (<ₗₑₓ-of₂ ≤-refl))
+      cut-elimination₀-gen ⟶A∨B@(∨ₚ₀₋R₂ ⟶B)   (∨ₚ₀₋L (here refl) A⟶ B⟶)  refl refl = rec-structural ⟶B B⟶E (<ₗₑₓ-of₀ (s≤s (m≤n+m _ _)))
         where
-          B⟶E = rec ⟶A∨B B⟶ (<ₗₑₓ-of₂ (s≤s (m≤n+m _ _))) (⟶₀₋wk {[]} ⟶A∨B) (⟶₀₋ex {[]} B⟶) (⟶₀₋wk-preserves-size-⟶₀₋ {[]} ⟶A∨B) (⟶₀₋ex-preserves-size-⟶₀₋ {[]} B⟶)
-      cut-elimination-helper′ trip    rec ⟶A∨B@(∨ₚ₀₋R₂ _)    (∨ₚ₀₋L (there C∨D∈) C⟶ D⟶) refl refl = ∨ₚ₀₋L C∨D∈
-                                                                                                     (rec ⟶A∨B C⟶ (<ₗₑₓ-of₂ (m≤m+n _ _)) (⟶₀₋wk {[]} ⟶A∨B) (⟶₀₋ex {[]} C⟶) (⟶₀₋wk-preserves-size-⟶₀₋ {[]} ⟶A∨B) (⟶₀₋ex-preserves-size-⟶₀₋ {[]} C⟶))
-                                                                                                     (rec ⟶A∨B D⟶ (<ₗₑₓ-of₂ (s≤s (m≤n+m _ _))) (⟶₀₋wk {[]} ⟶A∨B) (⟶₀₋ex {[]} D⟶) (⟶₀₋wk-preserves-size-⟶₀₋ {[]} ⟶A∨B) (⟶₀₋ex-preserves-size-⟶₀₋ {[]} D⟶))
-      cut-elimination-helper′ trip    rec ⟶A∨B@(∨ₚ₀₋R₂ _)    (→ₚ₀₋L (there C→D∈) ⟶C D⟶) refl refl = →ₚ₀₋L C→D∈
-                                                                                                     (rec ⟶A∨B ⟶C (<ₗₑₓ-of₂ (m≤m+n _ _)) ⟶A∨B ⟶C refl refl)
-                                                                                                     (rec ⟶A∨B D⟶ (<ₗₑₓ-of₂ (s≤s (m≤n+m _ _))) (⟶₀₋wk {[]} ⟶A∨B) (⟶₀₋ex {[]} D⟶) (⟶₀₋wk-preserves-size-⟶₀₋ {[]} ⟶A∨B) (⟶₀₋ex-preserves-size-⟶₀₋ {[]} D⟶))
-      cut-elimination-helper′ trip    rec ⟶A→B@(→ₚ₀₋R _)     (∧ₚ₀₋L₁ (there C∧D∈) C⟶)   refl refl = ∧ₚ₀₋L₁ C∧D∈ (rec ⟶A→B C⟶ (<ₗₑₓ-of₂ ≤-refl) (⟶₀₋wk {[]} ⟶A→B) (⟶₀₋ex {[]} C⟶) (⟶₀₋wk-preserves-size-⟶₀₋ {[]} ⟶A→B) (⟶₀₋ex-preserves-size-⟶₀₋ {[]} C⟶))
-      cut-elimination-helper′ trip    rec ⟶A→B@(→ₚ₀₋R _)     (∧ₚ₀₋L₂ (there C∧D∈) D⟶)   refl refl = ∧ₚ₀₋L₂ C∧D∈ (rec ⟶A→B D⟶ (<ₗₑₓ-of₂ ≤-refl) (⟶₀₋wk {[]} ⟶A→B) (⟶₀₋ex {[]} D⟶) (⟶₀₋wk-preserves-size-⟶₀₋ {[]} ⟶A→B) (⟶₀₋ex-preserves-size-⟶₀₋ {[]} D⟶))
-      cut-elimination-helper′ trip    rec ⟶A→B@(→ₚ₀₋R _)     (∨ₚ₀₋L (there C∨D∈) C⟶ D⟶) refl refl = ∨ₚ₀₋L C∨D∈
-                                                                                                     (rec ⟶A→B C⟶ (<ₗₑₓ-of₂ (m≤m+n _ _)) (⟶₀₋wk {[]} ⟶A→B) (⟶₀₋ex {[]} C⟶) (⟶₀₋wk-preserves-size-⟶₀₋ {[]} ⟶A→B) (⟶₀₋ex-preserves-size-⟶₀₋ {[]} C⟶))
-                                                                                                     (rec ⟶A→B D⟶ (<ₗₑₓ-of₂ (s≤s (m≤n+m _ _))) (⟶₀₋wk {[]} ⟶A→B) (⟶₀₋ex {[]} D⟶) (⟶₀₋wk-preserves-size-⟶₀₋ {[]} ⟶A→B) (⟶₀₋ex-preserves-size-⟶₀₋ {[]} D⟶))
-      cut-elimination-helper′ trip    rec ⟶A→B@(→ₚ₀₋R A⟶B)   (→ₚ₀₋L (here refl) ⟶A B⟶)  refl refl = rec ⟶B B⟶E (<ₗₑₓ-of₀ (s≤s (m≤n+m _ _))) ⟶B B⟶E refl refl
+          B⟶E = rec-wk/ex ⟶A∨B B⟶ (<ₗₑₓ-of₂ (s≤s (m≤n+m _ _)))
+      cut-elimination₀-gen ⟶A∨B@(∨ₚ₀₋R₂ _)    (∨ₚ₀₋L (there C∨D∈) C⟶ D⟶) refl refl = ∨ₚ₀₋L C∨D∈
+                                                                                       (rec-wk/ex ⟶A∨B C⟶ (<ₗₑₓ-of₂ (m≤m+n _ _)))
+                                                                                       (rec-wk/ex ⟶A∨B D⟶ (<ₗₑₓ-of₂ (s≤s (m≤n+m _ _))))
+      cut-elimination₀-gen ⟶A∨B@(∨ₚ₀₋R₂ _)    (→ₚ₀₋L (there C→D∈) ⟶C D⟶) refl refl = →ₚ₀₋L C→D∈
+                                                                                       (rec-structural ⟶A∨B ⟶C (<ₗₑₓ-of₂ (m≤m+n _ _)))
+                                                                                       (rec-wk/ex ⟶A∨B D⟶ (<ₗₑₓ-of₂ (s≤s (m≤n+m _ _))))
+      cut-elimination₀-gen ⟶A→B@(→ₚ₀₋R _)     (∧ₚ₀₋L₁ (there C∧D∈) C⟶)   refl refl = ∧ₚ₀₋L₁ C∧D∈ (rec-wk/ex ⟶A→B C⟶ (<ₗₑₓ-of₂ ≤-refl))
+      cut-elimination₀-gen ⟶A→B@(→ₚ₀₋R _)     (∧ₚ₀₋L₂ (there C∧D∈) D⟶)   refl refl = ∧ₚ₀₋L₂ C∧D∈ (rec-wk/ex ⟶A→B D⟶ (<ₗₑₓ-of₂ ≤-refl))
+      cut-elimination₀-gen ⟶A→B@(→ₚ₀₋R _)     (∨ₚ₀₋L (there C∨D∈) C⟶ D⟶) refl refl = ∨ₚ₀₋L C∨D∈
+                                                                                       (rec-wk/ex ⟶A→B C⟶ (<ₗₑₓ-of₂ (m≤m+n _ _)))
+                                                                                       (rec-wk/ex ⟶A→B D⟶ (<ₗₑₓ-of₂ (s≤s (m≤n+m _ _))))
+      cut-elimination₀-gen ⟶A→B@(→ₚ₀₋R A⟶B)   (→ₚ₀₋L (here refl) ⟶A B⟶)  refl refl = rec-structural ⟶B B⟶E (<ₗₑₓ-of₀ (s≤s (m≤n+m _ _)))
         where
-          ⟶A′ = rec ⟶A→B ⟶A (<ₗₑₓ-of₂ (m≤m+n _ _)) ⟶A→B ⟶A refl refl
-          ⟶B = rec ⟶A′ A⟶B (<ₗₑₓ-of₀ (m≤m+n _ _)) ⟶A′ A⟶B refl refl
-          B⟶E = rec ⟶A→B B⟶ (<ₗₑₓ-of₂ (s≤s (m≤n+m _ _))) (⟶₀₋wk {[]} ⟶A→B) (⟶₀₋ex {[]} B⟶) (⟶₀₋wk-preserves-size-⟶₀₋ {[]} ⟶A→B) (⟶₀₋ex-preserves-size-⟶₀₋ {[]} B⟶)
-      cut-elimination-helper′ trip    rec ⟶A→B@(→ₚ₀₋R _)     (→ₚ₀₋L (there C→D∈) ⟶C D⟶) refl refl = →ₚ₀₋L C→D∈
-                                                                                                     (rec ⟶A→B ⟶C (<ₗₑₓ-of₂ (m≤m+n _ _)) ⟶A→B ⟶C refl refl)
-                                                                                                     (rec ⟶A→B D⟶ (<ₗₑₓ-of₂ (s≤s (m≤n+m _ _))) (⟶₀₋wk {[]} ⟶A→B) (⟶₀₋ex {[]} D⟶) (⟶₀₋wk-preserves-size-⟶₀₋ {[]} ⟶A→B) (⟶₀₋ex-preserves-size-⟶₀₋ {[]} D⟶))
-      cut-elimination-helper′ trip    rec ⟶A                 (init₀₋ (here refl))       refl refl = ⟶A
-      cut-elimination-helper′ trip    rec ⟶A                 (init₀₋ (there D∈))        refl refl = init₀₋ D∈
-      cut-elimination-helper′ trip    rec ⟶A                 (⊥ₚ₀₋L (there ⊥∈))         refl refl = ⊥ₚ₀₋L ⊥∈
-      cut-elimination-helper′ trip    rec ⟶A                 (∧ₚ₀₋R ⟶C ⟶D)              refl refl = ∧ₚ₀₋R (rec ⟶A ⟶C (<ₗₑₓ-of₂ (m≤m+n _ _)) ⟶A ⟶C refl refl) (rec ⟶A ⟶D (<ₗₑₓ-of₂ (s≤s (m≤n+m _ _))) ⟶A ⟶D refl refl)
-      cut-elimination-helper′ trip    rec ⟶A                 (∨ₚ₀₋R₁ ⟶C)                refl refl = ∨ₚ₀₋R₁ (rec ⟶A ⟶C (<ₗₑₓ-of₂ ≤-refl) ⟶A ⟶C refl refl)
-      cut-elimination-helper′ trip    rec ⟶A                 (∨ₚ₀₋R₂ ⟶D)                refl refl = ∨ₚ₀₋R₂ (rec ⟶A ⟶D (<ₗₑₓ-of₂ ≤-refl) ⟶A ⟶D refl refl)
-      cut-elimination-helper′ trip    rec ⟶A                 (→ₚ₀₋R C⟶D)                refl refl = →ₚ₀₋R (rec ⟶A C⟶D (<ₗₑₓ-of₂ ≤-refl) (⟶₀₋wk {[]} ⟶A) (⟶₀₋ex {[]} C⟶D) (⟶₀₋wk-preserves-size-⟶₀₋ {[]} ⟶A) (⟶₀₋ex-preserves-size-⟶₀₋ {[]} C⟶D))
+          ⟶A′ = rec-structural ⟶A→B ⟶A (<ₗₑₓ-of₂ (m≤m+n _ _))
+          ⟶B  = rec-structural ⟶A′ A⟶B (<ₗₑₓ-of₀ (m≤m+n _ _))
+          B⟶E = rec-wk/ex ⟶A→B B⟶ (<ₗₑₓ-of₂ (s≤s (m≤n+m _ _)))
+      cut-elimination₀-gen ⟶A→B@(→ₚ₀₋R _)     (→ₚ₀₋L (there C→D∈) ⟶C D⟶) refl refl = →ₚ₀₋L C→D∈
+                                                                                       (rec-structural ⟶A→B ⟶C (<ₗₑₓ-of₂ (m≤m+n _ _)))
+                                                                                       (rec-wk/ex ⟶A→B D⟶ (<ₗₑₓ-of₂ (s≤s (m≤n+m _ _))))
+      cut-elimination₀-gen ⟶A                 (init₀₋ (here refl))       refl refl = ⟶A
+      cut-elimination₀-gen ⟶A                 (init₀₋ (there D∈))        refl refl = init₀₋ D∈
+      cut-elimination₀-gen ⟶A                 (⊥ₚ₀₋L (there ⊥∈))         refl refl = ⊥ₚ₀₋L ⊥∈
+      cut-elimination₀-gen ⟶A                 (∧ₚ₀₋R ⟶C ⟶D)              refl refl = ∧ₚ₀₋R
+                                                                                       (rec-structural ⟶A ⟶C (<ₗₑₓ-of₂ (m≤m+n _ _)))
+                                                                                       (rec-structural ⟶A ⟶D (<ₗₑₓ-of₂ (s≤s (m≤n+m _ _))))
+      cut-elimination₀-gen ⟶A                 (∨ₚ₀₋R₁ ⟶C)                refl refl = ∨ₚ₀₋R₁ (rec-structural ⟶A ⟶C (<ₗₑₓ-of₂ ≤-refl))
+      cut-elimination₀-gen ⟶A                 (∨ₚ₀₋R₂ ⟶D)                refl refl = ∨ₚ₀₋R₂ (rec-structural ⟶A ⟶D (<ₗₑₓ-of₂ ≤-refl))
+      cut-elimination₀-gen ⟶A                 (→ₚ₀₋R C⟶D)                refl refl = →ₚ₀₋R (rec-wk/ex ⟶A C⟶D (<ₗₑₓ-of₂ ≤-refl))
 
-      cut-elimination-helper : ∀ trip (rec : ∀ trip′ → trip′ <ₗₑₓ trip → cut-goal trip′) → cut-goal trip
-      cut-elimination-helper trip rec = cut-elimination-helper′ trip (λ {A} Seq Seq′ → rec (A , size-⟶₀₋ Seq , size-⟶₀₋ Seq′))
-
-  cut-elimination-gen : ∀ (sz sz′ : ℕ) {A Γ E} (Seq : Γ ⟶₀₋ A) (Seq′ : A ∷ Γ ⟶₀₋ E) → sz ≡ size-⟶₀₋ Seq → sz′ ≡ size-⟶₀₋ Seq′ → Γ ⟶₀₋ E
-  cut-elimination-gen sz sz′ {A} = Wfx.wfRec cut-goal (λ{ (A , sz , sz′) → CutRec.cut-elimination-helper (A , sz , sz′) }) (A , sz , sz′)
+  cut-elimination₀ : Γ ⟶₀₋ A → A ∷ Γ ⟶₀₋ E → Γ ⟶₀₋ E
+  cut-elimination₀ {Γ} {A} {E} ⟶A A⟶ = Wfx.wfRec cut-goal (λ trip rec → cut-elimination₀-gen trip (λ {A} Seq Seq′ → rec (A , size-⟶₀₋ Seq , size-⟶₀₋ Seq′))) (A , size-⟶₀₋ ⟶A , size-⟶₀₋ A⟶) ⟶A A⟶ refl refl
     where
       module Wfx = Wf.All (WfLex.×-wellFounded (On.wellFounded size-P₀ <-wellFounded) (WfLex.×-wellFounded <-wellFounded <-wellFounded)) lzero
-
-cut-elimination : Γ ⟶₀₋ A → A ∷ Γ ⟶₀₋ E → Γ ⟶₀₋ E
-cut-elimination {Γ} {A} {E} ⟶A A⟶ = cut-elimination-gen (size-⟶₀₋ ⟶A) (size-⟶₀₋ A⟶) ⟶A A⟶ refl refl
 
 ⟶₀⇒⟶₀₋ : Γ ⟶₀ A → Γ ⟶₀₋ A
 ⟶₀⇒⟶₀₋ (init₀ A∈)        = init₀₋ A∈
@@ -181,10 +185,74 @@ cut-elimination {Γ} {A} {E} ⟶A A⟶ = cut-elimination-gen (size-⟶₀₋ ⟶
 ⟶₀⇒⟶₀₋ (∨ₚ₀L A∨B∈ A⟶ B⟶) = ∨ₚ₀₋L A∨B∈ (⟶₀⇒⟶₀₋ A⟶) (⟶₀⇒⟶₀₋ B⟶)
 ⟶₀⇒⟶₀₋ (→ₚ₀R A⟶B)        = →ₚ₀₋R (⟶₀⇒⟶₀₋ A⟶B)
 ⟶₀⇒⟶₀₋ (→ₚ₀L A→B∈ ⟶A B⟶) = →ₚ₀₋L A→B∈ (⟶₀⇒⟶₀₋ ⟶A) (⟶₀⇒⟶₀₋ B⟶)
-⟶₀⇒⟶₀₋ (cut₀ ⟶A A⟶)      = cut-elimination (⟶₀⇒⟶₀₋ ⟶A) (⟶₀⇒⟶₀₋ A⟶)
+⟶₀⇒⟶₀₋ (cut₀ ⟶A A⟶)      = cut-elimination₀ (⟶₀⇒⟶₀₋ ⟶A) (⟶₀⇒⟶₀₋ A⟶)
 
-⟶₀-consistent : [] ⟶₀ ⊥ₚ₀ → ⊥
-⟶₀-consistent ⟶⊥ = ⟶₀₋-consistent (⟶₀⇒⟶₀₋ ⟶⊥)
+⟶₀-consistency : [] ⟶₀ ⊥ₚ₀ → ⊥
+⟶₀-consistency ⟶⊥ = ⟶₀₋-consistency (⟶₀⇒⟶₀₋ ⟶⊥)
 
-⊢₀-consistent : [] ⊢₀ ⊥ₚ₀ → ⊥
-⊢₀-consistent ⊢⊥ = ⟶₀-consistent (⊢₀⇒⟶₀ ⊢⊥)
+⊢₀-consistency : [] ⊢₀ ⊥ₚ₀ → ⊥
+⊢₀-consistency ⊢⊥ = ⟶₀-consistency (⊢₀⇒⟶₀ ⊢⊥)
+
+⊢₀ⁿ-subst : Γ′ ++ A ∷ Γ ⊢₀ⁿ B → Γ ⊢₀ʳ A → Γ′ ++ Γ ⊢₀ⁿ B
+⊢₀ʳ-subst : Γ′ ++ A ∷ Γ ⊢₀ʳ B → Γ ⊢₀ʳ A → Γ′ ++ Γ ⊢₀ʳ B
+
+⊢₀ⁿ-subst      (∧ₚ₀ⁿI ⊢B ⊢C)      ⊢A = ∧ₚ₀ⁿI (⊢₀ⁿ-subst ⊢B ⊢A) (⊢₀ⁿ-subst ⊢C ⊢A)
+⊢₀ⁿ-subst      (∨ₚ₀ⁿI₁ ⊢B)        ⊢A = ∨ₚ₀ⁿI₁ (⊢₀ⁿ-subst ⊢B ⊢A)
+⊢₀ⁿ-subst      (∨ₚ₀ⁿI₂ ⊢C)        ⊢A = ∨ₚ₀ⁿI₂ (⊢₀ⁿ-subst ⊢C ⊢A)
+⊢₀ⁿ-subst      (∨ₚ₀ⁿE ⊢B∨C B⊢ C⊢) ⊢A = ∨ₚ₀ⁿE (⊢₀ʳ-subst ⊢B∨C ⊢A) (⊢₀ⁿ-subst B⊢ ⊢A) (⊢₀ⁿ-subst C⊢ ⊢A)
+⊢₀ⁿ-subst      (→ₚ₀ⁿI B⊢C)        ⊢A = →ₚ₀ⁿI (⊢₀ⁿ-subst B⊢C ⊢A)
+⊢₀ⁿ-subst      (neut₀ⁿ ⊢B)        ⊢A = neut₀ⁿ (⊢₀ʳ-subst ⊢B ⊢A)
+
+⊢₀ʳ-subst {Γ′} (pre₀ʳ B∈)         ⊢A = ⊢B
+  where
+    ⊢B : _ ⊢₀ʳ _
+    ⊢B
+      with ∈-++⁻ Γ′ B∈
+    ...  | inj₁ B∈Γ′        = pre₀ʳ (∈-++⁺ˡ B∈Γ′)
+    ...  | inj₂ (here refl) = ⊢₀ʳwk′ {[]} ⊢A
+    ...  | inj₂ (there B∈Γ) = pre₀ʳ (∈-++⁺ʳ Γ′ B∈Γ)
+⊢₀ʳ-subst      (⊥ₚ₀ʳE ⊢⊥)         ⊢A = ⊥ₚ₀ʳE (⊢₀ʳ-subst ⊢⊥ ⊢A)
+⊢₀ʳ-subst      (∧ₚ₀ʳE₁ ⊢B∧C)      ⊢A = ∧ₚ₀ʳE₁ (⊢₀ʳ-subst ⊢B∧C ⊢A)
+⊢₀ʳ-subst      (∧ₚ₀ʳE₂ ⊢B∧C)      ⊢A = ∧ₚ₀ʳE₂ (⊢₀ʳ-subst ⊢B∧C ⊢A)
+⊢₀ʳ-subst      (→ₚ₀ʳE ⊢B→C ⊢B)    ⊢A = →ₚ₀ʳE (⊢₀ʳ-subst ⊢B→C ⊢A) (⊢₀ⁿ-subst ⊢B ⊢A)
+
+⟶₀₋⇒⊢₀ⁿ : Γ ⟶₀₋ A → Γ ⊢₀ⁿ A
+⟶₀₋⇒⊢₀ⁿ (init₀₋ A∈)        = neut₀ⁿ (pre₀ʳ A∈)
+⟶₀₋⇒⊢₀ⁿ (⊥ₚ₀₋L ⊥∈)         = neut₀ⁿ (⊥ₚ₀ʳE (pre₀ʳ ⊥∈))
+⟶₀₋⇒⊢₀ⁿ (∧ₚ₀₋R ⟶A ⟶B)      = ∧ₚ₀ⁿI (⟶₀₋⇒⊢₀ⁿ ⟶A) (⟶₀₋⇒⊢₀ⁿ ⟶B)
+⟶₀₋⇒⊢₀ⁿ (∧ₚ₀₋L₁ A∧B∈ A⟶)   = ⊢₀ⁿ-subst {[]} (⟶₀₋⇒⊢₀ⁿ A⟶) (∧ₚ₀ʳE₁ (pre₀ʳ A∧B∈))
+⟶₀₋⇒⊢₀ⁿ (∧ₚ₀₋L₂ A∧B∈ B⟶)   = ⊢₀ⁿ-subst {[]} (⟶₀₋⇒⊢₀ⁿ B⟶) (∧ₚ₀ʳE₂ (pre₀ʳ A∧B∈))
+⟶₀₋⇒⊢₀ⁿ (∨ₚ₀₋R₁ ⟶A)        = ∨ₚ₀ⁿI₁ (⟶₀₋⇒⊢₀ⁿ ⟶A)
+⟶₀₋⇒⊢₀ⁿ (∨ₚ₀₋R₂ ⟶B)        = ∨ₚ₀ⁿI₂ (⟶₀₋⇒⊢₀ⁿ ⟶B)
+⟶₀₋⇒⊢₀ⁿ (∨ₚ₀₋L A∨B∈ A⟶ B⟶) = ∨ₚ₀ⁿE (pre₀ʳ A∨B∈) (⟶₀₋⇒⊢₀ⁿ A⟶) (⟶₀₋⇒⊢₀ⁿ B⟶)
+⟶₀₋⇒⊢₀ⁿ (→ₚ₀₋R A⟶B)        = →ₚ₀ⁿI (⟶₀₋⇒⊢₀ⁿ A⟶B)
+⟶₀₋⇒⊢₀ⁿ (→ₚ₀₋L A→B∈ ⟶A B⟶) = ⊢₀ⁿ-subst {[]} (⟶₀₋⇒⊢₀ⁿ B⟶) (→ₚ₀ʳE (pre₀ʳ A→B∈) (⟶₀₋⇒⊢₀ⁿ ⟶A))
+
+⊢₀ⁿ⇒⟶₀₋ : Γ ⊢₀ⁿ A → Γ ⟶₀₋ A
+⊢₀ʳ⇒⟶₀₋⇒⟶₀₋ : Γ ⊢₀ʳ A → A ∷ Γ ⟶₀₋ C → Γ ⟶₀₋ C
+
+⊢₀ⁿ⇒⟶₀₋ (∧ₚ₀ⁿI ⊢A ⊢B)      = ∧ₚ₀₋R (⊢₀ⁿ⇒⟶₀₋ ⊢A) (⊢₀ⁿ⇒⟶₀₋ ⊢B)
+⊢₀ⁿ⇒⟶₀₋ (∨ₚ₀ⁿI₁ ⊢A)        = ∨ₚ₀₋R₁ (⊢₀ⁿ⇒⟶₀₋ ⊢A)
+⊢₀ⁿ⇒⟶₀₋ (∨ₚ₀ⁿI₂ ⊢B)        = ∨ₚ₀₋R₂ (⊢₀ⁿ⇒⟶₀₋ ⊢B)
+⊢₀ⁿ⇒⟶₀₋ (∨ₚ₀ⁿE ⊢A∨B A⊢ B⊢) = ⊢₀ʳ⇒⟶₀₋⇒⟶₀₋ ⊢A∨B (∨ₚ₀₋L (here refl) (⟶₀₋wk {_ ∷ []} (⊢₀ⁿ⇒⟶₀₋ A⊢)) (⟶₀₋wk {_ ∷ []} (⊢₀ⁿ⇒⟶₀₋ B⊢)))
+⊢₀ⁿ⇒⟶₀₋ (→ₚ₀ⁿI A⊢B)        = →ₚ₀₋R (⊢₀ⁿ⇒⟶₀₋ A⊢B)
+⊢₀ⁿ⇒⟶₀₋ (neut₀ⁿ ⊢A)        = ⊢₀ʳ⇒⟶₀₋⇒⟶₀₋ ⊢A (init₀₋ (here refl))
+
+⊢₀ʳ⇒⟶₀₋⇒⟶₀₋ (pre₀ʳ A∈)         A⟶ = ⟶₀₋-resp-∈⇒∈ ∈⇒∈ A⟶
+  where
+    ∈⇒∈ : ∀ {B} → B ∈ _ ∷ _ → B ∈ _
+    ∈⇒∈ (here refl) = ∈-++⁺ʳ _ A∈
+    ∈⇒∈ (there B∈)  = ∈-++⁺ʳ _ B∈
+⊢₀ʳ⇒⟶₀₋⇒⟶₀₋ (⊥ₚ₀ʳE ⊢⊥)         _  = ⊢₀ʳ⇒⟶₀₋⇒⟶₀₋ ⊢⊥ (⊥ₚ₀₋L (here refl))
+⊢₀ʳ⇒⟶₀₋⇒⟶₀₋ (∧ₚ₀ʳE₁ ⊢A∧B)      A⟶ = ⊢₀ʳ⇒⟶₀₋⇒⟶₀₋ ⊢A∧B (∧ₚ₀₋L₁ (here refl) (⟶₀₋wk {_ ∷ []} A⟶))
+⊢₀ʳ⇒⟶₀₋⇒⟶₀₋ (∧ₚ₀ʳE₂ ⊢A∧B)      B⟶ = ⊢₀ʳ⇒⟶₀₋⇒⟶₀₋ ⊢A∧B (∧ₚ₀₋L₂ (here refl) (⟶₀₋wk {_ ∷ []} B⟶))
+⊢₀ʳ⇒⟶₀₋⇒⟶₀₋ (→ₚ₀ʳE ⊢A→B ⊢A)    B⟶ = ⊢₀ʳ⇒⟶₀₋⇒⟶₀₋ ⊢A→B (→ₚ₀₋L (here refl) (⟶₀₋wk {[]} (⊢₀ⁿ⇒⟶₀₋ ⊢A)) (⟶₀₋wk {_ ∷ []} B⟶))
+
+⊢₀ⁿ-consistency : [] ⊢₀ⁿ ⊥ₚ₀ → ⊥
+⊢₀ⁿ-consistency ⊢⊥ = ⟶₀₋-consistency (⊢₀ⁿ⇒⟶₀₋ ⊢⊥)
+
+⊢₀ʳ-consistency : [] ⊢₀ʳ ⊥ₚ₀ → ⊥
+⊢₀ʳ-consistency ⊢⊥ = ⊢₀ⁿ-consistency (neut₀ⁿ ⊢⊥)
+
+weak-normalization₀ : Γ ⊢₀ A → Γ ⊢₀ⁿ A
+weak-normalization₀ ⊢A = ⟶₀₋⇒⊢₀ⁿ (⟶₀⇒⟶₀₋ (⊢₀⇒⟶₀ ⊢A))
