@@ -59,7 +59,7 @@ open import Logic.Zeroth.SCC.Properties
 ⟶₀⇒⟶₀₋ (∨ₚ₀L  A∨B∈ A⟶ B⟶) = ∨ₚ₀₋L A∨B∈ (⟶₀⇒⟶₀₋ A⟶) (⟶₀⇒⟶₀₋ B⟶)
 ⟶₀⇒⟶₀₋ (→ₚ₀R  A⟶B)        = →ₚ₀₋R (⟶₀⇒⟶₀₋ A⟶B)
 ⟶₀⇒⟶₀₋ (→ₚ₀L  A→B∈ ⟶A B⟶) = →ₚ₀₋L A→B∈ (⟶₀⇒⟶₀₋ ⟶A) (⟶₀⇒⟶₀₋ B⟶)
-⟶₀⇒⟶₀₋ (cut₀  ⟶A A⟶)      = cut-elimination₀ (⟶₀⇒⟶₀₋ ⟶A) (⟶₀⇒⟶₀₋ A⟶)
+⟶₀⇒⟶₀₋ (cut₀  ⟶A A⟶)      = cut₀₋ (⟶₀⇒⟶₀₋ ⟶A) (⟶₀⇒⟶₀₋ A⟶)
 
 ⟶₀₋⇒⊢₀ⁿ : Γ ⟶₀₋ A → Γ ⊢₀ⁿ A
 ⟶₀₋⇒⊢₀ⁿ (init₀₋ A∈)         = neut₀ⁿ (pre₀ʳ A∈)

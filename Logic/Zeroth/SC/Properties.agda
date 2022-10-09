@@ -60,6 +60,7 @@ open import Logic.Zeroth.SC
 ⟶₀₋-consistency (∨ₚ₀₋L  () _ _)
 ⟶₀₋-consistency (→ₚ₀₋L  () _ _)
 
+-- Proof of cut elimination theorem
 module _ where
   private
     _<ₗₑₓ_ : Rel (P₀ × ℕ × ℕ) 0ℓ
@@ -77,106 +78,107 @@ module _ where
     <ₗₑₓ-wellFounded : Wf.WellFounded _<ₗₑₓ_
     <ₗₑₓ-wellFounded = WfLex.×-wellFounded (On.wellFounded size-P₀ <-wellFounded) (WfLex.×-wellFounded <-wellFounded <-wellFounded)
 
-    cut-goal : P₀ × ℕ × ℕ → Set
-    cut-goal (A , sz , sz′) =
+    cut₀₋-goal : P₀ × ℕ × ℕ → Set
+    cut₀₋-goal (A , sz , sz′) =
       ∀ {Γ E} (Seq : Γ ⟶₀₋ A) (Seq′ : A ∷ Γ ⟶₀₋ E) →
       sz ≡ size-⟶₀₋ Seq →
       sz′ ≡ size-⟶₀₋ Seq′ → 
       Γ ⟶₀₋ E
 
-    module _ trip (rec : ∀ trip′ → trip′ <ₗₑₓ trip → cut-goal trip′) where
+    module _ trip (rec : ∀ trip′ → trip′ <ₗₑₓ trip → cut₀₋-goal trip′) where
       rec-structural : ∀ {Γ A E} → (Seq : Γ ⟶₀₋ A) (Seq′ : A ∷ Γ ⟶₀₋ E) → (A , size-⟶₀₋ Seq , size-⟶₀₋ Seq′) <ₗₑₓ trip → Γ ⟶₀₋ E
       rec-structural {A = A} Seq Seq′ ord = rec (A , size-⟶₀₋ Seq , size-⟶₀₋ Seq′) ord Seq Seq′ refl refl
 
       rec-wk/ex      : ∀ {Γ A B E} → (Seq : Γ ⟶₀₋ A) (Seq′ : B ∷ A ∷ Γ ⟶₀₋ E) → (A , size-⟶₀₋ Seq , size-⟶₀₋ Seq′) <ₗₑₓ trip → B ∷ Γ ⟶₀₋ E
       rec-wk/ex      {A = A} Seq Seq′ ord = rec (A , size-⟶₀₋ Seq , size-⟶₀₋ Seq′) ord (⟶₀₋wk {[]} Seq) (⟶₀₋ex {[]} Seq′) (⟶₀₋wk-preserves-size-⟶₀₋ {[]} Seq) (⟶₀₋ex-preserves-size-⟶₀₋ {[]} Seq′)
 
-      cut-elimination₀-gen : cut-goal trip
+      cut₀₋-gen : cut₀₋-goal trip
       -- When the sequent showing the cut formula ends with the `init₀₋` rule
-      cut-elimination₀-gen (init₀₋ A∈)         A⟶                          refl refl = ⟶₀₋-resp-∈⇒∈ ∈⇒∈ A⟶
+      cut₀₋-gen (init₀₋ A∈)         A⟶                          refl refl = ⟶₀₋-resp-∈⇒∈ ∈⇒∈ A⟶
         where
           ∈⇒∈ : ∀ {B} → B ∈ proj₁ trip ∷ _ → B ∈ _
           ∈⇒∈ (here refl) = ∈-++⁺ʳ _ A∈
           ∈⇒∈ (there B∈)  = ∈-++⁺ʳ _ B∈
       -- When the sequent showing the cut formula ends with the `⊥ₚ₀₋L` rule
-      cut-elimination₀-gen (⊥ₚ₀₋L  ⊥∈)         A⟶                          refl refl = ⊥ₚ₀₋L ⊥∈
+      cut₀₋-gen (⊥ₚ₀₋L  ⊥∈)         A⟶                          refl refl = ⊥ₚ₀₋L ⊥∈
       -- When the sequent showing the cut formula ends with any left rule,
       -- i.e. the rules where the cut formula cannot be the principal formula
-      cut-elimination₀-gen (∧ₚ₀₋L₁ A∧B∈ A⟶)    C⟶                          refl refl = ∧ₚ₀₋L₁ A∧B∈ (rec-structural A⟶ (⟶₀₋wk {_ ∷ []} C⟶) (<ₗₑₓ-of₁ ≤-refl))
-      cut-elimination₀-gen (∧ₚ₀₋L₂ A∧B∈ B⟶)    C⟶                          refl refl = ∧ₚ₀₋L₂ A∧B∈ (rec-structural B⟶ (⟶₀₋wk {_ ∷ []} C⟶) (<ₗₑₓ-of₁ ≤-refl))
-      cut-elimination₀-gen (∨ₚ₀₋L  A∨B∈ A⟶ B⟶) C⟶                          refl refl = ∨ₚ₀₋L A∨B∈
-                                                                                         (rec-structural A⟶ (⟶₀₋wk {_ ∷ []} C⟶) (<ₗₑₓ-of₁ (m≤m+n _ _)))
-                                                                                         (rec-structural B⟶ (⟶₀₋wk {_ ∷ []} C⟶) (<ₗₑₓ-of₁ (s≤s (m≤n+m _ _))))
-      cut-elimination₀-gen (→ₚ₀₋L  A→B∈ ⟶A B⟶) C⟶                          refl refl = →ₚ₀₋L A→B∈ ⟶A (rec-structural B⟶ (⟶₀₋wk {_ ∷ []} C⟶) (<ₗₑₓ-of₁ (s≤s (m≤n+m _ _))))
+      cut₀₋-gen (∧ₚ₀₋L₁ A∧B∈ A⟶)    C⟶                          refl refl = ∧ₚ₀₋L₁ A∧B∈ (rec-structural A⟶ (⟶₀₋wk {_ ∷ []} C⟶) (<ₗₑₓ-of₁ ≤-refl))
+      cut₀₋-gen (∧ₚ₀₋L₂ A∧B∈ B⟶)    C⟶                          refl refl = ∧ₚ₀₋L₂ A∧B∈ (rec-structural B⟶ (⟶₀₋wk {_ ∷ []} C⟶) (<ₗₑₓ-of₁ ≤-refl))
+      cut₀₋-gen (∨ₚ₀₋L  A∨B∈ A⟶ B⟶) C⟶                          refl refl = ∨ₚ₀₋L A∨B∈
+                                                                              (rec-structural A⟶ (⟶₀₋wk {_ ∷ []} C⟶) (<ₗₑₓ-of₁ (m≤m+n _ _)))
+                                                                              (rec-structural B⟶ (⟶₀₋wk {_ ∷ []} C⟶) (<ₗₑₓ-of₁ (s≤s (m≤n+m _ _))))
+      cut₀₋-gen (→ₚ₀₋L  A→B∈ ⟶A B⟶) C⟶                          refl refl = →ₚ₀₋L A→B∈ ⟶A (rec-structural B⟶ (⟶₀₋wk {_ ∷ []} C⟶) (<ₗₑₓ-of₁ (s≤s (m≤n+m _ _))))
       -- When the sequent assuming the cut formula ends with the `init₀₋` rule
-      cut-elimination₀-gen ⟶A                  (init₀₋ (here refl))        refl refl = ⟶A
-      cut-elimination₀-gen ⟶A                  (init₀₋ (there D∈))         refl refl = init₀₋ D∈
+      cut₀₋-gen ⟶A                  (init₀₋ (here refl))        refl refl = ⟶A
+      cut₀₋-gen ⟶A                  (init₀₋ (there D∈))         refl refl = init₀₋ D∈
       -- When the sequent assuming the cut formula ends with the `⊥ₚ₀₋L` rule
       -- `⊥ₚ₀₋L (here refl)` case (i.e. where the cut formula is `⊥ₚ₀`) is already covered by above cases
-      cut-elimination₀-gen ⟶A                  (⊥ₚ₀₋L  (there ⊥∈))         refl refl = ⊥ₚ₀₋L ⊥∈
+      cut₀₋-gen ⟶A                  (⊥ₚ₀₋L  (there ⊥∈))         refl refl = ⊥ₚ₀₋L ⊥∈
       -- When the sequent assuming the cut formula ends with any right rule,
       -- i.e. the rules where the cut formula cannot be the principal formula
-      cut-elimination₀-gen ⟶A                  (∧ₚ₀₋R  ⟶C ⟶D)              refl refl = ∧ₚ₀₋R
-                                                                                         (rec-structural ⟶A ⟶C (<ₗₑₓ-of₂ (m≤m+n _ _)))
-                                                                                         (rec-structural ⟶A ⟶D (<ₗₑₓ-of₂ (s≤s (m≤n+m _ _))))
-      cut-elimination₀-gen ⟶A                  (∨ₚ₀₋R₁ ⟶C)                 refl refl = ∨ₚ₀₋R₁ (rec-structural ⟶A ⟶C (<ₗₑₓ-of₂ ≤-refl))
-      cut-elimination₀-gen ⟶A                  (∨ₚ₀₋R₂ ⟶D)                 refl refl = ∨ₚ₀₋R₂ (rec-structural ⟶A ⟶D (<ₗₑₓ-of₂ ≤-refl))
-      cut-elimination₀-gen ⟶A                  (→ₚ₀₋R  C⟶D)                refl refl = →ₚ₀₋R (rec-wk/ex ⟶A C⟶D (<ₗₑₓ-of₂ ≤-refl))
+      cut₀₋-gen ⟶A                  (∧ₚ₀₋R  ⟶C ⟶D)              refl refl = ∧ₚ₀₋R
+                                                                              (rec-structural ⟶A ⟶C (<ₗₑₓ-of₂ (m≤m+n _ _)))
+                                                                              (rec-structural ⟶A ⟶D (<ₗₑₓ-of₂ (s≤s (m≤n+m _ _))))
+      cut₀₋-gen ⟶A                  (∨ₚ₀₋R₁ ⟶C)                 refl refl = ∨ₚ₀₋R₁ (rec-structural ⟶A ⟶C (<ₗₑₓ-of₂ ≤-refl))
+      cut₀₋-gen ⟶A                  (∨ₚ₀₋R₂ ⟶D)                 refl refl = ∨ₚ₀₋R₂ (rec-structural ⟶A ⟶D (<ₗₑₓ-of₂ ≤-refl))
+      cut₀₋-gen ⟶A                  (→ₚ₀₋R  C⟶D)                refl refl = →ₚ₀₋R (rec-wk/ex ⟶A C⟶D (<ₗₑₓ-of₂ ≤-refl))
       -- When the sequent assuming the cut formula ends with a left rule,
       -- but the rule does not use the cut formula as its principal formula
-      cut-elimination₀-gen ⟶A∧B@(∧ₚ₀₋R  _  _)  (∧ₚ₀₋L₁ (there C∧D∈) C⟶)    refl refl = ∧ₚ₀₋L₁ C∧D∈ (rec-wk/ex ⟶A∧B C⟶ (<ₗₑₓ-of₂ ≤-refl))
-      cut-elimination₀-gen ⟶A∧B@(∧ₚ₀₋R  _  _)  (∧ₚ₀₋L₂ (there C∧D∈) D⟶)    refl refl = ∧ₚ₀₋L₂ C∧D∈ (rec-wk/ex ⟶A∧B D⟶ (<ₗₑₓ-of₂ ≤-refl))
-      cut-elimination₀-gen ⟶A∧B@(∧ₚ₀₋R  _  _)  (∨ₚ₀₋L  (there C∨D∈) C⟶ D⟶) refl refl = ∨ₚ₀₋L C∨D∈
-                                                                                         (rec-wk/ex ⟶A∧B C⟶ (<ₗₑₓ-of₂ (m≤m+n _ _)))
-                                                                                         (rec-wk/ex ⟶A∧B D⟶ (<ₗₑₓ-of₂ (s≤s (m≤n+m _ _))))
-      cut-elimination₀-gen ⟶A∧B@(∧ₚ₀₋R  _  _)  (→ₚ₀₋L  (there C→D∈) ⟶C D⟶) refl refl = →ₚ₀₋L C→D∈
-                                                                                         (rec-structural ⟶A∧B ⟶C (<ₗₑₓ-of₂ (m≤m+n _ _)))
-                                                                                         (rec-wk/ex ⟶A∧B D⟶ (<ₗₑₓ-of₂ (s≤s (m≤n+m _ _))))
-      cut-elimination₀-gen ⟶A∨B@(∨ₚ₀₋R₁ _)     (∧ₚ₀₋L₁ (there C∧D∈) C⟶)    refl refl = ∧ₚ₀₋L₁ C∧D∈ (rec-wk/ex ⟶A∨B C⟶ (<ₗₑₓ-of₂ ≤-refl))
-      cut-elimination₀-gen ⟶A∨B@(∨ₚ₀₋R₁ _)     (∧ₚ₀₋L₂ (there C∧D∈) D⟶)    refl refl = ∧ₚ₀₋L₂ C∧D∈ (rec-wk/ex ⟶A∨B D⟶ (<ₗₑₓ-of₂ ≤-refl))
-      cut-elimination₀-gen ⟶A∨B@(∨ₚ₀₋R₁ _)     (∨ₚ₀₋L  (there C∨D∈) C⟶ D⟶) refl refl = ∨ₚ₀₋L C∨D∈
-                                                                                         (rec-wk/ex ⟶A∨B C⟶ (<ₗₑₓ-of₂ (m≤m+n _ _)))
-                                                                                         (rec-wk/ex ⟶A∨B D⟶ (<ₗₑₓ-of₂ (s≤s (m≤n+m _ _))))
-      cut-elimination₀-gen ⟶A∨B@(∨ₚ₀₋R₁ _)     (→ₚ₀₋L  (there C→D∈) ⟶C D⟶) refl refl = →ₚ₀₋L C→D∈
-                                                                                         (rec-structural ⟶A∨B ⟶C (<ₗₑₓ-of₂ (m≤m+n _ _)))
-                                                                                         (rec-wk/ex ⟶A∨B D⟶ (<ₗₑₓ-of₂ (s≤s (m≤n+m _ _))))
-      cut-elimination₀-gen ⟶A∨B@(∨ₚ₀₋R₂ _)     (∧ₚ₀₋L₁ (there C∧D∈) C⟶)    refl refl = ∧ₚ₀₋L₁ C∧D∈ (rec-wk/ex ⟶A∨B C⟶ (<ₗₑₓ-of₂ ≤-refl))
-      cut-elimination₀-gen ⟶A∨B@(∨ₚ₀₋R₂ _)     (∧ₚ₀₋L₂ (there C∧D∈) D⟶)    refl refl = ∧ₚ₀₋L₂ C∧D∈ (rec-wk/ex ⟶A∨B D⟶ (<ₗₑₓ-of₂ ≤-refl))
-      cut-elimination₀-gen ⟶A∨B@(∨ₚ₀₋R₂ _)     (∨ₚ₀₋L  (there C∨D∈) C⟶ D⟶) refl refl = ∨ₚ₀₋L C∨D∈
-                                                                                         (rec-wk/ex ⟶A∨B C⟶ (<ₗₑₓ-of₂ (m≤m+n _ _)))
-                                                                                         (rec-wk/ex ⟶A∨B D⟶ (<ₗₑₓ-of₂ (s≤s (m≤n+m _ _))))
-      cut-elimination₀-gen ⟶A∨B@(∨ₚ₀₋R₂ _)     (→ₚ₀₋L  (there C→D∈) ⟶C D⟶) refl refl = →ₚ₀₋L C→D∈
-                                                                                         (rec-structural ⟶A∨B ⟶C (<ₗₑₓ-of₂ (m≤m+n _ _)))
-                                                                                         (rec-wk/ex ⟶A∨B D⟶ (<ₗₑₓ-of₂ (s≤s (m≤n+m _ _))))
-      cut-elimination₀-gen ⟶A→B@(→ₚ₀₋R  _)     (∧ₚ₀₋L₁ (there C∧D∈) C⟶)    refl refl = ∧ₚ₀₋L₁ C∧D∈ (rec-wk/ex ⟶A→B C⟶ (<ₗₑₓ-of₂ ≤-refl))
-      cut-elimination₀-gen ⟶A→B@(→ₚ₀₋R  _)     (∧ₚ₀₋L₂ (there C∧D∈) D⟶)    refl refl = ∧ₚ₀₋L₂ C∧D∈ (rec-wk/ex ⟶A→B D⟶ (<ₗₑₓ-of₂ ≤-refl))
-      cut-elimination₀-gen ⟶A→B@(→ₚ₀₋R  _)     (∨ₚ₀₋L  (there C∨D∈) C⟶ D⟶) refl refl = ∨ₚ₀₋L C∨D∈
-                                                                                         (rec-wk/ex ⟶A→B C⟶ (<ₗₑₓ-of₂ (m≤m+n _ _)))
-                                                                                         (rec-wk/ex ⟶A→B D⟶ (<ₗₑₓ-of₂ (s≤s (m≤n+m _ _))))
-      cut-elimination₀-gen ⟶A→B@(→ₚ₀₋R  _)     (→ₚ₀₋L  (there C→D∈) ⟶C D⟶) refl refl = →ₚ₀₋L C→D∈
-                                                                                         (rec-structural ⟶A→B ⟶C (<ₗₑₓ-of₂ (m≤m+n _ _)))
-                                                                                         (rec-wk/ex ⟶A→B D⟶ (<ₗₑₓ-of₂ (s≤s (m≤n+m _ _))))
+      cut₀₋-gen ⟶A∧B@(∧ₚ₀₋R  _  _)  (∧ₚ₀₋L₁ (there C∧D∈) C⟶)    refl refl = ∧ₚ₀₋L₁ C∧D∈ (rec-wk/ex ⟶A∧B C⟶ (<ₗₑₓ-of₂ ≤-refl))
+      cut₀₋-gen ⟶A∧B@(∧ₚ₀₋R  _  _)  (∧ₚ₀₋L₂ (there C∧D∈) D⟶)    refl refl = ∧ₚ₀₋L₂ C∧D∈ (rec-wk/ex ⟶A∧B D⟶ (<ₗₑₓ-of₂ ≤-refl))
+      cut₀₋-gen ⟶A∧B@(∧ₚ₀₋R  _  _)  (∨ₚ₀₋L  (there C∨D∈) C⟶ D⟶) refl refl = ∨ₚ₀₋L C∨D∈
+                                                                              (rec-wk/ex ⟶A∧B C⟶ (<ₗₑₓ-of₂ (m≤m+n _ _)))
+                                                                              (rec-wk/ex ⟶A∧B D⟶ (<ₗₑₓ-of₂ (s≤s (m≤n+m _ _))))
+      cut₀₋-gen ⟶A∧B@(∧ₚ₀₋R  _  _)  (→ₚ₀₋L  (there C→D∈) ⟶C D⟶) refl refl = →ₚ₀₋L C→D∈
+                                                                              (rec-structural ⟶A∧B ⟶C (<ₗₑₓ-of₂ (m≤m+n _ _)))
+                                                                              (rec-wk/ex ⟶A∧B D⟶ (<ₗₑₓ-of₂ (s≤s (m≤n+m _ _))))
+      cut₀₋-gen ⟶A∨B@(∨ₚ₀₋R₁ _)     (∧ₚ₀₋L₁ (there C∧D∈) C⟶)    refl refl = ∧ₚ₀₋L₁ C∧D∈ (rec-wk/ex ⟶A∨B C⟶ (<ₗₑₓ-of₂ ≤-refl))
+      cut₀₋-gen ⟶A∨B@(∨ₚ₀₋R₁ _)     (∧ₚ₀₋L₂ (there C∧D∈) D⟶)    refl refl = ∧ₚ₀₋L₂ C∧D∈ (rec-wk/ex ⟶A∨B D⟶ (<ₗₑₓ-of₂ ≤-refl))
+      cut₀₋-gen ⟶A∨B@(∨ₚ₀₋R₁ _)     (∨ₚ₀₋L  (there C∨D∈) C⟶ D⟶) refl refl = ∨ₚ₀₋L C∨D∈
+                                                                              (rec-wk/ex ⟶A∨B C⟶ (<ₗₑₓ-of₂ (m≤m+n _ _)))
+                                                                              (rec-wk/ex ⟶A∨B D⟶ (<ₗₑₓ-of₂ (s≤s (m≤n+m _ _))))
+      cut₀₋-gen ⟶A∨B@(∨ₚ₀₋R₁ _)     (→ₚ₀₋L  (there C→D∈) ⟶C D⟶) refl refl = →ₚ₀₋L C→D∈
+                                                                              (rec-structural ⟶A∨B ⟶C (<ₗₑₓ-of₂ (m≤m+n _ _)))
+                                                                              (rec-wk/ex ⟶A∨B D⟶ (<ₗₑₓ-of₂ (s≤s (m≤n+m _ _))))
+      cut₀₋-gen ⟶A∨B@(∨ₚ₀₋R₂ _)     (∧ₚ₀₋L₁ (there C∧D∈) C⟶)    refl refl = ∧ₚ₀₋L₁ C∧D∈ (rec-wk/ex ⟶A∨B C⟶ (<ₗₑₓ-of₂ ≤-refl))
+      cut₀₋-gen ⟶A∨B@(∨ₚ₀₋R₂ _)     (∧ₚ₀₋L₂ (there C∧D∈) D⟶)    refl refl = ∧ₚ₀₋L₂ C∧D∈ (rec-wk/ex ⟶A∨B D⟶ (<ₗₑₓ-of₂ ≤-refl))
+      cut₀₋-gen ⟶A∨B@(∨ₚ₀₋R₂ _)     (∨ₚ₀₋L  (there C∨D∈) C⟶ D⟶) refl refl = ∨ₚ₀₋L C∨D∈
+                                                                              (rec-wk/ex ⟶A∨B C⟶ (<ₗₑₓ-of₂ (m≤m+n _ _)))
+                                                                              (rec-wk/ex ⟶A∨B D⟶ (<ₗₑₓ-of₂ (s≤s (m≤n+m _ _))))
+      cut₀₋-gen ⟶A∨B@(∨ₚ₀₋R₂ _)     (→ₚ₀₋L  (there C→D∈) ⟶C D⟶) refl refl = →ₚ₀₋L C→D∈
+                                                                              (rec-structural ⟶A∨B ⟶C (<ₗₑₓ-of₂ (m≤m+n _ _)))
+                                                                              (rec-wk/ex ⟶A∨B D⟶ (<ₗₑₓ-of₂ (s≤s (m≤n+m _ _))))
+      cut₀₋-gen ⟶A→B@(→ₚ₀₋R  _)     (∧ₚ₀₋L₁ (there C∧D∈) C⟶)    refl refl = ∧ₚ₀₋L₁ C∧D∈ (rec-wk/ex ⟶A→B C⟶ (<ₗₑₓ-of₂ ≤-refl))
+      cut₀₋-gen ⟶A→B@(→ₚ₀₋R  _)     (∧ₚ₀₋L₂ (there C∧D∈) D⟶)    refl refl = ∧ₚ₀₋L₂ C∧D∈ (rec-wk/ex ⟶A→B D⟶ (<ₗₑₓ-of₂ ≤-refl))
+      cut₀₋-gen ⟶A→B@(→ₚ₀₋R  _)     (∨ₚ₀₋L  (there C∨D∈) C⟶ D⟶) refl refl = ∨ₚ₀₋L C∨D∈
+                                                                              (rec-wk/ex ⟶A→B C⟶ (<ₗₑₓ-of₂ (m≤m+n _ _)))
+                                                                              (rec-wk/ex ⟶A→B D⟶ (<ₗₑₓ-of₂ (s≤s (m≤n+m _ _))))
+      cut₀₋-gen ⟶A→B@(→ₚ₀₋R  _)     (→ₚ₀₋L  (there C→D∈) ⟶C D⟶) refl refl = →ₚ₀₋L C→D∈
+                                                                              (rec-structural ⟶A→B ⟶C (<ₗₑₓ-of₂ (m≤m+n _ _)))
+                                                                              (rec-wk/ex ⟶A→B D⟶ (<ₗₑₓ-of₂ (s≤s (m≤n+m _ _))))
       -- When both the sequent showing the cut formula and the one assuming the cut formula
       -- end with rules that use the cut formula as their principal formulae
-      cut-elimination₀-gen ⟶A∧B@(∧ₚ₀₋R  ⟶A ⟶B) (∧ₚ₀₋L₁ (here refl) A⟶)     refl refl = rec-structural ⟶A A⟶E (<ₗₑₓ-of₀ (m≤m+n _ _))
+      cut₀₋-gen ⟶A∧B@(∧ₚ₀₋R  ⟶A ⟶B) (∧ₚ₀₋L₁ (here refl) A⟶)     refl refl = rec-structural ⟶A A⟶E (<ₗₑₓ-of₀ (m≤m+n _ _))
         where
           A⟶E = rec-wk/ex ⟶A∧B A⟶ (<ₗₑₓ-of₂ ≤-refl)
-      cut-elimination₀-gen ⟶A∧B@(∧ₚ₀₋R  ⟶A ⟶B) (∧ₚ₀₋L₂ (here refl) B⟶)     refl refl = rec-structural ⟶B B⟶E (<ₗₑₓ-of₀ (s≤s (m≤n+m _ _)))
+      cut₀₋-gen ⟶A∧B@(∧ₚ₀₋R  ⟶A ⟶B) (∧ₚ₀₋L₂ (here refl) B⟶)     refl refl = rec-structural ⟶B B⟶E (<ₗₑₓ-of₀ (s≤s (m≤n+m _ _)))
         where
           B⟶E = rec-wk/ex ⟶A∧B B⟶ (<ₗₑₓ-of₂ ≤-refl)
-      cut-elimination₀-gen ⟶A∨B@(∨ₚ₀₋R₁ ⟶A)    (∨ₚ₀₋L  (here refl) A⟶ B⟶)  refl refl = rec-structural ⟶A A⟶E (<ₗₑₓ-of₀ (m≤m+n _ _))
+      cut₀₋-gen ⟶A∨B@(∨ₚ₀₋R₁ ⟶A)    (∨ₚ₀₋L  (here refl) A⟶ B⟶)  refl refl = rec-structural ⟶A A⟶E (<ₗₑₓ-of₀ (m≤m+n _ _))
         where
           A⟶E = rec-wk/ex ⟶A∨B A⟶ (<ₗₑₓ-of₂ (m≤m+n _ _))
-      cut-elimination₀-gen ⟶A∨B@(∨ₚ₀₋R₂ ⟶B)    (∨ₚ₀₋L  (here refl) A⟶ B⟶)  refl refl = rec-structural ⟶B B⟶E (<ₗₑₓ-of₀ (s≤s (m≤n+m _ _)))
+      cut₀₋-gen ⟶A∨B@(∨ₚ₀₋R₂ ⟶B)    (∨ₚ₀₋L  (here refl) A⟶ B⟶)  refl refl = rec-structural ⟶B B⟶E (<ₗₑₓ-of₀ (s≤s (m≤n+m _ _)))
         where
           B⟶E = rec-wk/ex ⟶A∨B B⟶ (<ₗₑₓ-of₂ (s≤s (m≤n+m _ _)))
-      cut-elimination₀-gen ⟶A→B@(→ₚ₀₋R  A⟶B)   (→ₚ₀₋L  (here refl) ⟶A B⟶)  refl refl = rec-structural ⟶B B⟶E (<ₗₑₓ-of₀ (s≤s (m≤n+m _ _)))
+      cut₀₋-gen ⟶A→B@(→ₚ₀₋R  A⟶B)   (→ₚ₀₋L  (here refl) ⟶A B⟶)  refl refl = rec-structural ⟶B B⟶E (<ₗₑₓ-of₀ (s≤s (m≤n+m _ _)))
         where
           ⟶A′ = rec-structural ⟶A→B ⟶A (<ₗₑₓ-of₂ (m≤m+n _ _))
           ⟶B  = rec-structural ⟶A′ A⟶B (<ₗₑₓ-of₀ (m≤m+n _ _))
           B⟶E = rec-wk/ex ⟶A→B B⟶ (<ₗₑₓ-of₂ (s≤s (m≤n+m _ _)))
 
-  cut-elimination₀ : Γ ⟶₀₋ A → A ∷ Γ ⟶₀₋ E → Γ ⟶₀₋ E
-  cut-elimination₀ {Γ} {A} {E} ⟶A A⟶ = wfRec cut-goal cut-elimination₀-gen (A , size-⟶₀₋ ⟶A , size-⟶₀₋ A⟶) ⟶A A⟶ refl refl
+  -- cut elimination theorem
+  cut₀₋ : Γ ⟶₀₋ A → A ∷ Γ ⟶₀₋ E → Γ ⟶₀₋ E
+  cut₀₋ {Γ} {A} {E} ⟶A A⟶ = wfRec cut₀₋-goal cut₀₋-gen (A , size-⟶₀₋ ⟶A , size-⟶₀₋ A⟶) ⟶A A⟶ refl refl
     where
       open Wf.All <ₗₑₓ-wellFounded 0ℓ
