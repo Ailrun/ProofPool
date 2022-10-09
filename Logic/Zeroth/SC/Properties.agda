@@ -1,7 +1,6 @@
 -- Properties of Sequent Calculus without Cut
 module Logic.Zeroth.SC.Properties where
 
-open import Logic.Zeroth.Base
 open import Logic.Zeroth.SC
 
 ⟶₀₋-resp-∈⇒∈ : (∀ {A} → A ∈ Γ → A ∈ Γ′) → Γ ⟶₀₋ B → Γ′ ⟶₀₋ B
@@ -17,10 +16,10 @@ open import Logic.Zeroth.SC
 ⟶₀₋-resp-∈⇒∈ f (→ₚ₀₋L  B→C∈ ⟶B C⟶) = →ₚ₀₋L (f B→C∈) (⟶₀₋-resp-∈⇒∈ f ⟶B) (⟶₀₋-resp-∈⇒∈ (∈⇒∈-ext f) C⟶)
 
 ⟶₀₋wk : Γ′ ++ Γ ⟶₀₋ B → Γ′ ++ A ∷ Γ ⟶₀₋ B
-⟶₀₋wk {Γ′} ⟶B = ⟶₀₋-resp-∈⇒∈ (∈-++-∷ Γ′ _) ⟶B
+⟶₀₋wk {Γ′} ⟶B = ⟶₀₋-resp-∈⇒∈ (∈-++⇒∈-++-∷ Γ′ _) ⟶B
 
 ⟶₀₋wk′ : Γ′ ++ Γ ⟶₀₋ A → Γ′ ++ Γ″ ++ Γ ⟶₀₋ A
-⟶₀₋wk′ {Γ′} ⟶A = ⟶₀₋-resp-∈⇒∈ (∈-++-++ Γ′ _) ⟶A
+⟶₀₋wk′ {Γ′} ⟶A = ⟶₀₋-resp-∈⇒∈ (∈-++⇒∈-++-++ Γ′ _) ⟶A
 
 ⟶₀₋ct : Γ′ ++ A ∷ A ∷ Γ ⟶₀₋ B → Γ′ ++ A ∷ Γ ⟶₀₋ B
 ⟶₀₋ct {Γ′} ⟶B = ⟶₀₋-resp-∈⇒∈ (∈-++-dedupe₁ Γ′) ⟶B
@@ -41,10 +40,10 @@ open import Logic.Zeroth.SC
 ∈⇒∈-preserves-size-⟶₀₋ f (→ₚ₀₋L  B→C∈ ⟶B C⟶) = cong suc (cong₂ _+_ (∈⇒∈-preserves-size-⟶₀₋ f ⟶B) (∈⇒∈-preserves-size-⟶₀₋ (∈⇒∈-ext f) C⟶))
 
 ⟶₀₋wk-preserves-size-⟶₀₋ : ∀ (Seq : Γ′ ++ Γ ⟶₀₋ B) → size-⟶₀₋ Seq ≡ size-⟶₀₋ (⟶₀₋wk {Γ′} {A = A} Seq)
-⟶₀₋wk-preserves-size-⟶₀₋ {Γ′} = ∈⇒∈-preserves-size-⟶₀₋ (∈-++-∷ Γ′ _)
+⟶₀₋wk-preserves-size-⟶₀₋ {Γ′} = ∈⇒∈-preserves-size-⟶₀₋ (∈-++⇒∈-++-∷ Γ′ _)
 
 ⟶₀₋wk′-preserves-size-⟶₀₋ : ∀ (Seq : Γ′ ++ Γ ⟶₀₋ B) → size-⟶₀₋ Seq ≡ size-⟶₀₋ (⟶₀₋wk′ {Γ′} {Γ″ = Γ″} Seq)
-⟶₀₋wk′-preserves-size-⟶₀₋ {Γ′} = ∈⇒∈-preserves-size-⟶₀₋ (∈-++-++ Γ′ _)
+⟶₀₋wk′-preserves-size-⟶₀₋ {Γ′} = ∈⇒∈-preserves-size-⟶₀₋ (∈-++⇒∈-++-++ Γ′ _)
 
 ⟶₀₋ct-preserves-size-⟶₀₋ : ∀ (Seq : Γ′ ++ A ∷ A ∷ Γ ⟶₀₋ B) → size-⟶₀₋ Seq ≡ size-⟶₀₋ (⟶₀₋ct {Γ′} Seq)
 ⟶₀₋ct-preserves-size-⟶₀₋ {Γ′} = ∈⇒∈-preserves-size-⟶₀₋ (∈-++-dedupe₁ Γ′)

@@ -1,7 +1,6 @@
 -- Sequent Calculus without Cut
 module Logic.Zeroth.SC where
 
-open import Logic.Zeroth.Base
 open import Logic.Zeroth.Syntax public
 
 infixl 4 _⟶₀₋_

@@ -1,6 +1,5 @@
 module Logic.Zeroth.Properties where
 
-open import Logic.Zeroth.Base
 open import Logic.Zeroth.ND
 open import Logic.Zeroth.ND.Properties
 open import Logic.Zeroth.NND

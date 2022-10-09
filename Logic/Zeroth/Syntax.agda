@@ -1,6 +1,6 @@
 module Logic.Zeroth.Syntax where
 
-open import Logic.Zeroth.Base
+open import Logic.Base public
 
 infixl 11 ¬ₚ₀_
 infixl 10 _∧ₚ₀_

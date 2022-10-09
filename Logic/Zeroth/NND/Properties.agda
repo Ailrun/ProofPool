@@ -1,7 +1,6 @@
 -- Properties of Normal Natural Deduction
 module Logic.Zeroth.NND.Properties where
 
-open import Logic.Zeroth.Base
 open import Logic.Zeroth.NND
 
 ⊢₀ⁿ-resp-∈⇒∈ : (∀ {A} → A ∈ Γ → A ∈ Γ′) → Γ ⊢₀ⁿ B → Γ′ ⊢₀ⁿ B
@@ -21,16 +20,16 @@ open import Logic.Zeroth.NND
 ⊢₀ʳ-resp-∈⇒∈ f (→ₚ₀ʳE  ⊢B→C ⊢B) = →ₚ₀ʳE (⊢₀ʳ-resp-∈⇒∈ f ⊢B→C) (⊢₀ⁿ-resp-∈⇒∈ f ⊢B)
 
 ⊢₀ⁿwk : Γ′ ++ Γ ⊢₀ⁿ B → Γ′ ++ A ∷ Γ ⊢₀ⁿ B
-⊢₀ⁿwk {Γ′} ⊢B = ⊢₀ⁿ-resp-∈⇒∈ (∈-++-∷ Γ′ _) ⊢B
+⊢₀ⁿwk {Γ′} ⊢B = ⊢₀ⁿ-resp-∈⇒∈ (∈-++⇒∈-++-∷ Γ′ _) ⊢B
 
 ⊢₀ʳwk : Γ′ ++ Γ ⊢₀ʳ B → Γ′ ++ A ∷ Γ ⊢₀ʳ B
-⊢₀ʳwk {Γ′} ⊢B = ⊢₀ʳ-resp-∈⇒∈ (∈-++-∷ Γ′ _) ⊢B
+⊢₀ʳwk {Γ′} ⊢B = ⊢₀ʳ-resp-∈⇒∈ (∈-++⇒∈-++-∷ Γ′ _) ⊢B
 
 ⊢₀ⁿwk′ : Γ′ ++ Γ ⊢₀ⁿ A → Γ′ ++ Γ″ ++ Γ ⊢₀ⁿ A
-⊢₀ⁿwk′ {Γ′} ⊢A = ⊢₀ⁿ-resp-∈⇒∈ (∈-++-++ Γ′ _) ⊢A
+⊢₀ⁿwk′ {Γ′} ⊢A = ⊢₀ⁿ-resp-∈⇒∈ (∈-++⇒∈-++-++ Γ′ _) ⊢A
 
 ⊢₀ʳwk′ : Γ′ ++ Γ ⊢₀ʳ A → Γ′ ++ Γ″ ++ Γ ⊢₀ʳ A
-⊢₀ʳwk′ {Γ′} ⊢A = ⊢₀ʳ-resp-∈⇒∈ (∈-++-++ Γ′ _) ⊢A
+⊢₀ʳwk′ {Γ′} ⊢A = ⊢₀ʳ-resp-∈⇒∈ (∈-++⇒∈-++-++ Γ′ _) ⊢A
 
 ⊢₀ⁿct : Γ′ ++ A ∷ A ∷ Γ ⊢₀ⁿ B → Γ′ ++ A ∷ Γ ⊢₀ⁿ B
 ⊢₀ⁿct {Γ′} ⊢B = ⊢₀ⁿ-resp-∈⇒∈ (∈-++-dedupe₁ Γ′) ⊢B

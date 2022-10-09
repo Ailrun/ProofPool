@@ -1,4 +1,4 @@
-module Logic.Zeroth.Base where
+module Logic.Base where
 
 open import Data.Empty public
 open import Data.List hiding ([_]; map; zip) public
@@ -15,10 +15,13 @@ open import Data.Sum hiding (assocʳ; assocˡ; map; map₁; map₂; swap) public
 open import Function.Base public
 open import Induction.WellFounded
 open import Level renaming (_⊔_ to _l⊔_; suc to lsuc; zero to lzero) public
+open import Relation.Nullary public
+open import Relation.Nullary.Decidable public
 open import Relation.Binary.Construct.On
 open import Relation.Binary.Core public
 open import Relation.Binary.PropositionalEquality using (_≡_; cong; cong₂; refl; subst; trans) public
 
+module L = Data.List
 module WfLex = Data.Product.Relation.Binary.Lex.Strict
 module Wf = Induction.WellFounded
 module On = Relation.Binary.Construct.On
@@ -32,14 +35,14 @@ private
     x y z : A
     xs ys zs : List A
 
-∈-++-++ : ∀ xs {ys} zs → x ∈ xs ++ ys → x ∈ xs ++ zs ++ ys
-∈-++-++ xs zs x∈
+∈-++⇒∈-++-++ : ∀ xs {ys} zs → x ∈ xs ++ ys → x ∈ xs ++ zs ++ ys
+∈-++⇒∈-++-++ xs zs x∈
   with ∈-++⁻ xs x∈
 ...  | inj₁ x∈xs = ∈-++⁺ˡ x∈xs
 ...  | inj₂ x∈ys = ∈-++⁺ʳ xs (∈-++⁺ʳ zs x∈ys)
 
-∈-++-∷ : ∀ xs {ys} y → x ∈ xs ++ ys → x ∈ xs ++ y ∷ ys
-∈-++-∷ xs _ = ∈-++-++ xs (_ ∷ [])
+∈-++⇒∈-++-∷ : ∀ xs {ys} y → x ∈ xs ++ ys → x ∈ xs ++ y ∷ ys
+∈-++⇒∈-++-∷ xs _ = ∈-++⇒∈-++-++ xs (_ ∷ [])
 
 ∈-++-dedupe₁ : ∀ xs {ys} {y} → x ∈ xs ++ y ∷ y ∷ ys → x ∈ xs ++ y ∷ ys
 ∈-++-dedupe₁ xs x∈

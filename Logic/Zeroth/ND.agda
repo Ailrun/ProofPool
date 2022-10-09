@@ -1,7 +1,6 @@
 -- Natural Deduction
 module Logic.Zeroth.ND where
 
-open import Logic.Zeroth.Base
 open import Logic.Zeroth.Syntax public
 
 infixl 4 _⊢₀_
