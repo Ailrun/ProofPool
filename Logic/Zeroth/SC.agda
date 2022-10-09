@@ -55,13 +55,13 @@ data _⟶₀₋_ : Ctx₀ → P₀ → Set where
            Γ ⟶₀₋ C
 
 size-⟶₀₋ : Γ ⟶₀₋ A → ℕ
-size-⟶₀₋ (init₀₋ B∈)        = 1
-size-⟶₀₋ (⊥ₚ₀₋L ⊥∈)         = 1
-size-⟶₀₋ (∧ₚ₀₋R ⟶B ⟶C)      = suc (size-⟶₀₋ ⟶B + size-⟶₀₋ ⟶C)
-size-⟶₀₋ (∧ₚ₀₋L₁ B∧C∈ B⟶)   = suc (size-⟶₀₋ B⟶)
-size-⟶₀₋ (∧ₚ₀₋L₂ B∧C∈ C⟶)   = suc (size-⟶₀₋ C⟶)
-size-⟶₀₋ (∨ₚ₀₋R₁ ⟶B)        = suc (size-⟶₀₋ ⟶B)
-size-⟶₀₋ (∨ₚ₀₋R₂ ⟶C)        = suc (size-⟶₀₋ ⟶C)
-size-⟶₀₋ (∨ₚ₀₋L B∨C∈ B⟶ C⟶) = suc (size-⟶₀₋ B⟶ + size-⟶₀₋ C⟶)
-size-⟶₀₋ (→ₚ₀₋R B⟶C)        = suc (size-⟶₀₋ B⟶C)
-size-⟶₀₋ (→ₚ₀₋L B→C∈ ⟶B C⟶) = suc (size-⟶₀₋ ⟶B + size-⟶₀₋ C⟶)
+size-⟶₀₋ (init₀₋ B∈)         = 1
+size-⟶₀₋ (⊥ₚ₀₋L  ⊥∈)         = 1
+size-⟶₀₋ (∧ₚ₀₋R  ⟶B ⟶C)      = suc (size-⟶₀₋ ⟶B + size-⟶₀₋ ⟶C)
+size-⟶₀₋ (∧ₚ₀₋L₁ B∧C∈ B⟶)    = suc (size-⟶₀₋ B⟶)
+size-⟶₀₋ (∧ₚ₀₋L₂ B∧C∈ C⟶)    = suc (size-⟶₀₋ C⟶)
+size-⟶₀₋ (∨ₚ₀₋R₁ ⟶B)         = suc (size-⟶₀₋ ⟶B)
+size-⟶₀₋ (∨ₚ₀₋R₂ ⟶C)         = suc (size-⟶₀₋ ⟶C)
+size-⟶₀₋ (∨ₚ₀₋L  B∨C∈ B⟶ C⟶) = suc (size-⟶₀₋ B⟶ + size-⟶₀₋ C⟶)
+size-⟶₀₋ (→ₚ₀₋R  B⟶C)        = suc (size-⟶₀₋ B⟶C)
+size-⟶₀₋ (→ₚ₀₋L  B→C∈ ⟶B C⟶) = suc (size-⟶₀₋ ⟶B + size-⟶₀₋ C⟶)

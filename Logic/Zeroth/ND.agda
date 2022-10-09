@@ -52,13 +52,13 @@ data _⊢₀_ : Ctx₀ → P₀ → Set where
           Γ ⊢₀ B
 
 size-⊢₀ : Γ ⊢₀ A → ℕ
-size-⊢₀ (pre₀ B∈)         = 1
-size-⊢₀ (⊥ₚ₀E ⊢⊥)         = suc (size-⊢₀ ⊢⊥)
-size-⊢₀ (∧ₚ₀I ⊢B ⊢C)      = suc (size-⊢₀ ⊢B + size-⊢₀ ⊢C)
-size-⊢₀ (∧ₚ₀E₁ ⊢B∧C)      = suc (size-⊢₀ ⊢B∧C)
-size-⊢₀ (∧ₚ₀E₂ ⊢B∧C)      = suc (size-⊢₀ ⊢B∧C)
-size-⊢₀ (∨ₚ₀I₁ ⊢B)        = suc (size-⊢₀ ⊢B)
-size-⊢₀ (∨ₚ₀I₂ ⊢C)        = suc (size-⊢₀ ⊢C)
-size-⊢₀ (∨ₚ₀E ⊢B∨C B⊢ C⊢) = suc (size-⊢₀ ⊢B∨C + size-⊢₀ B⊢ + size-⊢₀ C⊢)
-size-⊢₀ (→ₚ₀I B⊢C)        = suc (size-⊢₀ B⊢C)
-size-⊢₀ (→ₚ₀E ⊢B→C ⊢B)    = suc (size-⊢₀ ⊢B→C + size-⊢₀ ⊢B)
+size-⊢₀ (pre₀  B∈)         = 1
+size-⊢₀ (⊥ₚ₀E  ⊢⊥)         = suc (size-⊢₀ ⊢⊥)
+size-⊢₀ (∧ₚ₀I  ⊢B ⊢C)      = suc (size-⊢₀ ⊢B + size-⊢₀ ⊢C)
+size-⊢₀ (∧ₚ₀E₁ ⊢B∧C)       = suc (size-⊢₀ ⊢B∧C)
+size-⊢₀ (∧ₚ₀E₂ ⊢B∧C)       = suc (size-⊢₀ ⊢B∧C)
+size-⊢₀ (∨ₚ₀I₁ ⊢B)         = suc (size-⊢₀ ⊢B)
+size-⊢₀ (∨ₚ₀I₂ ⊢C)         = suc (size-⊢₀ ⊢C)
+size-⊢₀ (∨ₚ₀E  ⊢B∨C B⊢ C⊢) = suc (size-⊢₀ ⊢B∨C + size-⊢₀ B⊢ + size-⊢₀ C⊢)
+size-⊢₀ (→ₚ₀I  B⊢C)        = suc (size-⊢₀ B⊢C)
+size-⊢₀ (→ₚ₀E  ⊢B→C ⊢B)    = suc (size-⊢₀ ⊢B→C + size-⊢₀ ⊢B)

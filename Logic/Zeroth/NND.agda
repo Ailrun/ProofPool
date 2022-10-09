@@ -63,15 +63,15 @@ data _⊢₀ʳ_ where
 size-⊢₀ⁿ : Γ ⊢₀ⁿ A → ℕ
 size-⊢₀ʳ : Γ ⊢₀ʳ A → ℕ
 
-size-⊢₀ⁿ (∧ₚ₀ⁿI ⊢B ⊢C)      = suc (size-⊢₀ⁿ ⊢B + size-⊢₀ⁿ ⊢C)
-size-⊢₀ⁿ (∨ₚ₀ⁿI₁ ⊢B)        = suc (size-⊢₀ⁿ ⊢B)
-size-⊢₀ⁿ (∨ₚ₀ⁿI₂ ⊢C)        = suc (size-⊢₀ⁿ ⊢C)
-size-⊢₀ⁿ (∨ₚ₀ⁿE ⊢B∨C B⊢ C⊢) = suc (size-⊢₀ʳ ⊢B∨C + size-⊢₀ⁿ B⊢ + size-⊢₀ⁿ C⊢)
-size-⊢₀ⁿ (→ₚ₀ⁿI B⊢C)        = suc (size-⊢₀ⁿ B⊢C)
-size-⊢₀ⁿ (neut₀ⁿ ⊢B)        = size-⊢₀ʳ ⊢B
+size-⊢₀ⁿ (∧ₚ₀ⁿI  ⊢B ⊢C)      = suc (size-⊢₀ⁿ ⊢B + size-⊢₀ⁿ ⊢C)
+size-⊢₀ⁿ (∨ₚ₀ⁿI₁ ⊢B)         = suc (size-⊢₀ⁿ ⊢B)
+size-⊢₀ⁿ (∨ₚ₀ⁿI₂ ⊢C)         = suc (size-⊢₀ⁿ ⊢C)
+size-⊢₀ⁿ (∨ₚ₀ⁿE  ⊢B∨C B⊢ C⊢) = suc (size-⊢₀ʳ ⊢B∨C + size-⊢₀ⁿ B⊢ + size-⊢₀ⁿ C⊢)
+size-⊢₀ⁿ (→ₚ₀ⁿI  B⊢C)        = suc (size-⊢₀ⁿ B⊢C)
+size-⊢₀ⁿ (neut₀ⁿ ⊢B)         = size-⊢₀ʳ ⊢B
 
-size-⊢₀ʳ (pre₀ʳ B∈)      = 1
-size-⊢₀ʳ (⊥ₚ₀ʳE ⊢⊥)      = suc (size-⊢₀ʳ ⊢⊥)
-size-⊢₀ʳ (∧ₚ₀ʳE₁ ⊢B∧C)   = suc (size-⊢₀ʳ ⊢B∧C)
-size-⊢₀ʳ (∧ₚ₀ʳE₂ ⊢B∧C)   = suc (size-⊢₀ʳ ⊢B∧C)
-size-⊢₀ʳ (→ₚ₀ʳE ⊢B→C ⊢B) = suc (size-⊢₀ʳ ⊢B→C + size-⊢₀ⁿ ⊢B)
+size-⊢₀ʳ (pre₀ʳ  B∈)      = 1
+size-⊢₀ʳ (⊥ₚ₀ʳE  ⊢⊥)      = suc (size-⊢₀ʳ ⊢⊥)
+size-⊢₀ʳ (∧ₚ₀ʳE₁ ⊢B∧C)    = suc (size-⊢₀ʳ ⊢B∧C)
+size-⊢₀ʳ (∧ₚ₀ʳE₂ ⊢B∧C)    = suc (size-⊢₀ʳ ⊢B∧C)
+size-⊢₀ʳ (→ₚ₀ʳE  ⊢B→C ⊢B) = suc (size-⊢₀ʳ ⊢B→C + size-⊢₀ⁿ ⊢B)
