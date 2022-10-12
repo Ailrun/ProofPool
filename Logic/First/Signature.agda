@@ -1,11 +1,18 @@
 module Logic.First.Signature where
 
-open import Logic.Base public
+open import Logic.Base
+
+infixr 8 _×ₜ₁_
+infixr 7 _→ₜ₁_
+
+data Ty₁ : Set where
+  1ₜ₁ : Ty₁
+  ℕₜ₁ : Ty₁
+  _→ₜ₁_ : Ty₁ → Ty₁ → Ty₁
+  _×ₜ₁_ : Ty₁ → Ty₁ → Ty₁
 
 record Signature₁ : Set₁ where
-  infix 4 _returns₁ₜ_
   field
-    TmConst₁ TmTy₁ TmPred₁ : Set
-    _returns₁ₜ_ : TmConst₁ → TmTy₁ → Set
-    cargs₁ₜ : TmConst₁ → List TmTy₁
-    pargs₁ₜ : TmPred₁ → List TmTy₁
+    Func₁ Pred₁ : Set
+    fargₜ₁ : Func₁ → Ty₁
+    fresₜ₁ : Func₁ → Ty₁
