@@ -5,6 +5,8 @@ open import Calculus.PolyLinear.Syntax
 open import Calculus.PolyLinear.Syntax.Properties
 open import Calculus.PolyLinear.Rules
 open import Calculus.PolyLinear.Rules.Properties
+open import Data.List
+open import Data.List.Properties
 open import Data.Nat
 open import Data.Product renaming (map to ×-map; map₂ to ×-map₂)
 open import Data.Sum
@@ -17,18 +19,18 @@ open import Relation.Nullary.Product
 𝕂∈-infer : ∀ x Γ →
            -------------------------
            Dec (∃ λ K → x ⦂ K 𝕂∈ Γ)
-𝕂∈-infer x       []       = no λ()
-𝕂∈-infer x       (_ 𝕋∷ Γ) = Dec-map′ (×-map₂ there𝕋) (×-map₂ λ{ (there𝕋 x∈) → x∈ }) (𝕂∈-infer x Γ)
-𝕂∈-infer zero    (K 𝕂∷ Γ) = yes (K , here refl)
-𝕂∈-infer (suc x) (K 𝕂∷ Γ) = Dec-map′ (×-map₂ there𝕂) (×-map₂ λ{ (there𝕂 x∈) → x∈ }) (𝕂∈-infer x Γ)
+𝕂∈-infer x       []         = no λ()
+𝕂∈-infer (suc x) (_ ∷ Γ) = Dec-map′ (×-map₂ there) (×-map₂ λ{ (there x∈) → x∈ }) (𝕂∈-infer x Γ)
+𝕂∈-infer zero    (_ /𝕋 ∷ Γ) = no λ()
+𝕂∈-infer zero    (K /𝕂 ∷ Γ) = yes (K , here refl)
 
 𝕋∈-infer : ∀ x Γ →
            ----------------------------------
            Dec (∃₂ λ T Γ′ → x ⦂ T 𝕋∈ Γ / Γ′)
-𝕋∈-infer x       []             = no λ()
-𝕋∈-infer x       (K       𝕂∷ Γ) = Dec-map′ (×-map₂ (×-map (K 𝕂∷_) there𝕂)) (×-map₂ λ{ (_ 𝕂∷ Γ′ , there𝕂 x∈) → Γ′ , x∈ }) (𝕋∈-infer x Γ)
-𝕋∈-infer zero    ((T , u) 𝕋∷ Γ) = Dec-map′ (λ prf → T , (T , inc𝕌 u prf) 𝕋∷ Γ , here refl) (λ{ (_ , _ , here {prf = prf} _) → recompute (useable𝕌-dec u) prf }) (useable𝕌-dec u)
-𝕋∈-infer (suc x) ((T , u) 𝕋∷ Γ) = Dec-map′ (×-map₂ (×-map ((T , u) 𝕋∷_) there𝕋)) (×-map₂ λ{ (_ 𝕋∷ Γ′ , there𝕋 x∈) → Γ′ , x∈ }) (𝕋∈-infer x Γ)
+𝕋∈-infer x       []               = no λ()
+𝕋∈-infer (suc x) (_          ∷ Γ) = Dec-map′ {!!} (×-map₂ λ{ (_ ∷ Γ′ , there x∈) → Γ′ , {!!} }) (𝕋∈-infer x Γ)
+𝕋∈-infer zero    (K       /𝕂 ∷ Γ) = no λ()
+𝕋∈-infer zero    ((T , u) /𝕋 ∷ Γ) = Dec-map′ (λ prf → T , (T , inc𝕌 u prf) /𝕋 ∷ Γ , {!!}) (λ{ (_ , _ , here {prf = prf} _) → recompute (useable𝕌-dec u) prf }) (useable𝕌-dec u)
 
 context-form-check : ∀ Γ →
                      -----------
@@ -38,33 +40,34 @@ kind-infer         : ∀ Γ T →
                      Dec (∃ λ K → Γ 𝕋⊢ T ⦂ K)
 
 context-form-check []             = yes []
-context-form-check (_       𝕂∷ Γ) = Dec-map′ ⋆𝕂∷_ (λ{ (⋆𝕂∷ ⊢Γ) → ⊢Γ }) (context-form-check Γ)
-context-form-check ((T , u) 𝕋∷ Γ) = Dec-map′ (λ{ ((Tyₗ , ⊢T) , ⊢Γ) → ⊢T 𝕋∷ ⊢Γ }) (λ{ (⊢T 𝕋∷ ⊢Γ) → (Tyₗ , ⊢T) , ⊢Γ }) ((kind-infer Γ T) ×-dec (context-form-check Γ))
+context-form-check (_ ∷ Γ) = {!!}
+-- context-form-check (_       𝕂∷ Γ) = Dec-map′ ⋆𝕂∷_ (λ{ (⋆𝕂∷ ⊢Γ) → ⊢Γ }) (context-form-check Γ)
+-- context-form-check ((T , u) 𝕋∷ Γ) = Dec-map′ (λ{ ((Tyₗ , ⊢T) , ⊢Γ) → ⊢T 𝕋∷ ⊢Γ }) (λ{ (⊢T 𝕋∷ ⊢Γ) → (Tyₗ , ⊢T) , ⊢Γ }) ((kind-infer Γ T) ×-dec (context-form-check Γ))
 
-kind-infer Γ (tvarₗ x)  = Dec-map′ (×-map₂ tvarₗ) (×-map₂ λ{ (tvarₗ x∈) → x∈ }) (𝕂∈-infer x Γ)
-kind-infer Γ (T ⊸ₗ U)   = Dec-map′ (λ{ ((Tyₗ , ⊢T) , (Tyₗ , ⊢U)) → Tyₗ , ⊢T ⊸ₗ ⊢U }) (λ{ (Tyₗ , ⊢T ⊸ₗ ⊢U) → (Tyₗ , ⊢T) , (Tyₗ , ⊢U) }) ((kind-infer Γ T) ×-dec (kind-infer Γ U))
-kind-infer Γ (!ₗ T)     = Dec-map′ (λ{ (Tyₗ , ⊢T) -> Tyₗ , !ₗ ⊢T }) (×-map₂ λ{ (!ₗ ⊢T) → ⊢T }) (kind-infer Γ T)
-kind-infer Γ (∀ₗ K ∙ T) = Dec-map′ (λ{ (Tyₗ , ⊢T) -> Tyₗ , ∀ₗ⋆∙ ⊢T }) (×-map₂ λ{ (∀ₗ⋆∙ ⊢T) → ⊢T }) (kind-infer (K 𝕂∷ Γ) T)
+kind-infer Γ (tvarₗ x) = Dec-map′ (×-map₂ tvarₗ) (×-map₂ λ{ (tvarₗ x∈) → x∈ }) (𝕂∈-infer x Γ)
+kind-infer Γ (T ⊸ₗ U)       = Dec-map′ (λ{ ((Tyₗ , ⊢T) , (Tyₗ , ⊢U)) → Tyₗ , ⊢T ⊸ₗ ⊢U }) (λ{ (Tyₗ , ⊢T ⊸ₗ ⊢U) → (Tyₗ , ⊢T) , (Tyₗ , ⊢U) }) ((kind-infer Γ T) ×-dec (kind-infer Γ U))
+kind-infer Γ (!ₗ T)         = Dec-map′ (λ{ (Tyₗ , ⊢T) -> Tyₗ , !ₗ ⊢T }) (×-map₂ λ{ (!ₗ ⊢T) → ⊢T }) (kind-infer Γ T)
+kind-infer Γ (∀ₗ K ∙ T)     = Dec-map′ (λ{ (Tyₗ , ⊢T) -> Tyₗ , ∀ₗ⋆∙ ⊢T }) (×-map₂ λ{ (∀ₗ⋆∙ ⊢T) → ⊢T }) (kind-infer (K /𝕂 ∷ Γ) T)
 
 type-infer : ∀ Γ M →
              ----------------------------------
              Dec (∃₂ λ T Γ′ → Γ 𝕄⊢ M ⦂ T / Γ′)
-type-infer Γ (varₗ x)            = Dec-map′
-                                     (×-map₂ (×-map₂ varₗ))
-                                     (×-map₂ (×-map₂ (λ{ (varₗ x∈) → x∈ })))
-                                     (𝕋∈-infer x Γ)
+type-infer Γ (varₗ x)       = Dec-map′
+                                (×-map₂ (×-map₂ varₗ))
+                                (×-map₂ (×-map₂ (λ{ (varₗ x∈) → x∈ })))
+                                (𝕋∈-infer x Γ)
 type-infer Γ (λₗ T ∘ M)
-  with type-infer ((T , 0/1ₗ) 𝕋∷ Γ) M
-...  | no ¬⊢M                    = no λ{ (_ ⊸ₗ U , Γ′ , λₗ x ∘ ⊢M) → ¬⊢M (U , (T , 1/1ₗ) 𝕋∷ Γ′ , ⊢M) }
+  with type-infer ((T , 0/1ₗ) /𝕋 ∷ Γ) M
+...  | no ¬⊢M                    = no λ{ (_ ⊸ₗ U , Γ′ , λₗ x ∘ ⊢M) → ¬⊢M (U , (T , 1/1ₗ) /𝕋 ∷ Γ′ , {!!}) }
 ...  | yes (U , Γ′ , ⊢M)
-    with ≤u 𝕋∷ _ ← 𝕄⊢⇒≤𝕌ℂ ⊢M
-       | (T′ , u) 𝕋∷ Γ″ ← Γ′
+    with ≤u /𝕋 ∷ _ ← 𝕄⊢⇒≤𝕌ℂ ⊢M
+       | (T′ , u) /𝕋 ∷ Γ″ ← Γ′
        | eq ← 𝕄⊢-preserves-extractℂ⁻ ⊢M
-      with refl ← ℂ⁻-𝕋∷-injectiveˡ eq
+      with refl ← ∷-injectiveˡ eq
         with ≤u
-...        | refl                = no λ{ (_ , _ , λₗ _ ∘ ⊢M′) → case (ℂ-𝕋∷-injectiveˡ₂ (𝕄⊢-det₂ ⊢M ⊢M′)) λ() }
+...        | refl                = no λ{ (_ , _ , λₗ _ ∘ ⊢M′) → case (cong proj₂ (∷-injectiveˡ {!!})) λ() } -- (𝕄⊢-det₂ ⊢M ⊢M′)
 ...        | 0/1ₗ≤1/1ₗ           = Dec-map′
-                                     (λ{ (Tyₗ , ⊢T) → _ , _ , λₗ ⊢T ∘ ⊢M })
+                                     (λ{ (Tyₗ , ⊢T) → _ , _ , λₗ ⊢T ∘ {!!} })
                                      (λ{ (_ , _ , λₗ ⊢T ∘ _) → _ , ⊢T })
                                      (kind-infer Γ T)
 type-infer Γ (M $ₗ∘ N)
@@ -101,20 +104,20 @@ type-infer Γ (let-bangₗ M inₗ N)
 ...    | tvarₗ _                 = no λ{ (_ , _ , let-bangₗ ⊢M′ inₗ _) → case (𝕄⊢-det₁ ⊢M ⊢M′) λ() }
 ...    | ∀ₗ _ ∙ _                = no λ{ (_ , _ , let-bangₗ ⊢M′ inₗ _) → case (𝕄⊢-det₁ ⊢M ⊢M′) λ() }
 ...    | _ ⊸ₗ _                  = no λ{ (_ , _ , let-bangₗ ⊢M′ inₗ _) → case (𝕄⊢-det₁ ⊢M ⊢M′) λ() }
-...    | !ₗ U                    = Dec-map′ ⊢N⇒⊢let-bang-M-in-N ⊢let-bang-M-in-N⇒⊢N (type-infer ((U , ∞ₗ) 𝕋∷ Γ′) N)
+...    | !ₗ U                    = Dec-map′ ⊢N⇒⊢let-bang-M-in-N ⊢let-bang-M-in-N⇒⊢N (type-infer ((U , ∞ₗ) /𝕋 ∷ Γ′) N)
   where
-    ⊢N⇒⊢let-bang-M-in-N : (∃₂ λ T Γ″ → (U , ∞ₗ) 𝕋∷ Γ′ 𝕄⊢ N ⦂ T / Γ″) → (∃₂ λ T Γ″ → Γ 𝕄⊢ let-bangₗ M inₗ N ⦂ T / Γ″)
+    ⊢N⇒⊢let-bang-M-in-N : (∃₂ λ T Γ″ → (U , ∞ₗ) /𝕋 ∷ Γ′ 𝕄⊢ N ⦂ T / Γ″) → (∃₂ λ T Γ″ → Γ 𝕄⊢ let-bangₗ M inₗ N ⦂ T / Γ″)
     ⊢N⇒⊢let-bang-M-in-N (_ , _ , ⊢N)
-      with refl 𝕋∷ _ ← 𝕄⊢⇒≤𝕌ℂ ⊢N = _ , _ , let-bangₗ ⊢M inₗ ⊢N
+      with refl /𝕋 ∷ _ ← 𝕄⊢⇒≤𝕌ℂ ⊢N = _ , _ , let-bangₗ ⊢M inₗ {!!} -- ⊢N
 
-    ⊢let-bang-M-in-N⇒⊢N : (∃₂ λ T Γ″ → Γ 𝕄⊢ let-bangₗ M inₗ N ⦂ T / Γ″) → (∃₂ λ T Γ″ → (U , ∞ₗ) 𝕋∷ Γ′ 𝕄⊢ N ⦂ T / Γ″)
+    ⊢let-bang-M-in-N⇒⊢N : (∃₂ λ T Γ″ → Γ 𝕄⊢ let-bangₗ M inₗ N ⦂ T / Γ″) → (∃₂ λ T Γ″ → (U , ∞ₗ) /𝕋 ∷ Γ′ 𝕄⊢ N ⦂ T / Γ″)
     ⊢let-bang-M-in-N⇒⊢N (_ , _ , let-bangₗ ⊢M′ inₗ ⊢N)
       with refl , refl ← 𝕄⊢-det ⊢M′ ⊢M = _ , _ , ⊢N
-type-infer Γ (Λₗ K ∙ M)          = Dec-map′ ⊢M⇒⊢ΛK∙M (λ{ (_ , _ , Λₗ⋆∙ ⊢M) → _ , _ , ⊢M }) (type-infer (K 𝕂∷ Γ) M)
+type-infer Γ (Λₗ K ∙ M)          = Dec-map′ ⊢M⇒⊢ΛK∙M (λ{ (_ , _ , Λₗ⋆∙ ⊢M) → _ , _ , ⊢M }) (type-infer (K /𝕂 ∷ Γ) M)
   where
-    ⊢M⇒⊢ΛK∙M : (∃₂ λ T Γ′ → K 𝕂∷ Γ 𝕄⊢ M ⦂ T / Γ′) → (∃₂ λ T Γ′ → Γ 𝕄⊢ Λₗ K ∙ M ⦂ T / Γ′)
+    ⊢M⇒⊢ΛK∙M : (∃₂ λ T Γ′ → K /𝕂 ∷ Γ 𝕄⊢ M ⦂ T / Γ′) → (∃₂ λ T Γ′ → Γ 𝕄⊢ Λₗ K ∙ M ⦂ T / Γ′)
     ⊢M⇒⊢ΛK∙M (_ , _ , ⊢M)
-      with ⋆𝕂∷ _ ← 𝕄⊢⇒≤𝕌ℂ ⊢M = _ , _ , Λₗ⋆∙ ⊢M
+      with refl/𝕂 ∷ _ ← 𝕄⊢⇒≤𝕌ℂ ⊢M = _ , _ , Λₗ⋆∙ ⊢M
 type-infer Γ (M $$ₗ∙ T)
   with type-infer Γ M
 ...  | no ¬⊢M                    = no λ{ (_ , _ , ⊢M $$ₗ∙ _) → ¬⊢M (_ , _ , ⊢M) }
