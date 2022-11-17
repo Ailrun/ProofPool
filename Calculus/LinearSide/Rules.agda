@@ -10,7 +10,7 @@ open import Data.Vec using (Vec; _∷_)
 import Data.Vec as Vec
 open import Data.Vec.Relation.Binary.Pointwise.Inductive using (Pointwise)
 import Data.Vec.Relation.Unary.All as VecAll
-open import Relation.Binary.PropositionalEquality
+open import Relation.Binary.PropositionalEquality using (_≡_; _≢_; refl)
 
 open import Calculus.LinearSide.Syntax
 open import Calculus.LinearSide.Syntax.Properties
@@ -46,6 +46,10 @@ data _unused-in_ : Fin n → 𝕄 n → Set where
                    x unused-in N →
                    ----------------------
                    x unused-in (M $∘ₗ N)
+
+  bangₗ          : x unused-in M →
+                   ----------------------
+                   x unused-in (bangₗ M)
 
   let-bangₗ_inₗ_ : x unused-in M →
                    (suc x) unused-in N →
