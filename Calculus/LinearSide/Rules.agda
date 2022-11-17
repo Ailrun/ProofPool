@@ -19,9 +19,7 @@ infixr 4 _s⊢ₗ_⦂_
 infixr 4 _⊢ₗ_⦂_
 infixr 4 _unused-in_
 infixr 4 _linear-in_
-infixr 4 all-linear
 infixr 4 _↝ₗ_
-
 
 infixr 9 λₗ*∘ₗ_∣ₗ_
 infixr 9 λₗ*∘ₗ_
@@ -84,9 +82,6 @@ data _linear-in_ : Fin n → 𝕄 n → Set where
                     (suc x) linear-in N →
                     --------------------------------
                     x linear-in (let-bangₗ M inₗ N)
-
-all-linear : 𝕄 n → Set
-all-linear {n} M = VecAll.All (_linear-in M) (Vec.allFin n)
 
 data _⊢ₗ_⦂_ {n} (Γ : ℂ n) : 𝕄 n → 𝕋 → Set where
   varₗ           : Vec.lookup Γ x ≡ T →

@@ -27,9 +27,9 @@ open import Calculus.LinearSide.Rules
 <⇒unused-in⇒unused-inVar↑⋆ : ∀ {n m m′} {x} {M : 𝕄 (n + m)} {ρ : Sub Fin m m′} →
                              x unused-in M →
                              Fin.toℕ x < n →
-                             Fin.lift n (Vec.lookup ρ) x unused-in (M /Var ρ VarSubst.↑⋆ n)
+                             Fin.lift n (Vec.lookup ρ) x unused-in (M /Var ρ V.↑⋆ n)
 <⇒unused-in⇒unused-inVar↑⋆ {n = n} {ρ = ρ} (varₗ {y = y} x≢)     x<
-  rewrite VarLemmas.lookup-↑⋆ (Vec.lookup ρ) {ρ = ρ} (λ _ → refl) n y
+  rewrite V.lookup-↑⋆ (Vec.lookup ρ) {ρ = ρ} (λ _ → refl) n y
     with x≡liftx ← <⇒lift≡ {f = Vec.lookup ρ} x<
       with Fin.toℕ y <? n
 ...      | yes y<
@@ -37,11 +37,7 @@ open import Calculus.LinearSide.Rules
                                                                          λ liftx≡lifty →
                                                                              x≢
                                                                                (Fin.toℕ-injective
-                                                                                 (≡.trans
-                                                                                   x≡liftx
-                                                                                   (≡.trans
-                                                                                     (≡.cong Fin.toℕ liftx≡lifty)
-                                                                                     lifty≡y)))
+                                                                                 (≡.trans x≡liftx (≡.trans (≡.cong Fin.toℕ liftx≡lifty) lifty≡y)))
 ...      | no  y≮
         with liftx≡x ← ≡.sym x≡liftx
            | y≥ ← ℕ.≮⇒≥ y≮
@@ -57,11 +53,15 @@ open import Calculus.LinearSide.Rules
 
 <⇒unused-in⇒unused-inVarwk⋆↑⋆ : ∀ {n m l} {x} (M : 𝕄 (m + l)) →
                                 Fin.toℕ x < n →
-                                m Fin.↑ʳ x unused-in (M /Var VarSubst.wk⋆ n VarSubst.↑⋆ m)
-<⇒unused-in⇒unused-inVarwk⋆↑⋆ {n = n} {m} {l} {x} (varₗ y) x<
+                                m Fin.↑ʳ x unused-in (M /Var V.wk⋆ n V.↑⋆ m)
+<⇒unused-in⇒unused-inVarwk⋆↑⋆ {n} {m} {l} {x} (varₗ y)            x<
   with Fin.toℕ y <? m
 ...  | yes y<
-    rewrite <⇒var/Varwk⋆↑⋆≡var n y< = varₗ λ m↑x≡ → ℕ.<⇒≢ (ℕ.<-transˡ y< (ℕ.m≤m+n _ _)) (≡.trans (≡.sym (Fin.toℕ-fromℕ< _)) (≡.trans (≡.cong Fin.toℕ (≡.sym m↑x≡)) (Fin.toℕ-↑ʳ m x)))
+    rewrite <⇒var/Varwk⋆↑⋆≡var n y<                                     = varₗ
+                                                                            λ m↑x≡ →
+                                                                              ℕ.<⇒≢
+                                                                                (ℕ.<-transˡ y< (ℕ.m≤m+n _ _))
+                                                                                (≡.trans (≡.sym (Fin.toℕ-fromℕ< _)) (≡.trans (≡.cong Fin.toℕ (≡.sym m↑x≡)) (Fin.toℕ-↑ʳ m x)))
 ...  | no  y≮
     with y≥ ← ℕ.≮⇒≥ y≮
       rewrite ↑ʳreduce≥≡id y≥
@@ -82,10 +82,10 @@ open import Calculus.LinearSide.Rules
     m + (n + Fin.toℕ y′)                                                         ∎)
   where
     open ≡.≡-Reasoning
-<⇒unused-in⇒unused-inVarwk⋆↑⋆ {n = n} (λₗ T ∘ₗ M) x< = λₗ*∘ₗ <⇒unused-in⇒unused-inVarwk⋆↑⋆ M x<
-<⇒unused-in⇒unused-inVarwk⋆↑⋆ {n = n} (M $∘ₗ N) x< = <⇒unused-in⇒unused-inVarwk⋆↑⋆ M x< $∘ₗ <⇒unused-in⇒unused-inVarwk⋆↑⋆ N x<
-<⇒unused-in⇒unused-inVarwk⋆↑⋆ {n = n} (bangₗ M) x< = bangₗ (<⇒unused-in⇒unused-inVarwk⋆↑⋆ M x<)
-<⇒unused-in⇒unused-inVarwk⋆↑⋆ {n = n} (let-bangₗ M inₗ N) x< = let-bangₗ <⇒unused-in⇒unused-inVarwk⋆↑⋆ M x< inₗ <⇒unused-in⇒unused-inVarwk⋆↑⋆ N x<
+<⇒unused-in⇒unused-inVarwk⋆↑⋆ {n}             (λₗ T ∘ₗ M)         x<   = λₗ*∘ₗ <⇒unused-in⇒unused-inVarwk⋆↑⋆ M x<
+<⇒unused-in⇒unused-inVarwk⋆↑⋆ {n}             (M $∘ₗ N)           x<   = <⇒unused-in⇒unused-inVarwk⋆↑⋆ M x< $∘ₗ <⇒unused-in⇒unused-inVarwk⋆↑⋆ N x<
+<⇒unused-in⇒unused-inVarwk⋆↑⋆ {n}             (bangₗ M)           x<   = bangₗ (<⇒unused-in⇒unused-inVarwk⋆↑⋆ M x<)
+<⇒unused-in⇒unused-inVarwk⋆↑⋆ {n}             (let-bangₗ M inₗ N) x<   = let-bangₗ <⇒unused-in⇒unused-inVarwk⋆↑⋆ M x< inₗ <⇒unused-in⇒unused-inVarwk⋆↑⋆ N x<
 
 <⇒unused-inwk⋆ : ∀ {n m} {x} (M : 𝕄 m) →
                  Fin.toℕ x < n →
@@ -100,7 +100,7 @@ open import Calculus.LinearSide.Rules
 <⇒unused-in⇒unused-in↑⋆ {n = n} {m} {m′} σ (varₗ {x = x} {y = y} x≢) x<
   with Fin.toℕ y <? n
 ...  | yes y<
-  rewrite <⇒var/≡var σ y<                                                                         = varₗ (λ fromx≡fromy → x≢ (Fin.toℕ-injective (Fin.fromℕ<-injective _ _ _ _ fromx≡fromy)))
+  rewrite <⇒var/≡var σ y<                                                                         = varₗ λ fromx≡fromy → x≢ (Fin.toℕ-injective (Fin.fromℕ<-injective _ _ _ _ fromx≡fromy))
 ...  | no  y≮
     with y≥ ← ℕ.≮⇒≥ y≮
       rewrite ↑ʳreduce≥≡id y≥
@@ -116,14 +116,14 @@ open import Calculus.LinearSide.Rules
 <⇒linear-in⇒linear-inVar↑⋆ : ∀ {n m m′} {x} {M : 𝕄 (n + m)} {ρ : Sub Fin m m′} →
                              x linear-in M →
                              Fin.toℕ x < n →
-                             Fin.lift n (Vec.lookup ρ) x linear-in (M /Var ρ VarSubst.↑⋆ n)
+                             Fin.lift n (Vec.lookup ρ) x linear-in (M /Var ρ V.↑⋆ n)
 <⇒linear-in⇒linear-inVar↑⋆ {n = n} {ρ = ρ} (varₗ {x = x} refl)    x<
-  rewrite VarLemmas.lookup-↑⋆ (Vec.lookup ρ) {ρ = ρ} (λ _ → refl) n x = varₗ refl
-<⇒linear-in⇒linear-inVar↑⋆                 (λₗ*∘ₗ Mₗ)             x< = λₗ*∘ₗ <⇒linear-in⇒linear-inVar↑⋆ Mₗ (s≤s x<)
-<⇒linear-in⇒linear-inVar↑⋆                 (Mₗ $∘ₗ∅ N∅)           x< = <⇒linear-in⇒linear-inVar↑⋆ Mₗ x< $∘ₗ∅ <⇒unused-in⇒unused-inVar↑⋆ N∅ x<
-<⇒linear-in⇒linear-inVar↑⋆                 (∅ M∅ $∘ₗ Nₗ)          x< = ∅ <⇒unused-in⇒unused-inVar↑⋆ M∅ x< $∘ₗ <⇒linear-in⇒linear-inVar↑⋆ Nₗ x<
-<⇒linear-in⇒linear-inVar↑⋆                 (let-bangₗ Mₗ inₗ∅ N∅) x< = let-bangₗ <⇒linear-in⇒linear-inVar↑⋆ Mₗ x< inₗ∅ <⇒unused-in⇒unused-inVar↑⋆ N∅ (s≤s x<)
-<⇒linear-in⇒linear-inVar↑⋆                 (let-bangₗ∅ M∅ inₗ Nₗ) x< = let-bangₗ∅ <⇒unused-in⇒unused-inVar↑⋆ M∅ x< inₗ <⇒linear-in⇒linear-inVar↑⋆ Nₗ (s≤s x<)
+  rewrite V.lookup-↑⋆ (Vec.lookup ρ) {ρ = ρ} (λ _ → refl) n x = varₗ refl
+<⇒linear-in⇒linear-inVar↑⋆                 (λₗ*∘ₗ Mₗ)             x<  = λₗ*∘ₗ <⇒linear-in⇒linear-inVar↑⋆ Mₗ (s≤s x<)
+<⇒linear-in⇒linear-inVar↑⋆                 (Mₗ $∘ₗ∅ N∅)           x<  = <⇒linear-in⇒linear-inVar↑⋆ Mₗ x< $∘ₗ∅ <⇒unused-in⇒unused-inVar↑⋆ N∅ x<
+<⇒linear-in⇒linear-inVar↑⋆                 (∅ M∅ $∘ₗ Nₗ)          x<  = ∅ <⇒unused-in⇒unused-inVar↑⋆ M∅ x< $∘ₗ <⇒linear-in⇒linear-inVar↑⋆ Nₗ x<
+<⇒linear-in⇒linear-inVar↑⋆                 (let-bangₗ Mₗ inₗ∅ N∅) x<  = let-bangₗ <⇒linear-in⇒linear-inVar↑⋆ Mₗ x< inₗ∅ <⇒unused-in⇒unused-inVar↑⋆ N∅ (s≤s x<)
+<⇒linear-in⇒linear-inVar↑⋆                 (let-bangₗ∅ M∅ inₗ Nₗ) x<  = let-bangₗ∅ <⇒unused-in⇒unused-inVar↑⋆ M∅ x< inₗ <⇒linear-in⇒linear-inVar↑⋆ Nₗ (s≤s x<)
 
 <⇒linear-in⇒linear-in↑⋆ : ∀ {n m m′} {x} {M : 𝕄 (n + m)} (σ : 𝕊 m m′) →
                           x linear-in M →
@@ -145,30 +145,30 @@ open import Calculus.LinearSide.Rules
 ⊢ₗ⇒⊢ₗ/Var : Vec.map (Vec.lookup Γ) ρ ⊢ₗ M ⦂ T →
             --------------------------------------------------
             Γ ⊢ₗ M /Var ρ ⦂ T
-⊢ₗ⇒⊢ₗ/Var {Γ = Γ} {ρ = ρ}                 (varₗ refl) = varₗ (≡.sym (Vec.lookup-map _ (Vec.lookup Γ) ρ))
+⊢ₗ⇒⊢ₗ/Var {Γ = Γ} {ρ = ρ}                 (varₗ refl)                    = varₗ (≡.sym (Vec.lookup-map _ (Vec.lookup Γ) ρ))
 ⊢ₗ⇒⊢ₗ/Var {Γ = Γ} {ρ = ρ} {M = λₗ U ∘ₗ _} (λₗ*∘ₗ ⊢M ∣ₗ Mₗ)
-  rewrite ≡.trans refl (Vec.map-∘ (Vec.lookup (U ∷ Γ)) suc ρ) = λₗ*∘ₗ ⊢ₗ⇒⊢ₗ/Var ⊢M ∣ₗ <⇒linear-in⇒linear-inVar↑⋆ Mₗ (ℕ.0<1+n {n = 0})
-⊢ₗ⇒⊢ₗ/Var (⊢M $∘ₗ ⊢N) = ⊢ₗ⇒⊢ₗ/Var ⊢M $∘ₗ ⊢ₗ⇒⊢ₗ/Var ⊢N
-⊢ₗ⇒⊢ₗ/Var (bangₗ ⊢M) = bangₗ (⊢ₗ⇒⊢ₗ/Var ⊢M)
-⊢ₗ⇒⊢ₗ/Var {Γ = Γ} {ρ = ρ} (let-bangₗ_inₗ_ {T = T} ⊢M ⊢N)
-  rewrite ≡.cong (T Vec.∷_) (≡.trans refl (Vec.map-∘ (Vec.lookup (T ∷ Γ)) suc ρ)) = let-bangₗ ⊢ₗ⇒⊢ₗ/Var ⊢M inₗ ⊢ₗ⇒⊢ₗ/Var ⊢N
+  rewrite Vec.map-∘ (Vec.lookup (U ∷ Γ)) suc ρ                           = λₗ*∘ₗ ⊢ₗ⇒⊢ₗ/Var ⊢M ∣ₗ <⇒linear-in⇒linear-inVar↑⋆ Mₗ (ℕ.0<1+n {n = 0})
+⊢ₗ⇒⊢ₗ/Var                                 (⊢M $∘ₗ ⊢N)                    = ⊢ₗ⇒⊢ₗ/Var ⊢M $∘ₗ ⊢ₗ⇒⊢ₗ/Var ⊢N
+⊢ₗ⇒⊢ₗ/Var                                 (bangₗ ⊢M)                     = bangₗ (⊢ₗ⇒⊢ₗ/Var ⊢M)
+⊢ₗ⇒⊢ₗ/Var {Γ = Γ} {ρ = ρ}                 (let-bangₗ_inₗ_ {T = T} ⊢M ⊢N)
+  rewrite ≡.cong (T Vec.∷_) (Vec.map-∘ (Vec.lookup (T ∷ Γ)) suc ρ)       = let-bangₗ ⊢ₗ⇒⊢ₗ/Var ⊢M inₗ ⊢ₗ⇒⊢ₗ/Var ⊢N
 
 ⊢ₗ⇒⊢ₗweaken : Γ ⊢ₗ M ⦂ T →
               --------------------------------------------------
               U ∷ Γ ⊢ₗ weaken M ⦂ T
-⊢ₗ⇒⊢ₗweaken {Γ = Γ} {U = U} ⊢M = ⊢ₗ⇒⊢ₗ/Var {Γ = U ∷ Γ} {ρ = VarSubst.wk} (≡.subst (_⊢ₗ _ ⦂ _) lemma′ ⊢M)
+⊢ₗ⇒⊢ₗweaken {Γ = Γ} {U = U} ⊢M = ⊢ₗ⇒⊢ₗ/Var (≡.subst (_⊢ₗ _ ⦂ _) lemma′ ⊢M)
   where
-    lemma : ∀ {n} {Γ : ℂ n} → Γ ≡ Vec.map (Vec.lookup Γ) VarSubst.id
+    lemma : ∀ {n} {Γ : ℂ n} → Γ ≡ Vec.map (Vec.lookup Γ) V.id
     lemma {Γ = []} = refl
-    lemma {Γ = T ∷ Γ} = ≡.cong (T ∷_) (≡.trans lemma (Vec.map-∘ (Vec.lookup (T ∷ Γ)) suc VarSubst.id))
+    lemma {Γ = T ∷ Γ} = ≡.cong (T ∷_) (≡.trans lemma (Vec.map-∘ (Vec.lookup (T ∷ Γ)) suc V.id))
 
-    lemma′ : Γ ≡ Vec.map (Vec.lookup (U ∷ Γ)) VarSubst.wk
-    lemma′ = ≡.trans (≡.trans lemma refl) (Vec.map-∘ (Vec.lookup (U ∷ Γ)) suc VarSubst.id)
+    lemma′ : Γ ≡ Vec.map (Vec.lookup (U ∷ Γ)) V.wk
+    lemma′ = ≡.trans (≡.trans lemma refl) (Vec.map-∘ (Vec.lookup (U ∷ Γ)) suc V.id)
 
 s⊢ₗ⇒s⊢ₗweaken : Γ s⊢ₗ σ ⦂ Δ →
                 T ∷ Γ s⊢ₗ Vec.map weaken σ ⦂ Δ
-s⊢ₗ⇒s⊢ₗweaken {_} {_} {_} {[]}    {[]}     ⊢σ = []
-s⊢ₗ⇒s⊢ₗweaken {_} {_} {_} {M ∷ σ} {T ∷ Γ} (⊢M ∷ ⊢σ) = ⊢ₗ⇒⊢ₗweaken ⊢M ∷ s⊢ₗ⇒s⊢ₗweaken ⊢σ
+s⊢ₗ⇒s⊢ₗweaken {σ = []}    {[]}    ⊢σ        = []
+s⊢ₗ⇒s⊢ₗweaken {σ = M ∷ σ} {T ∷ Γ} (⊢M ∷ ⊢σ) = ⊢ₗ⇒⊢ₗweaken ⊢M ∷ s⊢ₗ⇒s⊢ₗweaken ⊢σ
 
 s⊢ₗ⇒s⊢ₗ↑ : Γ s⊢ₗ σ ⦂ Δ →
            T ∷ Γ s⊢ₗ σ ↑ ⦂ T ∷ Δ
@@ -183,11 +183,11 @@ s⊢ₗwk⋆ {Γ = T ∷ Γ} {Δ = Δ}     = s⊢ₗ⇒s⊢ₗweaken s⊢ₗwk�
              Δ s⊢ₗ σ ⦂ Γ →
              --------------------------------------------------
              Δ ⊢ₗ M / σ ⦂ T
-⊢ₗ⇒s⊢ₗ⇒⊢ₗ/ {Δ = Δ}         (varₗ refl)           ⊢σ = VecPointwise.lookup {_∼_ = Δ ⊢ₗ_⦂_} ⊢σ _
-⊢ₗ⇒s⊢ₗ⇒⊢ₗ/         {σ = σ} (λₗ*∘ₗ ⊢M ∣ₗ Mₗ)      ⊢σ = λₗ*∘ₗ ⊢ₗ⇒s⊢ₗ⇒⊢ₗ/ ⊢M (s⊢ₗ⇒s⊢ₗ↑ ⊢σ) ∣ₗ <⇒linear-in⇒linear-in↑⋆ σ Mₗ (ℕ.0<1+n {n = 0})
-⊢ₗ⇒s⊢ₗ⇒⊢ₗ/                 (⊢M $∘ₗ ⊢N)           ⊢σ = ⊢ₗ⇒s⊢ₗ⇒⊢ₗ/ ⊢M ⊢σ $∘ₗ ⊢ₗ⇒s⊢ₗ⇒⊢ₗ/ ⊢N ⊢σ
-⊢ₗ⇒s⊢ₗ⇒⊢ₗ/                 (bangₗ ⊢M)            ⊢σ = bangₗ (⊢ₗ⇒s⊢ₗ⇒⊢ₗ/ ⊢M ⊢σ)
-⊢ₗ⇒s⊢ₗ⇒⊢ₗ/                 (let-bangₗ ⊢M inₗ ⊢N) ⊢σ = let-bangₗ (⊢ₗ⇒s⊢ₗ⇒⊢ₗ/ ⊢M ⊢σ) inₗ ⊢ₗ⇒s⊢ₗ⇒⊢ₗ/ ⊢N (s⊢ₗ⇒s⊢ₗ↑ ⊢σ)
+⊢ₗ⇒s⊢ₗ⇒⊢ₗ/ (varₗ refl)           ⊢σ = VecPointwise.lookup {_∼_ = _ ⊢ₗ_⦂_} ⊢σ _
+⊢ₗ⇒s⊢ₗ⇒⊢ₗ/ (λₗ*∘ₗ ⊢M ∣ₗ Mₗ)      ⊢σ = λₗ*∘ₗ ⊢ₗ⇒s⊢ₗ⇒⊢ₗ/ ⊢M (s⊢ₗ⇒s⊢ₗ↑ ⊢σ) ∣ₗ <⇒linear-in⇒linear-in↑⋆ _ Mₗ (ℕ.0<1+n {n = 0})
+⊢ₗ⇒s⊢ₗ⇒⊢ₗ/ (⊢M $∘ₗ ⊢N)           ⊢σ = ⊢ₗ⇒s⊢ₗ⇒⊢ₗ/ ⊢M ⊢σ $∘ₗ ⊢ₗ⇒s⊢ₗ⇒⊢ₗ/ ⊢N ⊢σ
+⊢ₗ⇒s⊢ₗ⇒⊢ₗ/ (bangₗ ⊢M)            ⊢σ = bangₗ (⊢ₗ⇒s⊢ₗ⇒⊢ₗ/ ⊢M ⊢σ)
+⊢ₗ⇒s⊢ₗ⇒⊢ₗ/ (let-bangₗ ⊢M inₗ ⊢N) ⊢σ = let-bangₗ (⊢ₗ⇒s⊢ₗ⇒⊢ₗ/ ⊢M ⊢σ) inₗ ⊢ₗ⇒s⊢ₗ⇒⊢ₗ/ ⊢N (s⊢ₗ⇒s⊢ₗ↑ ⊢σ)
 
 type-preservation : Γ ⊢ₗ M ⦂ T →
                     M ↝ₗ M′ →
@@ -219,3 +219,10 @@ progress (let-bangₗ ⊢M inₗ ⊢N)
 ...  | inj₁ (_ , M↝)           = inj₁ (_ , let-bangₗ M↝ inₗ?)
 progress (let-bangₗ bangₗ ⊢M inₗ ⊢N)
      | inj₂ (bangₗ VM)         = inj₁ (_ , β-!ₗ VM)
+
+no-double-usage-example : ∀ {n} {Γ : ℂ n} →
+                          ¬ (∃ λ T → Γ ⊢ₗ λₗ (baseₗ ⊸ₗ baseₗ ⊸ₗ baseₗ) ∘ₗ λₗ baseₗ ∘ₗ (varₗ 1 $∘ₗ varₗ 0 $∘ₗ varₗ 0) ⦂ T)
+no-double-usage-example (_ , λₗ*∘ₗ λₗ*∘ₗ _ ∣ₗ (_                $∘ₗ∅ varₗ 0≢0) ∣ₗ _)
+  with () ← 0≢0 refl
+no-double-usage-example (_ , λₗ*∘ₗ λₗ*∘ₗ _ ∣ₗ (∅ _ $∘ₗ varₗ 0≢0 $∘ₗ  _)        ∣ₗ _)
+  with () ← 0≢0 refl
