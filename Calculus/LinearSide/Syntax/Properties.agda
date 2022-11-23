@@ -202,30 +202,64 @@ var/σ↑⋆≡var/σ/wk⋆ : ∀ n {m m′} x (σ : 𝕊 m m′) →
 var/σ↑⋆≡var/σ/wk⋆ zero    x σ = ≡.sym (id-vanishes (varₗ x / σ))
 var/σ↑⋆≡var/σ/wk⋆ (suc n) x σ = ≡.trans (suc-/-↑ {ρ = σ ↑⋆ n} (n Fin.↑ʳ x)) (≡.trans (≡.cong (_/ wk) (var/σ↑⋆≡var/σ/wk⋆ n x σ)) (≡.sym (/-weaken {ρ = wk⋆ n} (varₗ x / σ))))
 
-/-wk⋆ : ∀ n {m} {M : 𝕄 m} →
-        M / wk⋆ n ≡ M /Var V.wk⋆ n
-/-wk⋆ n {m} {M} = /✶-↑✶ (ε ▻ wk⋆ n) (ε ▻ V.wk⋆ n) lemma 0 M
+/-id : ∀ n {m} {M : 𝕄 (n + m)} →
+       M / id ↑⋆ n ≡ M /Var V.id V.↑⋆ n
+/-id n {_} {M} = /✶-↑✶ (ε ▻ id) (ε ▻ V.id) lemma n M
   where
     open ≡.≡-Reasoning
 
     lemma : ∀ k x →
-            varₗ x / wk⋆ n ↑⋆ k ≡ varₗ x /Var V.wk⋆ n V.↑⋆ k
-    lemma k x
-      with Fin.toℕ x <? k
-    ...  | yes x< = begin
-                    varₗ x / wk⋆ n ↑⋆ k ≡⟨ <⇒var/wk⋆↑⋆≡var n x< ⟩
-                    varₗ (Fin.fromℕ< (ℕ.<-transˡ x< (ℕ.m≤m+n k (n + m)))) ≡˘⟨ <⇒var/Varwk⋆↑⋆≡var n x< ⟩
-                    varₗ x /Var V.wk⋆ n V.↑⋆ k ∎
-    ...  | no  x≮
-        with x≥ ← ℕ.≮⇒≥ x≮
-          rewrite ↑ʳreduce≥≡id x≥ = begin
-                                    varₗ (k Fin.↑ʳ Fin.reduce≥ x x≥) / wk⋆ n ↑⋆ k ≡⟨ var/σ↑⋆≡var/σ/wk⋆ k (Fin.reduce≥ x x≥) (wk⋆ n) ⟩
-                                    varₗ (Fin.reduce≥ x x≥) / wk⋆ n / wk⋆ k ≡⟨ ≡.cong (_/ wk⋆ k) (var/wk⋆≡var n (Fin.reduce≥ x x≥)) ⟩
-                                    varₗ (n Fin.↑ʳ (Fin.reduce≥ x x≥)) / wk⋆ k ≡⟨ var/wk⋆≡var k (n Fin.↑ʳ Fin.reduce≥ x x≥) ⟩
-                                    varₗ (k Fin.↑ʳ n Fin.↑ʳ (Fin.reduce≥ x x≥)) ≡˘⟨ var/Varwk⋆≡var k (n Fin.↑ʳ Fin.reduce≥ x x≥) ⟩
-                                    varₗ (n Fin.↑ʳ (Fin.reduce≥ x x≥)) /Var V.wk⋆ k ≡˘⟨ ≡.cong (_/Var V.wk⋆ k) (var/Varwk⋆≡var n (Fin.reduce≥ x x≥)) ⟩
-                                    (varₗ (Fin.reduce≥ x x≥) /Var V.wk⋆ n) /Var V.wk⋆ k ≡˘⟨ var/Varσ↑⋆≡var/Varσ/Varwk⋆ k (Fin.reduce≥ x x≥) (V.wk⋆ n) ⟩
-                                    varₗ (k Fin.↑ʳ Fin.reduce≥ x x≥) /Var V.wk⋆ n V.↑⋆ k ∎
+            varₗ x / id ↑⋆ k ≡ varₗ x /Var V.id V.↑⋆ k
+    lemma k x                 = begin
+      varₗ x / id ↑⋆ k          ≡⟨ ≡.cong (varₗ x /_) (id-↑⋆ k) ⟩
+      varₗ x / id               ≡⟨ id-vanishes (varₗ x) ⟩
+      varₗ x                    ≡˘⟨ ≡.cong varₗ (V.id-vanishes x) ⟩
+      varₗ x /Var V.id          ≡˘⟨ ≡.cong (varₗ x /Var_) (V.id-↑⋆ k) ⟩
+      varₗ x /Var V.id V.↑⋆ k   ∎
+
+/Var-⊙ : ∀ n {m l k} {M : 𝕄 (n + m)} {ρ₁ : Sub Fin m l} {ρ₂ : Sub Fin l k} →
+         M /Var (ρ₁ V.⊙ ρ₂) V.↑⋆ n ≡ (M /Var ρ₁ V.↑⋆ n) /Var ρ₂ V.↑⋆ n
+/Var-⊙ n {M = M} {ρ₁} {ρ₂} = /✶-↑✶ (ε ▻ ρ₁ V.⊙ ρ₂) (ε ▻ ρ₁ ▻ ρ₂) lemma n M
+  where
+    open ≡.≡-Reasoning
+
+    lemma : ∀ k x →
+            varₗ x /Var (ρ₁ V.⊙ ρ₂) V.↑⋆ k ≡ (varₗ x /Var ρ₁ V.↑⋆ k) /Var ρ₂ V.↑⋆ k
+    lemma k x                                = begin
+      varₗ x /Var (ρ₁ V.⊙ ρ₂) V.↑⋆ k           ≡⟨ ≡.cong (λ f → varₗ (Vec.lookup f x)) (V.↑⋆-distrib k) ⟩
+      varₗ x /Var (ρ₁ V.↑⋆ k V.⊙ ρ₂ V.↑⋆ k)    ≡⟨ ≡.cong varₗ (V.lookup-⨀ x (ε ▻ ρ₁ V.↑⋆ k ▻ ρ₂ V.↑⋆ k)) ⟩
+      (varₗ x /Var ρ₁ V.↑⋆ k) /Var ρ₂ V.↑⋆ k   ∎
+
+/-wk⋆↑⋆ : ∀ n m {l} {M : 𝕄 (m + l)} →
+          M / wk⋆ n ↑⋆ m ≡ M /Var V.wk⋆ n V.↑⋆ m
+/-wk⋆↑⋆ zero    m {l} {M} = /-id m {M = M}
+/-wk⋆↑⋆ (suc n) m {l} {M} = begin
+  M / wk⋆ (suc n) ↑⋆ m                     ≡⟨ ≡.cong (λ σ → M / σ ↑⋆ m) map-weaken ⟩
+  M / (wk⋆ n ⊙ wk) ↑⋆ m                    ≡⟨ ≡.cong (M /_) (↑⋆-distrib m) ⟩
+  M / wk⋆ n ↑⋆ m ⊙ wk ↑⋆ m                 ≡⟨ /-⨀ M (ε ▻ wk⋆ n ↑⋆ m ▻ wk ↑⋆ m) ⟩
+  M / wk⋆ n ↑⋆ m / wk ↑⋆ m                 ≡⟨ ≡.cong (_/ wk ↑⋆ m) (/-wk⋆↑⋆ n m {M = M}) ⟩
+  (M /Var V.wk⋆ n V.↑⋆ m) / wk ↑⋆ m        ≡⟨ /✶-↑✶
+                                                (ε ▻ wk)
+                                                (ε ▻ V.wk)
+                                                (λ k x →
+                                                  begin
+    varₗ x / wk ↑⋆ k                              ≡⟨ var-/-wk-↑⋆ k x ⟩
+    varₗ (Fin.lift k suc x)                       ≡⟨ ≡.cong varₗ (≡.sym (V.var-/-wk-↑⋆ k x)) ⟩
+    varₗ x /Var V.wk V.↑⋆ k                       ∎)
+                                                m
+                                                (M /Var V.wk⋆ n V.↑⋆ m) ⟩
+  (M /Var V.wk⋆ n V.↑⋆ m) /Var V.wk V.↑⋆ m ≡˘⟨ /Var-⊙ m {M = M} {ρ₁ = V.wk⋆ n} {ρ₂ = V.wk} ⟩
+  M /Var (V.wk⋆ n V.⊙ V.wk) V.↑⋆ m         ≡⟨ ≡.cong (λ ρ → M /Var ρ V.↑⋆ m)
+                                                (V.extensionality
+                                                  λ x →
+                                                    begin
+    x V./ V.wk⋆ n V.⊙ V.wk                          ≡⟨ Vec.lookup-map x (V._/ V.wk) (V.wk⋆ n) ⟩
+    x V./ V.wk⋆ n V./ V.wk                          ≡⟨ V./-wk ⟩
+    suc (x V./ V.wk⋆ n)                             ≡˘⟨ Vec.lookup-map x suc (V.wk⋆ n) ⟩
+    x V./ V.wk⋆ (suc n)                             ∎) ⟩
+  M /Var V.wk⋆ (suc n) V.↑⋆ m                     ∎
+  where
+    open ≡.≡-Reasoning
 
 infixr 9 _→ₗ_
 infixr 9 λₗ_∙ₗ_

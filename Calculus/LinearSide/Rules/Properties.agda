@@ -87,11 +87,11 @@ open import Calculus.LinearSide.Rules
 <⇒unused-in⇒unused-inVarwk⋆↑⋆ {n}             (bangₗ M)           x<   = bangₗ (<⇒unused-in⇒unused-inVarwk⋆↑⋆ M x<)
 <⇒unused-in⇒unused-inVarwk⋆↑⋆ {n}             (let-bangₗ M inₗ N) x<   = let-bangₗ <⇒unused-in⇒unused-inVarwk⋆↑⋆ M x< inₗ <⇒unused-in⇒unused-inVarwk⋆↑⋆ N x<
 
-<⇒unused-inwk⋆ : ∀ {n m} {x} (M : 𝕄 m) →
-                 Fin.toℕ x < n →
-                 x unused-in (M / wk⋆ n)
-<⇒unused-inwk⋆ {n} {m} M x<
-  rewrite /-wk⋆ n {m = m} {M = M} = <⇒unused-in⇒unused-inVarwk⋆↑⋆ M x<
+<⇒unused-in⇒unused-inwk⋆↑⋆ : ∀ {n m l} {x} (M : 𝕄 (m + l)) →
+                             Fin.toℕ x < n →
+                             m Fin.↑ʳ x unused-in (M / wk⋆ n ↑⋆ m)
+<⇒unused-in⇒unused-inwk⋆↑⋆ {n} {m} {l} M x<
+  rewrite /-wk⋆↑⋆ n m {M = M} = <⇒unused-in⇒unused-inVarwk⋆↑⋆ M x<
 
 <⇒unused-in⇒unused-in↑⋆ : ∀ {n m m′} {x} {M : 𝕄 (n + m)} (σ : 𝕊 m m′) →
                           x unused-in M →
@@ -104,7 +104,7 @@ open import Calculus.LinearSide.Rules
 ...  | no  y≮
     with y≥ ← ℕ.≮⇒≥ y≮
       rewrite ↑ʳreduce≥≡id y≥
-            | var/σ↑⋆≡var/σ/wk⋆ n (Fin.reduce≥ _ y≥) σ                                            = <⇒unused-inwk⋆ (varₗ (Fin.reduce≥ y y≥) / σ) (ℕ.≤-trans (ℕ.≤-reflexive (≡.cong suc (Fin.toℕ-fromℕ< (ℕ.<-transˡ x< (ℕ.m≤m+n _ _))))) x<)
+            | var/σ↑⋆≡var/σ/wk⋆ n (Fin.reduce≥ _ y≥) σ                                            = <⇒unused-in⇒unused-inwk⋆↑⋆ {m = 0} (varₗ (Fin.reduce≥ y y≥) / σ) (ℕ.≤-trans (ℕ.≤-reflexive (≡.cong suc (Fin.toℕ-fromℕ< (ℕ.<-transˡ x< (ℕ.m≤m+n _ _))))) x<)
 <⇒unused-in⇒unused-in↑⋆ {n = n} {m} {m′} σ (λₗ*∘ₗ M∅)                x<
   rewrite Fin.fromℕ<-cong _ _ refl (ℕ.<-transˡ x< (ℕ.m≤m+n n m′)) (ℕ.≤-trans x< (ℕ.m≤m+n n m′))   = λₗ*∘ₗ <⇒unused-in⇒unused-in↑⋆ σ M∅ (s≤s x<)
 <⇒unused-in⇒unused-in↑⋆ {n = n}          σ (M∅ $∘ₗ N∅)               x<                           = <⇒unused-in⇒unused-in↑⋆ σ M∅ x< $∘ₗ <⇒unused-in⇒unused-in↑⋆ σ N∅ x<
@@ -226,3 +226,20 @@ no-double-usage-example (_ , λₗ*∘ₗ λₗ*∘ₗ _ ∣ₗ (_              
   with () ← 0≢0 refl
 no-double-usage-example (_ , λₗ*∘ₗ λₗ*∘ₗ _ ∣ₗ (∅ _ $∘ₗ varₗ 0≢0 $∘ₗ  _)        ∣ₗ _)
   with () ← 0≢0 refl
+
+⊢ₗtt : Γ ⊢ₗ ttₗ ⦂ ⊤ₗ
+⊢ₗtt = λₗ*∘ₗ varₗ refl ∣ₗ varₗ refl
+
+⊢ₗλₗ*∙ₗ_ : T ∷ Γ ⊢ₗ M ⦂ U →
+           ------------------------
+           Γ ⊢ₗ λₗ T ∙ₗ M ⦂ T →ₗ U
+⊢ₗλₗ*∙ₗ_ {T = T} {M = M} ⊢M = λₗ*∘ₗ
+                                let-bangₗ
+                                  varₗ refl
+                                inₗ
+                                  ⊢ₗ⇒s⊢ₗ⇒⊢ₗ/ ⊢M (s⊢ₗ⇒s⊢ₗ↑ (s⊢ₗwk⋆ {Γ = !ₗ T ∷ []}))
+                              ∣ₗ
+                                let-bangₗ
+                                  varₗ refl
+                                inₗ∅
+                                  <⇒unused-in⇒unused-inwk⋆↑⋆ {m = 1} M (s≤s (z≤n {n = 0}))

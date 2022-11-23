@@ -71,7 +71,7 @@ variable
   ρ ρ′ ρ″ ρ‴ ρ₀ ρ₁ ρ₂ ρ₃ : Sub Fin n n′
 
 pattern ⊤ₗ = baseₗ ⊸ₗ baseₗ
-pattern ttₗ = λₗ baseₗ ∘ₗ varₗ 0
+pattern ttₗ = λₗ baseₗ ∘ₗ varₗ Fin.zero
 
 record HasLength (S : Set) : Set where
   inductive
