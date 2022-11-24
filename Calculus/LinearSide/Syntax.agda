@@ -6,7 +6,7 @@ import Data.Nat.Literals as ℕ
 open import Data.Fin using (Fin)
 import Data.Fin.Literals as Fin
 open import Data.Fin.Substitution
-open import Data.Unit hiding (_≟_)
+open import Data.Unit using (tt) public
 open import Data.Vec using (Vec)
 import Data.Vec as Vec
 

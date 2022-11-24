@@ -2,23 +2,21 @@ module Calculus.LinearSide.Rules.Properties where
 
 open import Data.Nat hiding (_/_)
 import Data.Nat.Properties as ℕ
-open import Data.Fin using (Fin; zero; suc)
+open import Data.Fin using (Fin; suc)
 import Data.Fin as Fin
 import Data.Fin.Properties as Fin
 open import Data.Fin.Substitution
 open import Data.Fin.Substitution.Lemmas
-open import Data.Product
-open import Data.Sum
-open import Data.Unit hiding (_≟_)
-open import Data.Vec using (Vec; []; _∷_; _++_)
+open import Data.Product using (∃; _,_; -,_)
+open import Data.Sum using (_⊎_; inj₁; inj₂)
+open import Data.Vec using ([]; _∷_; _++_)
 import Data.Vec as Vec
 import Data.Vec.Properties as Vec
 open import Data.Vec.Relation.Binary.Pointwise.Inductive using (Pointwise; []; _∷_)
 import Data.Vec.Relation.Binary.Pointwise.Inductive as VecPointwise
-import Data.Vec.Relation.Unary.All as VecAll
 open import Relation.Binary.PropositionalEquality using (_≡_; refl)
 import Relation.Binary.PropositionalEquality as ≡
-open import Relation.Nullary
+open import Relation.Nullary using (¬_; yes; no)
 
 open import Calculus.LinearSide.Syntax
 open import Calculus.LinearSide.Syntax.Properties
@@ -57,7 +55,7 @@ open import Calculus.LinearSide.Rules
 <⇒unused-in⇒unused-inVarwk⋆↑⋆ {n} {m} {l} {x} (varₗ y)            x<
   with Fin.toℕ y <? m
 ...  | yes y<
-    rewrite <⇒var/Varwk⋆↑⋆≡var n y<                                     = varₗ
+    rewrite <⇒var/Var≡var (V.wk⋆ n) y<                                  = varₗ
                                                                             λ m↑x≡ →
                                                                               ℕ.<⇒≢
                                                                                 (ℕ.<-transˡ y< (ℕ.m≤m+n _ _))
@@ -72,11 +70,16 @@ open import Calculus.LinearSide.Rules
                                                                                 (ℕ.+-monoʳ-< m (ℕ.<-transˡ x< (ℕ.m≤m+n _ _)))
                                                                                 (begin
     m + Fin.toℕ x                                                                ≡˘⟨ Fin.toℕ-↑ʳ m x ⟩
-    Fin.toℕ (m Fin.↑ʳ x)                                                         ≡⟨ ≡.cong Fin.toℕ (begin
-      _                                                                                             ≡⟨ m↑x≡ ⟩
-      Vec.lookup (V.wk⋆ m) (Vec.lookup (V.wk⋆ n) y′)                                                ≡⟨ ≡.cong (Vec.lookup (V.wk⋆ m)) (varₗ-injective (var/Varwk⋆≡var n y′)) ⟩
-      Vec.lookup (V.wk⋆ m) (n Fin.↑ʳ y′)                                                            ≡⟨ varₗ-injective (var/Varwk⋆≡var m (n Fin.↑ʳ y′)) ⟩
-      _                                                                                             ∎) ⟩
+    Fin.toℕ (m Fin.↑ʳ x)                                                         ≡⟨ ≡.cong
+                                                                                      Fin.toℕ
+                                                                                      (begin
+      _                                                                                ≡⟨ m↑x≡ ⟩
+      Vec.lookup (V.wk⋆ m) (Vec.lookup (V.wk⋆ n) y′)                                   ≡⟨ ≡.cong
+                                                                                            (Vec.lookup (V.wk⋆ m))
+                                                                                            (varₗ-injective (var/Varwk⋆≡var n y′)) ⟩
+      Vec.lookup (V.wk⋆ m) (n Fin.↑ʳ y′)                                               ≡⟨ varₗ-injective
+                                                                                            (var/Varwk⋆≡var m (n Fin.↑ʳ y′)) ⟩
+      _                                                                                ∎) ⟩
     Fin.toℕ (m Fin.↑ʳ (n Fin.↑ʳ y′))                                             ≡⟨ Fin.toℕ-↑ʳ m (n Fin.↑ʳ y′) ⟩
     m + Fin.toℕ (n Fin.↑ʳ y′)                                                    ≡⟨ ≡.cong (m +_) (Fin.toℕ-↑ʳ n y′) ⟩
     m + (n + Fin.toℕ y′)                                                         ∎)
@@ -174,7 +177,7 @@ s⊢ₗ⇒s⊢ₗ↑ : Γ s⊢ₗ σ ⦂ Δ →
            T ∷ Γ s⊢ₗ σ ↑ ⦂ T ∷ Δ
 s⊢ₗ⇒s⊢ₗ↑ ⊢σ = varₗ refl ∷ s⊢ₗ⇒s⊢ₗweaken ⊢σ
 
-s⊢ₗwk⋆ : ∀ {Γ : Vec 𝕋 n} {Δ : Vec 𝕋 n′} → Γ ++ Δ s⊢ₗ wk⋆ (len Γ) {len Δ} ⦂ Δ
+s⊢ₗwk⋆ : ∀ {Γ : ℂ n} {Δ : ℂ n′} → Γ ++ Δ s⊢ₗ wk⋆ (len Γ) {len Δ} ⦂ Δ
 s⊢ₗwk⋆ {Γ = []}    {Δ = []}    = []
 s⊢ₗwk⋆ {Γ = []}    {Δ = _ ∷ Δ} = varₗ refl ∷ s⊢ₗwk⋆
 s⊢ₗwk⋆ {Γ = T ∷ Γ} {Δ = Δ}     = s⊢ₗ⇒s⊢ₗweaken s⊢ₗwk⋆
@@ -188,6 +191,16 @@ s⊢ₗwk⋆ {Γ = T ∷ Γ} {Δ = Δ}     = s⊢ₗ⇒s⊢ₗweaken s⊢ₗwk�
 ⊢ₗ⇒s⊢ₗ⇒⊢ₗ/ (⊢M $∘ₗ ⊢N)           ⊢σ = ⊢ₗ⇒s⊢ₗ⇒⊢ₗ/ ⊢M ⊢σ $∘ₗ ⊢ₗ⇒s⊢ₗ⇒⊢ₗ/ ⊢N ⊢σ
 ⊢ₗ⇒s⊢ₗ⇒⊢ₗ/ (bangₗ ⊢M)            ⊢σ = bangₗ (⊢ₗ⇒s⊢ₗ⇒⊢ₗ/ ⊢M ⊢σ)
 ⊢ₗ⇒s⊢ₗ⇒⊢ₗ/ (let-bangₗ ⊢M inₗ ⊢N) ⊢σ = let-bangₗ (⊢ₗ⇒s⊢ₗ⇒⊢ₗ/ ⊢M ⊢σ) inₗ ⊢ₗ⇒s⊢ₗ⇒⊢ₗ/ ⊢N (s⊢ₗ⇒s⊢ₗ↑ ⊢σ)
+
+⊢ₗ-deterministic : Γ ⊢ₗ M ⦂ T →
+                   Γ ⊢ₗ M ⦂ U →
+                   T ≡ U
+⊢ₗ-deterministic (varₗ refl) (varₗ eq) = eq
+⊢ₗ-deterministic (λₗ*∘ₗ ⊢M ∣ₗ _) (λₗ*∘ₗ ⊢M′ ∣ₗ _) = ≡.cong (_ ⊸ₗ_) (⊢ₗ-deterministic ⊢M ⊢M′)
+⊢ₗ-deterministic (⊢M $∘ₗ ⊢N) (⊢M′ $∘ₗ ⊢N′) = ⊸ₗ-injectiveʳ (⊢ₗ-deterministic ⊢M ⊢M′)
+⊢ₗ-deterministic (bangₗ ⊢M) (bangₗ ⊢M′) = ≡.cong !ₗ (⊢ₗ-deterministic ⊢M ⊢M′)
+⊢ₗ-deterministic (let-bangₗ ⊢M inₗ ⊢N) (let-bangₗ ⊢M′ inₗ ⊢N′)
+  rewrite !ₗ-injective (⊢ₗ-deterministic ⊢M ⊢M′) = ⊢ₗ-deterministic ⊢N ⊢N′
 
 type-preservation : Γ ⊢ₗ M ⦂ T →
                     M ↝ₗ M′ →
@@ -204,21 +217,21 @@ progress : [] ⊢ₗ M ⦂ T → (∃ λ M′ → M ↝ₗ M′) ⊎ Valueₗ M
 progress (λₗ*∘ₗ ⊢M ∣ₗ Mₗ)      = inj₂ λₗ?∘ₗ?
 progress (⊢M $∘ₗ ⊢N)
   with progress ⊢M
-...  | inj₁ (_ , M↝)           = inj₁ (_ , M↝ $∘ₗ?)
+...  | inj₁ (_ , M↝)           = inj₁ (-, M↝ $∘ₗ?)
 progress ((λₗ*∘ₗ ⊢M ∣ₗ x) $∘ₗ ⊢N)
      | inj₂ λₗ?∘ₗ?
     with progress ⊢N
-...    | inj₁ (_ , N↝)         = inj₁ (_ , !$∘ₗ N↝)
-...    | inj₂ VN               = inj₁ (_ , β-⊸ₗ VN)
+...    | inj₁ (_ , N↝)         = inj₁ (-, !$∘ₗ N↝)
+...    | inj₂ VN               = inj₁ (-, β-⊸ₗ VN)
 progress (bangₗ ⊢M)
   with progress ⊢M
-...  | inj₁ (_ , M↝)           = inj₁ (_ , bangₗ M↝)
+...  | inj₁ (_ , M↝)           = inj₁ (-, bangₗ M↝)
 ...  | inj₂ VM                 = inj₂ (bangₗ VM)
 progress (let-bangₗ ⊢M inₗ ⊢N)
   with progress ⊢M
-...  | inj₁ (_ , M↝)           = inj₁ (_ , let-bangₗ M↝ inₗ?)
+...  | inj₁ (_ , M↝)           = inj₁ (-, let-bangₗ M↝ inₗ?)
 progress (let-bangₗ bangₗ ⊢M inₗ ⊢N)
-     | inj₂ (bangₗ VM)         = inj₁ (_ , β-!ₗ VM)
+     | inj₂ (bangₗ VM)         = inj₁ (-, β-!ₗ VM)
 
 no-double-usage-example : ∀ {n} {Γ : ℂ n} →
                           ¬ (∃ λ T → Γ ⊢ₗ λₗ (baseₗ ⊸ₗ baseₗ ⊸ₗ baseₗ) ∘ₗ λₗ baseₗ ∘ₗ (varₗ 1 $∘ₗ varₗ 0 $∘ₗ varₗ 0) ⦂ T)

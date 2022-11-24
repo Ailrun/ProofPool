@@ -1,24 +1,20 @@
 module Calculus.LinearSide.Rules where
 
-open import Agda.Builtin.FromNat
-open import Data.Nat hiding (zero; suc; _/_)
-open import Data.Fin using (Fin; zero; suc)
-import Data.Fin.Literals as Fin
-open import Data.Fin.Substitution
-open import Data.Unit hiding (_≟_)
-open import Data.Vec using (Vec; _∷_)
+open import Data.Nat hiding (_/_)
+open import Data.Fin using (Fin; suc)
+open import Data.Fin.Substitution using (Sub)
+open import Data.Vec using (_∷_)
 import Data.Vec as Vec
 open import Data.Vec.Relation.Binary.Pointwise.Inductive using (Pointwise)
-import Data.Vec.Relation.Unary.All as VecAll
 open import Relation.Binary.PropositionalEquality using (_≡_; _≢_; refl)
 
 open import Calculus.LinearSide.Syntax
 open import Calculus.LinearSide.Syntax.Properties
 
-infixr 4 _s⊢ₗ_⦂_
-infixr 4 _⊢ₗ_⦂_
-infixr 4 _unused-in_
-infixr 4 _linear-in_
+infix  4 _s⊢ₗ_⦂_
+infix  4 _⊢ₗ_⦂_
+infix  4 _unused-in_
+infix  4 _linear-in_
 infixr 4 _↝ₗ_
 
 infixr 9 λₗ*∘ₗ_∣ₗ_

@@ -7,16 +7,16 @@ import Data.Fin as Fin
 import Data.Fin.Properties as Fin
 open import Data.Fin.Substitution
 open import Data.Fin.Substitution.Lemmas
-open import Data.Sum
+open import Data.Product using (_×_; -,_; <_,_>; uncurry)
+open import Data.Sum using (_⊎_; inj₁; inj₂)
 import Data.Sum as Σ
-open import Data.Unit hiding (_≟_)
-open import Data.Vec using (Vec)
 import Data.Vec as Vec
 import Data.Vec.Properties as Vec
-open import Relation.Binary.Construct.Closure.ReflexiveTransitive
+open import Relation.Binary.Construct.Closure.ReflexiveTransitive using (ε; _◅_; _▻_)
 open import Relation.Binary.PropositionalEquality using (_≡_; refl)
 import Relation.Binary.PropositionalEquality as ≡
-open import Relation.Nullary
+open import Relation.Nullary using (Dec; yes; no)
+import Relation.Nullary.Decidable as Dec
 
 open import Calculus.LinearSide.Syntax
 
@@ -126,82 +126,6 @@ open TermLemmas 𝕄Lemmas public hiding (var)
 module V where
   open VarLemmas public
 
-<⇒var/≡var : ∀ {n m m′} {x : Fin (n + m)} (σ : 𝕊 m m′) →
-             (x< : Fin.toℕ x < n) →
-             varₗ x / σ ↑⋆ n ≡ varₗ (Fin.fromℕ< (ℕ.<-transˡ x< (ℕ.m≤m+n _ _)))
-<⇒var/≡var {suc _} {_} {_} {zero}  σ (s≤s z≤n)              = refl
-<⇒var/≡var {suc n} {_} {_} {suc x} σ (s≤s x<)
-  rewrite suc-/-↑ {ρ = σ ↑⋆ n} x                            = begin
-    varₗ x / σ ↑⋆ n / wk                                      ≡⟨ ≡.cong (_/ wk) (<⇒var/≡var σ x<) ⟩
-    varₗ (Fin.fromℕ< (ℕ.<-transˡ x< (ℕ.m≤m+n _ _))) / wk      ≡⟨ ≡.cong (_/ wk) (≡.cong varₗ (Fin.fromℕ<-cong _ _ refl _ _)) ⟩
-    varₗ (Fin.fromℕ< (ℕ.≤-trans x< (ℕ.m≤m+n _ _))) / wk       ≡⟨ /-wk ⟩
-    weaken (varₗ (Fin.fromℕ< (ℕ.≤-trans x< (ℕ.m≤m+n _ _))))   ≡⟨ weaken-var ⟩
-    varₗ (suc (Fin.fromℕ< (ℕ.≤-trans x< (ℕ.m≤m+n _ _))))      ∎
-  where
-    open ≡.≡-Reasoning
-
-var/Varwk⋆≡var : ∀ n {m} (x : Fin m) →
-                 varₗ x /Var V.wk⋆ n ≡ varₗ (n Fin.↑ʳ x)
-var/Varwk⋆≡var zero    {m} x        = ≡.cong varₗ (V.id-vanishes _)
-var/Varwk⋆≡var (suc n) {m} x        = begin
-    varₗ x /Var V.wk⋆ (suc n)         ≡⟨ ≡.cong (varₗ x /Var_) (V.map-weaken {ρ = V.wk⋆ n}) ⟩
-    varₗ x /Var V.wk⋆ n V.⊙ V.wk      ≡⟨ ≡.cong varₗ (V./-⊙ {ρ₁ = V.wk⋆ n} {ρ₂ = V.wk} x) ⟩
-    (varₗ x /Var V.wk⋆ n) /Var V.wk   ≡⟨ ≡.cong (_/Var V.wk) (var/Varwk⋆≡var n x) ⟩
-    varₗ (n Fin.↑ʳ x) /Var V.wk       ≡⟨⟩
-    weaken (varₗ (n Fin.↑ʳ x))        ≡⟨ weaken-var ⟩
-    varₗ (suc (n Fin.↑ʳ x))           ∎
-  where
-    open ≡.≡-Reasoning
-
-var/wk⋆≡var : ∀ n {m} (x : Fin m) →
-              varₗ x / wk⋆ n ≡ varₗ (n Fin.↑ʳ x)
-var/wk⋆≡var zero    {m} x      = id-vanishes _
-var/wk⋆≡var (suc n) {m} x      = begin
-    varₗ x / wk⋆ (suc n)       ≡⟨ ≡.cong (varₗ x /_) (map-weaken {ρ = wk⋆ n}) ⟩
-    varₗ x / wk⋆ n ⊙ wk        ≡⟨ /-⊙ {ρ₁ = wk⋆ n} {ρ₂ = wk} (varₗ x) ⟩
-    varₗ x / wk⋆ n / wk        ≡⟨ ≡.cong (_/ wk) (var/wk⋆≡var n x) ⟩
-    varₗ (n Fin.↑ʳ x) / wk     ≡⟨ /-wk ⟩
-    weaken (varₗ (n Fin.↑ʳ x)) ≡⟨ weaken-var ⟩
-    varₗ (suc (n Fin.↑ʳ x))    ∎
-  where
-    open ≡.≡-Reasoning
-
-<⇒var/Varwk⋆↑⋆≡var : ∀ n {m l} {x : Fin (m + l)} →
-                     (x< : Fin.toℕ x < m) →
-                     varₗ x /Var V.wk⋆ n V.↑⋆ m ≡ varₗ (Fin.fromℕ< (ℕ.<-transˡ x< (ℕ.m≤m+n _ _))) -- (Fin.join m (n + l) (map₂ (n Fin.↑ʳ_) (Fin.splitAt m x)))
-<⇒var/Varwk⋆↑⋆≡var n {suc m} {l} {zero}  (s≤s z≤n) = refl
-<⇒var/Varwk⋆↑⋆≡var n {suc m} {l} {suc x} (s≤s x<)
-  with eq ← varₗ-injective (<⇒var/Varwk⋆↑⋆≡var n x<)
-    rewrite Vec.lookup-map x Fin.suc (V.wk⋆ n V.↑⋆ m)
-          | Fin.fromℕ<-cong _ _ refl (ℕ.<-transˡ x< (ℕ.m≤m+n m (n + l))) (ℕ.≤-trans x< (ℕ.m≤m+n m (n + l))) = ≡.cong varₗ (≡.cong suc eq)
-
-<⇒var/wk⋆↑⋆≡var : ∀ n {m l} {x : Fin (m + l)} →
-                  (x< : Fin.toℕ x < m) →
-                  varₗ x / wk⋆ n ↑⋆ m ≡ varₗ (Fin.fromℕ< (ℕ.<-transˡ x< (ℕ.m≤m+n _ _))) -- (Fin.join m (n + l) (map₂ (n Fin.↑ʳ_) (Fin.splitAt m x)))
-<⇒var/wk⋆↑⋆≡var n {suc m} {l} {zero}  (s≤s z≤n) = refl
-<⇒var/wk⋆↑⋆≡var n {suc m} {l} {suc x} (s≤s x<)
-  with eq ← <⇒var/wk⋆↑⋆≡var n x<
-    rewrite Vec.lookup-map x weaken (wk⋆ n ↑⋆ m)
-          | Fin.fromℕ<-cong _ _ refl (ℕ.<-transˡ x< (ℕ.m≤m+n m (n + l))) (ℕ.≤-trans x< (ℕ.m≤m+n m (n + l)))
-          | ≡.sym (var-/-wk-↑⋆ 0 (Fin.fromℕ< (ℕ.≤-trans x< (ℕ.m≤m+n m (n + l)))))
-          | /-wk {t = varₗ (Fin.fromℕ< (ℕ.≤-trans x< (ℕ.m≤m+n m (n + l))))} = ≡.cong weaken eq
-
-var/Varσ↑⋆≡var/Varσ/Varwk⋆ : ∀ n {m m′} x (ρ : Sub Fin m m′) →
-                             varₗ (n Fin.↑ʳ x) /Var ρ V.↑⋆ n ≡ (varₗ x /Var ρ) /Var V.wk⋆ n
-var/Varσ↑⋆≡var/Varσ/Varwk⋆ zero    {m} {l} x ρ = ≡.cong varₗ (≡.sym (V.id-vanishes (x V./ ρ)))
-var/Varσ↑⋆≡var/Varσ/Varwk⋆ (suc n) {m} {l} x ρ = begin
-  varₗ (suc (n Fin.↑ʳ x)) /Var ρ V.↑⋆ n V.↑      ≡⟨ ≡.cong varₗ (V.suc-/-↑ {ρ = ρ V.↑⋆ n} (n Fin.↑ʳ x)) ⟩
-  (varₗ (n Fin.↑ʳ x) /Var ρ V.↑⋆ n) /Var V.wk    ≡⟨ ≡.cong (_/Var V.wk) (var/Varσ↑⋆≡var/Varσ/Varwk⋆ n x ρ) ⟩
-  ((varₗ x /Var ρ) /Var V.wk⋆ n) /Var V.wk       ≡˘⟨ ≡.cong varₗ (V./-weaken {ρ = V.wk⋆ n} (x V./ ρ)) ⟩
-  (varₗ x /Var ρ) /Var V.wk⋆ (suc n)             ∎
-  where
-    open ≡.≡-Reasoning
-
-var/σ↑⋆≡var/σ/wk⋆ : ∀ n {m m′} x (σ : 𝕊 m m′) →
-                    varₗ (n Fin.↑ʳ x) / σ ↑⋆ n ≡ varₗ x / σ / wk⋆ n
-var/σ↑⋆≡var/σ/wk⋆ zero    x σ = ≡.sym (id-vanishes (varₗ x / σ))
-var/σ↑⋆≡var/σ/wk⋆ (suc n) x σ = ≡.trans (suc-/-↑ {ρ = σ ↑⋆ n} (n Fin.↑ʳ x)) (≡.trans (≡.cong (_/ wk) (var/σ↑⋆≡var/σ/wk⋆ n x σ)) (≡.sym (/-weaken {ρ = wk⋆ n} (varₗ x / σ))))
-
 /-id : ∀ n {m} {M : 𝕄 (n + m)} →
        M / id ↑⋆ n ≡ M /Var V.id V.↑⋆ n
 /-id n {_} {M} = /✶-↑✶ (ε ▻ id) (ε ▻ V.id) lemma n M
@@ -244,7 +168,7 @@ var/σ↑⋆≡var/σ/wk⋆ (suc n) x σ = ≡.trans (suc-/-↑ {ρ = σ ↑⋆ 
                                                 (λ k x →
                                                   begin
     varₗ x / wk ↑⋆ k                              ≡⟨ var-/-wk-↑⋆ k x ⟩
-    varₗ (Fin.lift k suc x)                       ≡⟨ ≡.cong varₗ (≡.sym (V.var-/-wk-↑⋆ k x)) ⟩
+    varₗ (Fin.lift k suc x)                       ≡˘⟨ ≡.cong varₗ (V.var-/-wk-↑⋆ k x) ⟩
     varₗ x /Var V.wk V.↑⋆ k                       ∎)
                                                 m
                                                 (M /Var V.wk⋆ n V.↑⋆ m) ⟩
@@ -257,7 +181,68 @@ var/σ↑⋆≡var/σ/wk⋆ (suc n) x σ = ≡.trans (suc-/-↑ {ρ = σ ↑⋆ 
     x V./ V.wk⋆ n V./ V.wk                          ≡⟨ V./-wk ⟩
     suc (x V./ V.wk⋆ n)                             ≡˘⟨ Vec.lookup-map x suc (V.wk⋆ n) ⟩
     x V./ V.wk⋆ (suc n)                             ∎) ⟩
-  M /Var V.wk⋆ (suc n) V.↑⋆ m                     ∎
+  M /Var V.wk⋆ (suc n) V.↑⋆ m              ∎
+  where
+    open ≡.≡-Reasoning
+
+<⇒var/Var≡var : ∀ {n m m′} {x : Fin (n + m)} (ρ : Sub Fin m m′) →
+             (x< : Fin.toℕ x < n) →
+             varₗ x /Var ρ V.↑⋆ n ≡ varₗ (Fin.fromℕ< (ℕ.<-transˡ x< (ℕ.m≤m+n _ _)))
+<⇒var/Var≡var {suc _} {_} {_} {zero}  ρ (s≤s z≤n)           = refl
+<⇒var/Var≡var {suc n} {_} {_} {suc x} ρ (s≤s x<)
+  rewrite V.suc-/-↑ {ρ = ρ V.↑⋆ n} x                        = begin
+    weaken (varₗ (x V./ ρ V.↑⋆ n))                            ≡⟨ ≡.cong weaken (<⇒var/Var≡var ρ x<) ⟩
+    weaken (varₗ (Fin.fromℕ< (ℕ.<-transˡ x< (ℕ.m≤m+n _ _))))  ≡⟨ ≡.cong weaken (≡.cong varₗ (Fin.fromℕ<-cong _ _ refl _ _)) ⟩
+    weaken (varₗ (Fin.fromℕ< (ℕ.≤-trans x< (ℕ.m≤m+n _ _))))   ≡⟨ weaken-var ⟩
+    varₗ (suc (Fin.fromℕ< (ℕ.≤-trans x< (ℕ.m≤m+n _ _))))      ∎
+  where
+    open ≡.≡-Reasoning
+
+<⇒var/≡var : ∀ {n m m′} {x : Fin (n + m)} (σ : 𝕊 m m′) →
+             (x< : Fin.toℕ x < n) →
+             varₗ x / σ ↑⋆ n ≡ varₗ (Fin.fromℕ< (ℕ.<-transˡ x< (ℕ.m≤m+n _ _)))
+<⇒var/≡var {suc _} {_} {_} {zero}  σ (s≤s z≤n)              = refl
+<⇒var/≡var {suc n} {_} {_} {suc x} σ (s≤s x<)
+  rewrite suc-/-↑ {ρ = σ ↑⋆ n} x                            = begin
+    varₗ x / σ ↑⋆ n / wk                                      ≡⟨ ≡.cong (_/ wk) (<⇒var/≡var σ x<) ⟩
+    varₗ (Fin.fromℕ< (ℕ.<-transˡ x< (ℕ.m≤m+n _ _))) / wk      ≡⟨ ≡.cong (_/ wk) (≡.cong varₗ (Fin.fromℕ<-cong _ _ refl _ _)) ⟩
+    varₗ (Fin.fromℕ< (ℕ.≤-trans x< (ℕ.m≤m+n _ _))) / wk       ≡⟨ /-wk ⟩
+    weaken (varₗ (Fin.fromℕ< (ℕ.≤-trans x< (ℕ.m≤m+n _ _))))   ≡⟨ weaken-var ⟩
+    varₗ (suc (Fin.fromℕ< (ℕ.≤-trans x< (ℕ.m≤m+n _ _))))      ∎
+  where
+    open ≡.≡-Reasoning
+
+var/Varwk⋆≡var : ∀ n {m} (x : Fin m) →
+                 varₗ x /Var V.wk⋆ n ≡ varₗ (n Fin.↑ʳ x)
+var/Varwk⋆≡var zero    {m} x        = ≡.cong varₗ (V.id-vanishes _)
+var/Varwk⋆≡var (suc n) {m} x        = begin
+    varₗ x /Var V.wk⋆ (suc n)         ≡⟨ ≡.cong (varₗ x /Var_) (V.map-weaken {ρ = V.wk⋆ n}) ⟩
+    varₗ x /Var V.wk⋆ n V.⊙ V.wk      ≡⟨ ≡.cong varₗ (V./-⊙ {ρ₁ = V.wk⋆ n} {ρ₂ = V.wk} x) ⟩
+    weaken (varₗ x /Var V.wk⋆ n)      ≡⟨ ≡.cong weaken (var/Varwk⋆≡var n x) ⟩
+    weaken (varₗ (n Fin.↑ʳ x))        ≡⟨ weaken-var ⟩
+    varₗ (suc (n Fin.↑ʳ x))           ∎
+  where
+    open ≡.≡-Reasoning
+
+var/Varσ↑⋆≡var/Varσ/Varwk⋆ : ∀ n {m m′} x (ρ : Sub Fin m m′) →
+                             varₗ (n Fin.↑ʳ x) /Var ρ V.↑⋆ n ≡ (varₗ x /Var ρ) /Var V.wk⋆ n
+var/Varσ↑⋆≡var/Varσ/Varwk⋆ zero    {m} {l} x ρ = ≡.cong varₗ (≡.sym (V.id-vanishes (x V./ ρ)))
+var/Varσ↑⋆≡var/Varσ/Varwk⋆ (suc n) {m} {l} x ρ = begin
+  varₗ (suc (n Fin.↑ʳ x)) /Var ρ V.↑⋆ n V.↑      ≡⟨ ≡.cong varₗ (V.suc-/-↑ {ρ = ρ V.↑⋆ n} (n Fin.↑ʳ x)) ⟩
+  (varₗ (n Fin.↑ʳ x) /Var ρ V.↑⋆ n) /Var V.wk    ≡⟨ ≡.cong (_/Var V.wk) (var/Varσ↑⋆≡var/Varσ/Varwk⋆ n x ρ) ⟩
+  ((varₗ x /Var ρ) /Var V.wk⋆ n) /Var V.wk       ≡˘⟨ ≡.cong varₗ (V./-weaken {ρ = V.wk⋆ n} (x V./ ρ)) ⟩
+  (varₗ x /Var ρ) /Var V.wk⋆ (suc n)             ∎
+  where
+    open ≡.≡-Reasoning
+
+var/σ↑⋆≡var/σ/wk⋆ : ∀ n {m m′} x (σ : 𝕊 m m′) →
+                    varₗ (n Fin.↑ʳ x) / σ ↑⋆ n ≡ varₗ x / σ / wk⋆ n
+var/σ↑⋆≡var/σ/wk⋆ zero    x σ          = ≡.sym (id-vanishes (varₗ x / σ))
+var/σ↑⋆≡var/σ/wk⋆ (suc n) x σ          = begin
+  varₗ (suc (n Fin.↑ʳ x)) / σ ↑⋆ suc n   ≡⟨ suc-/-↑ {ρ = σ ↑⋆ n} (n Fin.↑ʳ x) ⟩
+  varₗ (n Fin.↑ʳ x) / σ ↑⋆ n / wk        ≡⟨ ≡.cong (_/ wk) (var/σ↑⋆≡var/σ/wk⋆ n x σ) ⟩
+  varₗ x / σ / wk⋆ n / wk                ≡˘⟨ /-weaken {ρ = wk⋆ n} (varₗ x / σ) ⟩
+  varₗ x / σ / wk⋆ (suc n)               ∎
   where
     open ≡.≡-Reasoning
 
@@ -269,3 +254,36 @@ T →ₗ U = !ₗ T ⊸ₗ U
 
 λₗ_∙ₗ_ : 𝕋 → 𝕄 (suc n) → 𝕄 n
 λₗ T ∙ₗ M = λₗ !ₗ T ∘ₗ let-bangₗ (varₗ 0) inₗ (M / wk ↑)
+
+!ₗ-injective : ∀ {T₀ T₁ : 𝕋} →
+               !ₗ T₀ ≡ !ₗ T₁ →
+               T₀ ≡ T₁
+!ₗ-injective refl = refl
+
+⊸ₗ-injectiveˡ : ∀ {T₀ U₀ T₁ U₁ : 𝕋} →
+                T₀ ⊸ₗ U₀ ≡ T₁ ⊸ₗ U₁ →
+                T₀ ≡ T₁
+⊸ₗ-injectiveˡ refl = refl
+
+⊸ₗ-injectiveʳ : ∀ {T₀ U₀ T₁ U₁ : 𝕋} →
+                T₀ ⊸ₗ U₀ ≡ T₁ ⊸ₗ U₁ →
+                U₀ ≡ U₁
+⊸ₗ-injectiveʳ refl = refl
+
+⊸ₗ-injective : ∀ {T₀ U₀ T₁ U₁ : 𝕋} →
+               T₀ ⊸ₗ U₀ ≡ T₁ ⊸ₗ U₁ →
+               (T₀ ≡ T₁) × (U₀ ≡ U₁)
+⊸ₗ-injective = < ⊸ₗ-injectiveˡ , ⊸ₗ-injectiveʳ >
+
+infix  4 _𝕋≟_
+_𝕋≟_ : ∀ (T₀ T₁ : 𝕋) →
+       Dec (T₀ ≡ T₁)
+baseₗ      𝕋≟ baseₗ      = yes refl
+baseₗ      𝕋≟ (T₁ ⊸ₗ U₁) = no (λ ())
+baseₗ      𝕋≟ !ₗ T₁      = no (λ ())
+(T₀ ⊸ₗ U₀) 𝕋≟ baseₗ      = no (λ ())
+(T₀ ⊸ₗ U₀) 𝕋≟ (T₁ ⊸ₗ U₁) = Dec.map′ (uncurry (≡.cong₂ _⊸ₗ_)) ⊸ₗ-injective ((T₀ 𝕋≟ T₁) Dec.×-dec (U₀ 𝕋≟ U₁))
+(T₀ ⊸ₗ U₀) 𝕋≟ !ₗ T₁      = no (λ ())
+!ₗ T₀      𝕋≟ baseₗ      = no (λ ())
+!ₗ T₀      𝕋≟ (T₁ ⊸ₗ U₁) = no (λ ())
+!ₗ T₀      𝕋≟ !ₗ T₁      = Dec.map′ (≡.cong !ₗ) !ₗ-injective (T₀ 𝕋≟ T₁)
