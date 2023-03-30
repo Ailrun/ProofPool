@@ -1,1 +1,4 @@
 *.agdai
+*.hi
+*.o
+/out/
