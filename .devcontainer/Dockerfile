@@ -54,6 +54,8 @@ RUN mkdir -p "$HOME/.agda"
 
 RUN git clone -b v1.7.2 --single-branch --depth 1 "https://github.com/agda/agda-stdlib" "$HOME/.agda/agda-stdlib"
 
+RUN make -C "$HOME/.agda/agda-stdlib" setup
+
 RUN echo "$HOME/.agda/agda-stdlib/standard-library.agda-lib" > "$HOME/.agda/libraries-2.6.3"
 
 RUN echo "standard-library" > "$HOME/.agda/defaults"
