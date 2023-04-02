@@ -16,8 +16,11 @@ open import Relation.Binary.PropositionalEquality using (_≡_; _≢_)
 open import Calculus.Elevator.Syntax ℓ₁ ℓ₂ ℳ
 
 infix   4 ⊢[_]_⦂⋆
+infix   4 ⊢[_]e_
 infix   4 ⊢[_]_
+infix   4 _~e_⊞_
 infix   4 _~_⊞_
+infix   4 _∤[_]e_
 infix   4 _∤[_]_
 infix   4 _⦂[_]_∈_
 infix   4 _⊢[_]_⦂_
@@ -45,20 +48,24 @@ data ⊢[_]_⦂⋆ : Mode → Type → Set (ℓ₁ ⊔ ℓ₂) where
                 -------------------------
                 ⊢[ m ] `↓[ m₀ ⇒ m ] S ⦂⋆
 
+data ⊢[_]e_ : Mode → ContextEntry → Set (ℓ₁ ⊔ ℓ₂) where
+  valid    : ⊢[ m₀ ] S ⦂⋆ →
+             m ≤ₘ m₀ →
+             ------------------------
+             ⊢[ m ]e (S , m₀ , true)
+
+  unusable : ⊢[ m₀ ] S ⦂⋆ →
+             -------------------------
+             ⊢[ m ]e (S , m₀ , false)
+
 data ⊢[_]_ : Mode → Context → Set (ℓ₁ ⊔ ℓ₂) where
-  []     : ----------
-           ⊢[ m ] []
+  []  : ----------
+        ⊢[ m ] []
 
-  _[_]∷_ : ⊢[ m₀ ] S ⦂⋆ →
-           m ≤ₘ m₀ →
-           ⊢[ m ] Γ →
-           ----------------------------
-           ⊢[ m ] (S , m₀ , true) ∷ Γ
-
-  _[?]∷_ : ⊢[ m₀ ] S ⦂⋆ →
-           ⊢[ m ] Γ →
-           ----------------------------
-           ⊢[ m ] (S , m₀ , false) ∷ Γ
+  _∷_ : ⊢[ m ]e e →
+        ⊢[ m ] Γ →
+        ----------------------------
+        ⊢[ m ] e ∷ Γ
 
 data _is-deletable : ContextEntry → Set where
   unusable  : -----------------------------
@@ -68,32 +75,47 @@ data _is-deletable : ContextEntry → Set where
               ----------------------------
               (S , m , true) is-deletable
 
--- extract entry-wise maps (like "_is-deletable")
+data _~e_⊞_ : ContextEntry → ContextEntry → ContextEntry → Set where
+  contraction : Bool.T (stₘ m ``Co) →
+                --------------------------------------------------
+                (S , m , true) ~e (S , m , true) ⊞ (S , m , true)
+
+  to-left     : ---------------------------------------------------
+                (S , m , true) ~e (S , m , true) ⊞ (S , m , false)
+
+  to-right    : ---------------------------------------------------
+                (S , m , true) ~e (S , m , false) ⊞ (S , m , true)
+
+  unusable    : -----------------------------------------------------
+                (S , m , false) ~e (S , m , false) ⊞ (S , m , false)
 
 data _~_⊞_ : Context → Context → Context → Set where
-  []     : ------------------
-           [] ~ [] ⊞ []
+  []  : ------------------
+        [] ~ [] ⊞ []
 
-  _∷[_]_ : dS₀ Bool.∨ dS₁ ≡ dS →
-           Bool.if stₘ m ``Co then ⊤ else dS₀ Bool.∧ dS₁ ≡ false →
-           Γ ~ Γ₀ ⊞ Γ₁ →
-           -----------------------------------------------------------
-           (S , m , dS) ∷ Γ ~ (S , m , dS₀) ∷ Γ₀ ⊞ (S , m , dS₁) ∷ Γ₁
+  _∷_ : e ~e e₀ ⊞ e₁ →
+        Γ ~ Γ₀ ⊞ Γ₁ →
+        ---------------------------
+        e ∷ Γ ~ e₀ ∷ Γ₀ ⊞ e₁ ∷ Γ₁
+
+data _∤[_]e_ : ContextEntry → Mode → ContextEntry → Set (ℓ₁ ⊔ ℓ₂) where
+  delete : ¬ (m ≤ₘ m₀) →
+           (S , m₀ , dS) is-deletable →
+           ------------------------------------------
+           (S , m₀ , dS) ∤[ m ]e (S , m₀ , false)
+
+  keep   : m ≤ₘ m₀ →
+           ------------------------------------
+           (S , m₀ , dS) ∤[ m ]e (S , m₀ , dS)
 
 data _∤[_]_ : Context → Mode → Context → Set (ℓ₁ ⊔ ℓ₂) where
-  []      : -------------
-            [] ∤[ m ] []
+  []  : -------------
+        [] ∤[ m ] []
 
-  _∷≰[_]_ : dS Bool.≤ stₘ m₀ ``Wk →
-            ¬ (m ≤ₘ m₀) →
-            Γ ∤[ m ] Γ′ →
-            -----------------------------------------------
-            (S , m₀ , dS) ∷ Γ ∤[ m ] (S , m₀ , false) ∷ Γ′
-
-  ∤∷≤[_]_ : m ≤ₘ m₀ →
-            Γ ∤[ m ] Γ′ →
-            --------------------------------------------
-            (S , m₀ , dS) ∷ Γ ∤[ m ] (S , m₀ , dS) ∷ Γ′
+  _∷_ : e ∤[ m ]e e′ →
+        Γ ∤[ m ] Γ′ →
+        ---------------------
+        e ∷ Γ ∤[ m ] e′ ∷ Γ′
 
 data _⦂[_]_∈_ : ℕ → Mode → Type → Context → Set ℓ₁ where
   here  : All _is-deletable Γ →
