@@ -1,3 +1,4 @@
+{-# OPTIONS --safe --without-K #-}
 module Calculus.Elevator.ModeSpec where
 
 open import Agda.Primitive

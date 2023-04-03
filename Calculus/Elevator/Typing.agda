@@ -1,3 +1,4 @@
+{-# OPTIONS --safe --without-K #-}
 open import Calculus.Elevator.ModeSpec
 
 module Calculus.Elevator.Typing ℓ₁ ℓ₂ (ℳ : ModeSpec ℓ₁ ℓ₂) where
@@ -16,11 +17,11 @@ open import Relation.Binary.PropositionalEquality using (_≡_; _≢_)
 open import Calculus.Elevator.Syntax ℓ₁ ℓ₂ ℳ
 
 infix   4 ⊢[_]_⦂⋆
-infix   4 ⊢[_]e_
+infix   4 [_]⊢[_]d_
 infix   4 ⊢[_]_
-infix   4 _~e_⊞_
+infix   4 _[_]~d_⊞_
 infix   4 _~_⊞_
-infix   4 _∤[_]e_
+infix   4 _[_]∤[_]d_
 infix   4 _∤[_]_
 infix   4 _⦂[_]_∈_
 infix   4 _⊢[_]_⦂_
@@ -48,86 +49,79 @@ data ⊢[_]_⦂⋆ : Mode → Type → Set (ℓ₁ ⊔ ℓ₂) where
                 -------------------------
                 ⊢[ m ] `↓[ m₀ ⇒ m ] S ⦂⋆
 
-data ⊢[_]e_ : Mode → ContextEntry → Set (ℓ₁ ⊔ ℓ₂) where
-  valid    : ⊢[ m₀ ] S ⦂⋆ →
-             m ≤ₘ m₀ →
-             ------------------------
-             ⊢[ m ]e (S , m₀ , true)
+data [_]⊢[_]d_ : Mode → Mode → Useable → Set (ℓ₁ ⊔ ℓ₂) where
+  valid    : m ≤ₘ m₀ →
+             -------------------
+             [ m₀ ]⊢[ m ]d true
 
-  unusable : ⊢[ m₀ ] S ⦂⋆ →
-             -------------------------
-             ⊢[ m ]e (S , m₀ , false)
+  unusable : --------------------
+             [ m₀ ]⊢[ m ]d false
 
-data ⊢[_]_ : Mode → Context → Set (ℓ₁ ⊔ ℓ₂) where
-  []  : ----------
-        ⊢[ m ] []
+⊢[_]_ : Mode → Context → Set (ℓ₁ ⊔ ℓ₂)
+⊢[ m ] Γ = All (λ (S , m₀ , d) → ⊢[ m₀ ] S ⦂⋆ × [ m₀ ]⊢[ m ]d d) Γ
 
-  _∷_ : ⊢[ m ]e e →
-        ⊢[ m ] Γ →
-        ----------------------------
-        ⊢[ m ] e ∷ Γ
-
-data _is-deletable : ContextEntry → Set where
+data _[_]is-deletable : Useable → Mode → Set ℓ₁ where
   unusable  : -----------------------------
-              (S , m , false) is-deletable
+              false [ m ]is-deletable
 
   weakening : Bool.T (stₘ m ``Wk) →
               ----------------------------
-              (S , m , true) is-deletable
+              true [ m ]is-deletable
 
-_is-all-deletable = All _is-deletable
+_is-all-deletable : Context → Set ℓ₁
+_is-all-deletable = All (λ (_ , m , d) → d [ m ]is-deletable)
 
-data _~e_⊞_ : ContextEntry → ContextEntry → ContextEntry → Set where
+data _[_]~d_⊞_ : Useable → Mode → Useable → Useable → Set ℓ₁ where
   contraction : Bool.T (stₘ m ``Co) →
-                --------------------------------------------------
-                (S , m , true) ~e (S , m , true) ⊞ (S , m , true)
+                -------------------------
+                true [ m ]~d true ⊞ true
 
-  to-left     : ---------------------------------------------------
-                (S , m , true) ~e (S , m , true) ⊞ (S , m , false)
+  to-left     : --------------------------
+                true [ m ]~d true ⊞ false
 
-  to-right    : ---------------------------------------------------
-                (S , m , true) ~e (S , m , false) ⊞ (S , m , true)
+  to-right    : --------------------------
+                true [ m ]~d false ⊞ true
 
-  unusable    : -----------------------------------------------------
-                (S , m , false) ~e (S , m , false) ⊞ (S , m , false)
+  unusable    : ----------------------------
+                false [ m ]~d false ⊞ false
 
-data _~_⊞_ : Context → Context → Context → Set where
+data _~_⊞_ : Context → Context → Context → Set ℓ₁ where
   []  : ------------------
         [] ~ [] ⊞ []
 
-  _∷_ : e ~e e₀ ⊞ e₁ →
+  _∷_ : d [ m ]~d d₀ ⊞ d₁ →
         Γ ~ Γ₀ ⊞ Γ₁ →
-        ---------------------------
-        e ∷ Γ ~ e₀ ∷ Γ₀ ⊞ e₁ ∷ Γ₁
+        -----------------------------------------------------------
+        (S , m , d) ∷ Γ ~ (S , m , d₀) ∷ Γ₀ ⊞ (S , m , d₁) ∷ Γ₁
 
-data _∤[_]e_ : ContextEntry → Mode → ContextEntry → Set (ℓ₁ ⊔ ℓ₂) where
+data _[_]∤[_]d_ : Useable → Mode → Mode → Useable → Set (ℓ₁ ⊔ ℓ₂) where
   delete : ¬ (m ≤ₘ m₀) →
-           (S , m₀ , dS) is-deletable →
-           ------------------------------------------
-           (S , m₀ , dS) ∤[ m ]e (S , m₀ , false)
+           d [ m₀ ]is-deletable →
+           ------------------------
+           d [ m₀ ]∤[ m ]d false
 
   keep   : m ≤ₘ m₀ →
-           ------------------------------------
-           (S , m₀ , dS) ∤[ m ]e (S , m₀ , dS)
+           --------------------
+           d [ m₀ ]∤[ m ]d d
 
 data _∤[_]_ : Context → Mode → Context → Set (ℓ₁ ⊔ ℓ₂) where
   []  : -------------
         [] ∤[ m ] []
 
-  _∷_ : e ∤[ m ]e e′ →
+  _∷_ : d [ m₀ ]∤[ m ]d d′ →
         Γ ∤[ m ] Γ′ →
-        ---------------------
-        e ∷ Γ ∤[ m ] e′ ∷ Γ′
+        ---------------------------------------------
+        (S , m₀ , d) ∷ Γ ∤[ m ] (S , m₀ , d′) ∷ Γ′
 
 data _⦂[_]_∈_ : ℕ → Mode → Type → Context → Set ℓ₁ where
   here  : Γ is-all-deletable →
           --------------------------------
           0 ⦂[ m ] S ∈ (S , m , true) ∷ Γ
 
-  there : e is-deletable →
+  there : dT [ m₀ ]is-deletable →
           x ⦂[ m ] S ∈ Γ →
-          -----------------------
-          suc x ⦂[ m ] S ∈ e ∷ Γ
+          -----------------------------------
+          suc x ⦂[ m ] S ∈ (T , m₀ , dT) ∷ Γ
 
 data _⊢[_]_⦂_ : Context → Mode → Term → Type → Set (ℓ₁ ⊔ ℓ₂) where
   `unit                     : Γ is-all-deletable →
