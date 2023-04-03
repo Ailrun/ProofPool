@@ -21,7 +21,7 @@ record ModeSpec ℓ₁ ℓ₂ : Set (lsuc (ℓ₁ ⊔ ℓ₂)) where
     isDecPartialOrder : IsDecPartialOrder _≡_ _≤ₘ_
     stₘ : Mode → ModeSpecSt → Bool
     opₘ : Mode → ModeSpecOp → Bool
-    isWellStructured : ∀ m₁ m₂ s → m₁ ≤ₘ m₂ → stₘ m₁ s Bool.≤ stₘ m₂ s
+    isWellStructured : ∀ m₁ m₂ s → m₁ ≤ₘ m₂ → Bool.T (stₘ m₁ s) → Bool.T (stₘ m₂ s)
 
   _≤?ₘ_ = isDecPartialOrder .IsDecPartialOrder._≤?_
   _<ₘ_ = Strict._<_ _≡_ _≤ₘ_

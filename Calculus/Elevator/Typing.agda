@@ -75,6 +75,8 @@ data _is-deletable : ContextEntry → Set where
               ----------------------------
               (S , m , true) is-deletable
 
+_is-all-deletable = All _is-deletable
+
 data _~e_⊞_ : ContextEntry → ContextEntry → ContextEntry → Set where
   contraction : Bool.T (stₘ m ``Co) →
                 --------------------------------------------------
@@ -118,7 +120,7 @@ data _∤[_]_ : Context → Mode → Context → Set (ℓ₁ ⊔ ℓ₂) where
         e ∷ Γ ∤[ m ] e′ ∷ Γ′
 
 data _⦂[_]_∈_ : ℕ → Mode → Type → Context → Set ℓ₁ where
-  here  : All _is-deletable Γ →
+  here  : Γ is-all-deletable →
           --------------------------------
           0 ⦂[ m ] S ∈ (S , m , true) ∷ Γ
 
@@ -128,7 +130,8 @@ data _⦂[_]_∈_ : ℕ → Mode → Type → Context → Set ℓ₁ where
           suc x ⦂[ m ] S ∈ e ∷ Γ
 
 data _⊢[_]_⦂_ : Context → Mode → Term → Type → Set (ℓ₁ ⊔ ℓ₂) where
-  `unit                     : --------------------
+  `unit                     : Γ is-all-deletable →
+                              ---------------------
                               Γ ⊢[ m ] `unit ⦂ `⊤
 
   `λ⦂-∘_                    : (S , m , true) ∷ Γ ⊢[ m ] L ⦂ T →
