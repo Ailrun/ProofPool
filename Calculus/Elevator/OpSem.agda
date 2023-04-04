@@ -86,11 +86,11 @@ wk_ = wk[ 1 ↑ 0 ]_
 [ L /[ m ] x ] `unlift[ m₀ ⇒ m₁ ] M
   with m₀ ≤?ₘ m
 ...  | yes _ = `unlift[ m₀ ⇒ m₁ ] ([ L /[ m ] x ] M)
-...  | no  _ = `unlift[ m₀ ⇒ m₁ ] ([ `unit /[ m ] x ] M) -- no-op substitution
+...  | no  _ = `unlift[ m₀ ⇒ m₁ ] ([ `# x /[ m ] x ] M) -- no-op substitution
 [ L /[ m ] x ] `return[ m₀ ⇒ m₁ ] M
   with m₀ ≤?ₘ m
 ...  | yes _ = `return[ m₀ ⇒ m₁ ] ([ L /[ m ] x ] M)
-...  | no  _ = `return[ m₀ ⇒ m₁ ] ([ `unit /[ m ] x ] M) -- no-op substitution
+...  | no  _ = `return[ m₀ ⇒ m₁ ] ([ `# x /[ m ] x ] M) -- no-op substitution
 [ L /[ m ] x ] (`let-return[ m₀ ⇒ m₁ ] M `in N) = `let-return[ m₀ ⇒ m₁ ] [ L /[ m ] x ] M `in [ wk L /[ m ] suc x ] N
 [ L /[ m ] x ] (`λ⦂[ m′ ] S ∘ M) = `λ⦂[ m′ ] S ∘ [ wk L /[ m ] suc x ] M
 [ L /[ m ] x ] (M `$ N) = [ L /[ m ] x ] M `$ [ L /[ m ] x ] N

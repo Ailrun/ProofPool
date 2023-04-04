@@ -82,6 +82,21 @@ open O ℓ₁ ℓ₂ ℳ
 ⊢d∧∤d⇒⊢d (valid m≤) (keep m′≤)        = valid m′≤
 ⊢d∧∤d⇒⊢d (unusable) (keep m′≤)        = unusable
 
+⊢d∧≤⇒∤d : [ m₀ ]⊢[ m ]d d →
+          m′ ≤ₘ m →
+          d [ m₀ ]∤[ m′ ]d d
+⊢d∧≤⇒∤d                (valid m≤) ≤m = keep (≤-trans ≤m m≤)
+⊢d∧≤⇒∤d {m₀} {m′ = m′} unusable   ≤m
+  with m′ ≤?ₘ m₀
+...  | no  m′≰ = delete m′≰ unusable
+...  | yes m′≤ = keep m′≤
+
+⊢∧≤⇒∤ : ⊢[ m ] Γ →
+        m′ ≤ₘ m →
+        Γ ∤[ m′ ] Γ
+⊢∧≤⇒∤ []               ≤m = []
+⊢∧≤⇒∤ ((⊢S , ⊢d) ∷ ⊢Γ) ≤m = ⊢d∧≤⇒∤d ⊢d ≤m ∷ ⊢∧≤⇒∤ ⊢Γ ≤m
+
 ⊢∧∤⇒⊢ : ⊢[ m ] Γ →
         Γ ∤[ m₀ ] Γ′ →
         ----------------

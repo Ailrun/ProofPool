@@ -119,8 +119,14 @@ wk[↑]-preserves-⊢ Δ ΨDel (`#_ {x = y} y∈)
   with _ , Γ₀∤ , Γ₀′Del ← is-all-deletable⇒∤ m₀ Γ₀Del
     with _ , Γ∤ , Γ′~ ← ~⊞⁻¹-preserves-∤ Γ₀∤ Γ₁∤ Γ~ = Γ∤ ⊢`return[-⇒-] ⊢∧~⊞-is-all-deletable⇒⊢ Γ′~ Γ₀′Del ⊢L
 ⊢∧~⊞-is-all-deletable⇒⊢ Γ~ Γ₀Del (Γ₁~ ⊢`let-return[-⇒-] ⊢L ⦂ ⊢↓ `in ⊢M)
-  with _ , Γ₁′~ , Γ~′ ← ~⊞-assoc (~⊞-swap Γ~) (~⊞-swap Γ₁~) = ~⊞-swap Γ~′ T.⊢`let-return[-⇒-] (⊢∧~⊞-is-all-deletable⇒⊢ (~⊞-swap Γ₁′~) Γ₀Del ⊢L) ⦂ ⊢↓ `in ⊢M
+  with _ , Γ₁′~ , Γ~′ ← ~⊞-assoc (~⊞-swap Γ~) (~⊞-swap Γ₁~) = ~⊞-swap Γ~′ ⊢`let-return[-⇒-] (⊢∧~⊞-is-all-deletable⇒⊢ (~⊞-swap Γ₁′~) Γ₀Del ⊢L) ⦂ ⊢↓ `in ⊢M
 ⊢∧~⊞-is-all-deletable⇒⊢ Γ~ Γ₀Del (`# x∈)                                = `# ⊢∧~⊞-is-all-deletable⇒⊢var Γ~ Γ₀Del x∈
+
+subst-targetvar : x ≡ y →
+                  ∀ M →
+                  Γ ⊢[ m ] [ L /[ m₀ ] x ] M ⦂ T →
+                  Γ ⊢[ m ] [ L /[ m₀ ] y ] M ⦂ T
+subst-targetvar {_} {_} {Γ} {m} {L} {m₀} {T} eq M = subst (λ x → Γ ⊢[ m ] [ L /[ m₀ ] x ] M ⦂ T) eq
 
 [/]-preserves-⊢⁰ : ∀ Δ₀ →
                    ⊢[ m ] T ⦂⋆ →
@@ -147,16 +153,16 @@ wk[↑]-preserves-⊢ Δ ΨDel (`#_ {x = y} y∈)
   with _ , (_ , _ , d) ∷ _ , refl , Δ₀∤ , d∤ ∷ Ψ₀∤ ← ∤-preserves-++ Δ₀ Δ₀SΨ₀∤
     with m₁ ≤?ₘ m₀
 ...    | yes _
-      with false ← d = ∤-++⁺ Δ₀∤ Ψ₀∤ ⊢`unlift[-⇒-] subst (λ x → _ ⊢[ m₁ ] [ L /[ m₀ ] x ] M ⦂ `↑[ m ⇒ m₁ ] T) (length-respects-∤ Δ₀∤) ([/]-preserves-⊢⁰ _ ⊢↑ ⊢M) ⦂ ⊢↑
+      with false ← d = ∤-++⁺ Δ₀∤ Ψ₀∤ ⊢`unlift[-⇒-] subst-targetvar (length-respects-∤ Δ₀∤) M ([/]-preserves-⊢⁰ _ ⊢↑ ⊢M) ⦂ ⊢↑
 ...    | no  m₁≰
-      with false ← d = ∤-++⁺ Δ₀∤ Ψ₀∤ ⊢`unlift[-⇒-] subst (λ x → _ ⊢[ m₁ ] [ `unit /[ m₀ ] x ] M ⦂ `↑[ m ⇒ m₁ ] T) (length-respects-∤ Δ₀∤) ([/]-preserves-⊢⁰ _ ⊢↑ ⊢M) ⦂ ⊢↑
+      with false ← d = ∤-++⁺ Δ₀∤ Ψ₀∤ ⊢`unlift[-⇒-] subst-targetvar (length-respects-∤ Δ₀∤) M ([/]-preserves-⊢⁰ _ ⊢↑ ⊢M) ⦂ ⊢↑
 [/]-preserves-⊢⁰ {m} {`↓[ _ ⇒ _ ] T} {_} {m₀} {_} {`return[ m₁ ⇒ _ ] M} {L} Δ₀ (`↓[-⇒ _ ][ _ ] ⊢T) (Δ₀SΨ₀∤ ⊢`return[-⇒-] ⊢M)
   with _ , (_ , _ , d) ∷ _ , refl , Δ₀∤ , d∤ ∷ Ψ₀∤ ← ∤-preserves-++ Δ₀ Δ₀SΨ₀∤
     with m₁ ≤?ₘ m₀
 ...    | yes _
-      with false ← d = ∤-++⁺ Δ₀∤ Ψ₀∤ ⊢`return[-⇒-] subst (λ x → _ ⊢[ m₁ ] [ L /[ m₀ ] x ] M ⦂ T) (length-respects-∤ Δ₀∤) ([/]-preserves-⊢⁰ _ ⊢T ⊢M)
+      with false ← d = ∤-++⁺ Δ₀∤ Ψ₀∤ ⊢`return[-⇒-] subst-targetvar (length-respects-∤ Δ₀∤) M ([/]-preserves-⊢⁰ _ ⊢T ⊢M)
 ...    | no  m₁≰
-      with false ← d = ∤-++⁺ Δ₀∤ Ψ₀∤ ⊢`return[-⇒-] subst (λ x → _ ⊢[ m₁ ] [ `unit /[ m₀ ] x ] M ⦂ T) (length-respects-∤ Δ₀∤) ([/]-preserves-⊢⁰ _ ⊢T ⊢M)
+      with false ← d = ∤-++⁺ Δ₀∤ Ψ₀∤ ⊢`return[-⇒-] subst-targetvar (length-respects-∤ Δ₀∤) M ([/]-preserves-⊢⁰ _ ⊢T ⊢M)
 [/]-preserves-⊢⁰ {m} {T} {_} {m₀} {_} {`let-return[ _ ⇒ m₁ ] M `in N} {L} Δ₀ ⊢T (Δ₀SΨ₀~ ⊢`let-return[-⇒-] ⊢M ⦂ ⊢↓ `in ⊢N)
   with `↓[-⇒_][_]_ {S = S} _ _ ⊢S ← ⊢↓
      | Δ₀₀ , Δ₀₁ , _ ∷ Ψ₀₀ , _ ∷ Ψ₀₁ , refl , refl , Δ₀~ , unusable ∷ Ψ₀~ ← ~⊞-preserves-++ Δ₀ Δ₀SΨ₀~
@@ -189,11 +195,43 @@ wk[↑]-preserves-⊢ Δ ΨDel (`#_ {x = y} y∈)
 [/]-preserves-⊢¹ Δ₀ Γ~ ⊢Γ₁ ⊢L ⊢T (`unit Δ₀eΨ₀Del)
   with Δ₀Del , weakening Wk∈m₀ ∷ Ψ₀Del ← All.++⁻ Δ₀ Δ₀eΨ₀Del = `unit (~⊞⁻¹-preserves-is-all-deletable (All.++⁺ Δ₀Del Ψ₀Del) (⊢∧Wk≤⇒is-all-deletable ⊢Γ₁ ℳ.≤-refl Wk∈m₀) Γ~)
 [/]-preserves-⊢¹ Δ₀ Γ~ ⊢Γ₁ ⊢L (⊢T₀ `⊸[ _ ] ⊢T₁) (`λ⦂-∘ ⊢M) = `λ⦂-∘ ([/]-preserves-⊢¹ (_ ∷ Δ₀) (to-left ∷ Γ~) ((⊢T₀ , unusable) ∷ ⊢Γ₁) (wk[↑]-preserves-⊢ [] (unusable ∷ []) ⊢L) ⊢T₁ ⊢M)
-[/]-preserves-⊢¹ Δ₀ Γ~ ⊢Γ₁ ⊢L ⊢T (Δ₀SΨ₀~ ⊢ ⊢M ⦂ ⊢⊸ `$ ⊢N) = {!!}
+[/]-preserves-⊢¹ {_} {_} {_} {m₀} {L} {_} {m} {T} {M `$ N} Δ₀ Γ~ ⊢Γ₁ ⊢L ⊢T (Δ₀SΨ₀~ ⊢ ⊢M ⦂ ⊢⊸ `$ ⊢N)
+  with _`⊸[_]_ {S = T₀} ⊢T₀ _ _ ← ⊢⊸
+     | Δ₀₀ , Δ₀₁ , _ ∷ Ψ₀₀ , _ ∷ Ψ₀₁ , refl , refl , Δ₀~ , d~ ∷ Ψ₀~ ← ~⊞-preserves-++ Δ₀ Δ₀SΨ₀~
+    with d~
+...    | contraction Co∈m₀
+      with Γ₂′ , Γ₃′ , Γ₂′~ , Γ₃′~ , Γ~′ ← ~⊞-contraction-assoc Γ~ (~⊞-++⁺ Δ₀~ Ψ₀~) ⊢Γ₁ Co∈m₀ = Γ~′ ⊢ subst-targetvar (proj₁ (length-respects-~⊞ Δ₀~)) M ([/]-preserves-⊢¹ _ Γ₂′~ ⊢Γ₁ ⊢L ⊢⊸ ⊢M) ⦂ ⊢⊸ `$ subst-targetvar (proj₂ (length-respects-~⊞ Δ₀~)) N ([/]-preserves-⊢¹ _ Γ₃′~ ⊢Γ₁ ⊢L ⊢T₀ ⊢N)
+...    | to-left
+      with Γ₁′ , Γ₁′~ , Γ~′ ← ~⊞-assoc Γ~ (~⊞-swap (~⊞-++⁺ Δ₀~ Ψ₀~)) = ~⊞-swap Γ~′ ⊢ subst-targetvar (proj₁ (length-respects-~⊞ Δ₀~)) M ([/]-preserves-⊢¹ _ Γ₁′~ ⊢Γ₁ ⊢L ⊢⊸ ⊢M) ⦂ ⊢⊸ `$ subst-targetvar (proj₂ (length-respects-~⊞ Δ₀~)) N ([/]-preserves-⊢⁰ _ ⊢T₀ ⊢N)
+...    | to-right
+      with Γ₁′ , Γ₁′~ , Γ~′ ← ~⊞-assoc Γ~ (~⊞-++⁺ Δ₀~ Ψ₀~) = Γ~′ ⊢ subst-targetvar (proj₁ (length-respects-~⊞ Δ₀~)) M ([/]-preserves-⊢⁰ _ ⊢⊸ ⊢M) ⦂ ⊢⊸ `$ subst-targetvar (proj₂ (length-respects-~⊞ Δ₀~)) N ([/]-preserves-⊢¹ _ Γ₁′~ ⊢Γ₁ ⊢L ⊢T₀ ⊢N)
 [/]-preserves-⊢¹ Δ₀ Γ~ ⊢Γ₁ ⊢L (`↑[-⇒ _ ][ _ ] ⊢T) (`lift[-⇒-] ⊢M) = `lift[-⇒-] [/]-preserves-⊢¹ Δ₀ Γ~ ⊢Γ₁ ⊢L ⊢T ⊢M
-[/]-preserves-⊢¹ Δ₀ Γ~ ⊢Γ₁ ⊢L ⊢T (Δ₀SΨ₀∤ ⊢`unlift[-⇒-] ⊢M ⦂ ⊢↑) = {!!}
-[/]-preserves-⊢¹ Δ₀ Γ~ ⊢Γ₁ ⊢L ⊢T (Δ₀SΨ₀∤ ⊢`return[-⇒-] ⊢M) = {!!}
-[/]-preserves-⊢¹ Δ₀ Γ~ ⊢Γ₁ ⊢L ⊢T (Δ₀SΨ₀~ ⊢`let-return[-⇒-] ⊢M ⦂ ⊢↓ `in ⊢N) = {!!}
+[/]-preserves-⊢¹ {_} {_} {_} {m₀} {L} {_} {m} {T} {`unlift[ m₁ ⇒ _ ] M} Δ₀ Γ~ ⊢Γ₁ ⊢L ⊢T (Δ₀SΨ₀∤ ⊢`unlift[-⇒-] ⊢M ⦂ ⊢↑)
+  with Δ₀′ , _ ∷ Ψ₀′ , refl , Δ₀∤ , d∤ ∷ Ψ₀∤ ← ∤-preserves-++ Δ₀ Δ₀SΨ₀∤
+    with d∤ | m₁ ≤?ₘ m₀
+...    | delete m₁≰ _               | yes m₁≤ with () ← m₁≰ m₁≤
+...    | keep _                     | yes m₁≤
+      with Γ′ , Γ∤ , Γ′~ ← ~⊞⁻¹-preserves-∤ (∤-++⁺ Δ₀∤ Ψ₀∤) (⊢∧≤⇒∤ ⊢Γ₁ m₁≤) Γ~ = Γ∤ ⊢`unlift[-⇒-] (subst-targetvar (length-respects-∤ Δ₀∤) M ([/]-preserves-⊢¹ Δ₀′ Γ′~ ⊢Γ₁ ⊢L ⊢↑ ⊢M)) ⦂ ⊢↑
+...    | delete _ (weakening Wk∈m₀) | no  m₁≰ = ⊢∧~⊞-is-all-deletable⇒⊢ (~⊞-swap Γ~) (⊢∧Wk≤⇒is-all-deletable ⊢Γ₁ ℳ.≤-refl Wk∈m₀) (∤-++⁺ Δ₀∤ Ψ₀∤ ⊢`unlift[-⇒-] (subst-targetvar (length-respects-∤ Δ₀∤) M ([/]-preserves-⊢⁰ Δ₀′ ⊢↑ ⊢M)) ⦂ ⊢↑)
+...    | keep m₁≤                   | no  m₁≰ with () ← m₁≰ m₁≤
+[/]-preserves-⊢¹ {_} {_} {_} {m₀} {L} {_} {m} {T} {`return[ m₁ ⇒ _ ] M} Δ₀ Γ~ ⊢Γ₁ ⊢L (`↓[-⇒ _ ][ _ ] ⊢T) (Δ₀SΨ₀∤ ⊢`return[-⇒-] ⊢M)
+  with Δ₀′ , _ ∷ Ψ₀′ , refl , Δ₀∤ , d∤ ∷ Ψ₀∤ ← ∤-preserves-++ Δ₀ Δ₀SΨ₀∤
+    with d∤ | m₁ ≤?ₘ m₀
+...    | delete m₁≰ _               | yes m₁≤ with () ← m₁≰ m₁≤
+...    | keep _                     | yes m₁≤
+      with Γ′ , Γ∤ , Γ′~ ← ~⊞⁻¹-preserves-∤ (∤-++⁺ Δ₀∤ Ψ₀∤) (⊢∧≤⇒∤ ⊢Γ₁ m₁≤) Γ~ = Γ∤ ⊢`return[-⇒-] (subst-targetvar (length-respects-∤ Δ₀∤) M ([/]-preserves-⊢¹ Δ₀′ Γ′~ ⊢Γ₁ ⊢L ⊢T ⊢M))
+...    | delete _ (weakening Wk∈m₀) | no  m₁≰ = ⊢∧~⊞-is-all-deletable⇒⊢ (~⊞-swap Γ~) (⊢∧Wk≤⇒is-all-deletable ⊢Γ₁ ℳ.≤-refl Wk∈m₀) (∤-++⁺ Δ₀∤ Ψ₀∤ ⊢`return[-⇒-] (subst-targetvar (length-respects-∤ Δ₀∤) M ([/]-preserves-⊢⁰ Δ₀′ ⊢T ⊢M)))
+...    | keep m₁≤                   | no  m₁≰ with () ← m₁≰ m₁≤
+[/]-preserves-⊢¹ {_} {_} {_} {m₀} {L} {_} {m} {T} {`let-return[ _ ⇒ _ ] M `in N} Δ₀ Γ~ ⊢Γ₁ ⊢L ⊢T (Δ₀SΨ₀~ ⊢`let-return[-⇒-] ⊢M ⦂ ⊢↓ `in ⊢N)
+  with `↓[-⇒_][_]_ {S = T₀} _ _ ⊢T₀ ← ⊢↓
+     | Δ₀₀ , Δ₀₁ , _ ∷ Ψ₀₀ , _ ∷ Ψ₀₁ , refl , refl , Δ₀~ , d~ ∷ Ψ₀~ ← ~⊞-preserves-++ Δ₀ Δ₀SΨ₀~
+    with d~
+...    | contraction Co∈m₀
+      with Γ₂′ , Γ₃′ , Γ₂′~ , Γ₃′~ , Γ~′ ← ~⊞-contraction-assoc Γ~ (~⊞-++⁺ Δ₀~ Ψ₀~) ⊢Γ₁ Co∈m₀ = Γ~′ ⊢`let-return[-⇒-] subst-targetvar (proj₁ (length-respects-~⊞ Δ₀~)) M ([/]-preserves-⊢¹ _ Γ₂′~ ⊢Γ₁ ⊢L ⊢↓ ⊢M) ⦂ ⊢↓ `in subst-targetvar (cong suc (proj₂ (length-respects-~⊞ Δ₀~))) N ([/]-preserves-⊢¹ _ (to-left ∷ Γ₃′~) ((⊢T₀ , unusable) ∷ ⊢Γ₁) (wk[↑]-preserves-⊢ [] (unusable ∷ []) ⊢L) ⊢T ⊢N)
+...    | to-left
+      with Γ₁′ , Γ₁′~ , Γ~′ ← ~⊞-assoc Γ~ (~⊞-swap (~⊞-++⁺ Δ₀~ Ψ₀~)) = ~⊞-swap Γ~′ ⊢`let-return[-⇒-] subst-targetvar (proj₁ (length-respects-~⊞ Δ₀~)) M ([/]-preserves-⊢¹ _ Γ₁′~ ⊢Γ₁ ⊢L ⊢↓ ⊢M) ⦂ ⊢↓ `in subst-targetvar (cong suc (proj₂ (length-respects-~⊞ Δ₀~))) N ([/]-preserves-⊢⁰ _ ⊢T ⊢N)
+...    | to-right
+      with Γ₁′ , Γ₁′~ , Γ~′ ← ~⊞-assoc Γ~ (~⊞-++⁺ Δ₀~ Ψ₀~) = Γ~′ ⊢`let-return[-⇒-] subst-targetvar (proj₁ (length-respects-~⊞ Δ₀~)) M ([/]-preserves-⊢⁰ _ ⊢↓ ⊢M) ⦂ ⊢↓ `in subst-targetvar (cong suc (proj₂ (length-respects-~⊞ Δ₀~))) N ([/]-preserves-⊢¹ _ (to-left ∷ Γ₁′~) ((⊢T₀ , unusable) ∷ ⊢Γ₁) (wk[↑]-preserves-⊢ [] (unusable ∷ []) ⊢L) ⊢T ⊢N)
 [/]-preserves-⊢¹ {Ψ₀ = Ψ₀} {m₀ = m₀} {S = S} Δ₀ Γ~ ⊢Γ₁ ⊢L ⊢T (`#_ {x = y} y∈)
   with y ℕ.≥? length Δ₀
 ...  | no  y≱
