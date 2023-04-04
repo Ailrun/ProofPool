@@ -30,10 +30,10 @@ data WeakNorm where
   `neut                 : WeakNeut L → WeakNorm L
 
 data WeakNeut where
-  `#_                   : ∀ x → WeakNeut (`# x)
   `unlift[_⇒_]          : ∀ m₀ m₁ → WeakNeut L → WeakNeut (`unlift[ m₀ ⇒ m₁ ] L)
   `let-return[_⇒_]_`in_ : ∀ m₀ m₁ → WeakNeut L → ∀ N → WeakNeut (`let-return[ m₀ ⇒ m₁ ] L `in N)
   _`$_                  : WeakNeut L → WeakNorm M → WeakNeut (L `$ M)
+  `#_                   : ∀ x → WeakNeut (`# x)
 
 ≢lift[-⇒-] : Term → Set
 ≢lift[-⇒-] `unit = ⊤

@@ -1,7 +1,7 @@
 {-# OPTIONS --safe #-}
 open import Calculus.Elevator.ModeSpec
 
-module Calculus.Elevator.Lemma ℓ₁ ℓ₂ (ℳ : ModeSpec ℓ₁ ℓ₂) where
+module Calculus.Elevator.Typing.Properties ℓ₁ ℓ₂ (ℳ : ModeSpec ℓ₁ ℓ₂) where
 private
   module ℳ = ModeSpec ℳ
 open ℳ
@@ -29,94 +29,6 @@ import Calculus.Elevator.OpSem as O
 open S ℓ₁ ℓ₂ ℳ
 open T ℓ₁ ℓ₂ ℳ
 open O ℓ₁ ℓ₂ ℳ
-
-⊢d∧<ₘ⇒⊢d : [ m₀ ]⊢[ m ]d d →
-           m′ <ₘ m →
-           ------------------
-           [ m₀ ]⊢[ m′ ]d d
-⊢d∧<ₘ⇒⊢d (valid m≤) <m = valid (≤-trans (<⇒≤ <m) m≤)
-⊢d∧<ₘ⇒⊢d unusable   <m = unusable
-
-⊢∧<ₘ⇒⊢ : ⊢[ m ] Γ →
-         m₀ <ₘ m →
-         -----------
-         ⊢[ m₀ ] Γ
-⊢∧<ₘ⇒⊢ []               <m = []
-⊢∧<ₘ⇒⊢ ((⊢S , ⊢d) ∷ ⊢Γ) <m = (⊢S , ⊢d∧<ₘ⇒⊢d ⊢d <m) ∷ ⊢∧<ₘ⇒⊢ ⊢Γ <m
-
-⊢d∧-~d⊞-⇒⊢d : [ m₀ ]⊢[ m ]d dS →
-              dS [ m₀ ]~d dS₀ ⊞ dS₁ →
-              --------------------------------------
-              [ m₀ ]⊢[ m ]d dS₀ × [ m₀ ]⊢[ m ]d dS₁
-⊢d∧-~d⊞-⇒⊢d ⊢d         (contraction Co∈m₀) = ⊢d , ⊢d
-⊢d∧-~d⊞-⇒⊢d (valid m≤) to-left             = valid m≤ , unusable
-⊢d∧-~d⊞-⇒⊢d (valid m≤) to-right            = unusable , valid m≤
-⊢d∧-~d⊞-⇒⊢d ⊢d         unusable            = ⊢d , ⊢d
-
-⊢∧-~⊞-⇒⊢ : ⊢[ m ] Γ →
-           Γ ~ Γ₀ ⊞ Γ₁ →
-           ----------------------
-           ⊢[ m ] Γ₀ × ⊢[ m ] Γ₁
-⊢∧-~⊞-⇒⊢ []        []        = [] , []
-⊢∧-~⊞-⇒⊢ ((⊢S , ⊢d) ∷ ⊢Γ) (d~ ∷ Γ~)
-  with ⊢d₀ , ⊢d₁ ← ⊢d∧-~d⊞-⇒⊢d ⊢d d~
-     | ⊢Γ₀ , ⊢Γ₁ ← ⊢∧-~⊞-⇒⊢ ⊢Γ Γ~    = (⊢S , ⊢d₀) ∷ ⊢Γ₀ , (⊢S , ⊢d₁) ∷ ⊢Γ₁
-
-⊢∧-~⊞-⇒⊢₀ : ⊢[ m ] Γ →
-             Γ ~ Γ₀ ⊞ Γ₁ →
-             --------------
-             ⊢[ m ] Γ₀
-⊢∧-~⊞-⇒⊢₀ ⊢Γ Γ~ = proj₁ (⊢∧-~⊞-⇒⊢ ⊢Γ Γ~)
-
-⊢∧-~⊞-⇒⊢₁ : ⊢[ m ] Γ →
-             Γ ~ Γ₀ ⊞ Γ₁ →
-             --------------
-             ⊢[ m ] Γ₁
-⊢∧-~⊞-⇒⊢₁ ⊢Γ Γ~ = proj₂ (⊢∧-~⊞-⇒⊢ ⊢Γ Γ~)
-
-⊢d∧∤d⇒⊢d : [ m₀ ]⊢[ m ]d d →
-           d [ m₀ ]∤[ m′ ]d d′ →
-           ----------------------
-           [ m₀ ]⊢[ m′ ]d d′
-⊢d∧∤d⇒⊢d ⊢d         (delete m′≰ dDel) = unusable
-⊢d∧∤d⇒⊢d (valid m≤) (keep m′≤)        = valid m′≤
-⊢d∧∤d⇒⊢d (unusable) (keep m′≤)        = unusable
-
-⊢d∧≤⇒∤d : [ m₀ ]⊢[ m ]d d →
-          m′ ≤ₘ m →
-          d [ m₀ ]∤[ m′ ]d d
-⊢d∧≤⇒∤d                (valid m≤) ≤m = keep (≤-trans ≤m m≤)
-⊢d∧≤⇒∤d {m₀} {m′ = m′} unusable   ≤m
-  with m′ ≤?ₘ m₀
-...  | no  m′≰ = delete m′≰ unusable
-...  | yes m′≤ = keep m′≤
-
-⊢∧≤⇒∤ : ⊢[ m ] Γ →
-        m′ ≤ₘ m →
-        Γ ∤[ m′ ] Γ
-⊢∧≤⇒∤ []               ≤m = []
-⊢∧≤⇒∤ ((⊢S , ⊢d) ∷ ⊢Γ) ≤m = ⊢d∧≤⇒∤d ⊢d ≤m ∷ ⊢∧≤⇒∤ ⊢Γ ≤m
-
-⊢∧∤⇒⊢ : ⊢[ m ] Γ →
-        Γ ∤[ m₀ ] Γ′ →
-        ----------------
-        ⊢[ m₀ ] Γ′
-⊢∧∤⇒⊢ []        []        = []
-⊢∧∤⇒⊢ ((⊢S , ⊢d) ∷ ⊢Γ) (d∤ ∷ Γ∤) = (⊢S , ⊢d∧∤d⇒⊢d ⊢d d∤) ∷ ⊢∧∤⇒⊢ ⊢Γ Γ∤
-
-⊢d∧Wk≤⇒is-del : [ m₀ ]⊢[ m ]d d →
-                m′ ≤ₘ m →
-                Bool.T (stₘ m′ ``Wk) →
-                d [ m₀ ]is-del
-⊢d∧Wk≤⇒is-del (valid m≤) m′≤ Wk∈m′ = weakening (isWellStructured _ _ ``Wk m≤ (isWellStructured _ _ ``Wk m′≤ Wk∈m′))
-⊢d∧Wk≤⇒is-del unusable   m′≤ Wk∈m′ = unusable
-
-⊢∧Wk≤⇒is-all-del : ⊢[ m ] Γ →
-                   m′ ≤ₘ m →
-                   Bool.T (stₘ m′ ``Wk) →
-                   Γ is-all-del
-⊢∧Wk≤⇒is-all-del []               m′≤ Wk∈m′ = []
-⊢∧Wk≤⇒is-all-del ((⊢S , ⊢d) ∷ ⊢Γ) m′≤ Wk∈m′ = ⊢d∧Wk≤⇒is-del ⊢d m′≤ Wk∈m′ ∷ ⊢∧Wk≤⇒is-all-del ⊢Γ m′≤ Wk∈m′
 
 left-bias-~d⊞ : ∀ m d →
                 ∃ (λ d₁ → d [ m ]~d d ⊞ d₁)
@@ -291,7 +203,7 @@ length-respects-∤ (e∤ ∷ Γ∤) = cong suc (length-respects-∤ Γ∤)
                      ∃₂ (λ d′₀ d′₁ → d′ [ m₀ ]~d d′₀ ⊞ d′₁ × d′₀ [ m₀ ]∤[ m ]d d₀ × d′₁ [ m₀ ]∤[ m ]d d₁)
 ∤d⁻¹-preserves-~d⊞ d~       (keep ≤m₀)                     = _ , _ , d~ , keep ≤m₀ , keep ≤m₀
 ∤d⁻¹-preserves-~d⊞ unusable (delete ≰m₀ unusable)          = _ , _ , unusable , delete ≰m₀ unusable , delete ≰m₀ unusable
-∤d⁻¹-preserves-~d⊞ unusable (delete ≰m₀ (weakening Wk∈m₀)) = _ , _ , to-left , delete ≰m₀ (weakening Wk∈m₀) , delete ≰m₀ unusable -- arbitrary choice???
+∤d⁻¹-preserves-~d⊞ unusable (delete ≰m₀ (weakening Wk∈m₀)) = _ , _ , to-left , delete ≰m₀ (weakening Wk∈m₀) , delete ≰m₀ unusable
 
 ∤-preserves-++ : ∀ Δ →
                  Δ ++ Ψ ∤[ m ] Γ →
@@ -376,37 +288,12 @@ assoc-∤ (d∤ ∷ Γ∤) (d′∤ ∷ Γ′∤)
 ∤⁻¹-preserves-is-all-del []              []        = []
 ∤⁻¹-preserves-is-all-del (d′Del ∷ Γ′Del) (d∤ ∷ Γ∤) = ∤d⁻¹-preserves-is-del d′Del d∤ ∷ ∤⁻¹-preserves-is-all-del Γ′Del Γ∤
 
-∤⁻¹-preserves-∈ : ∀ Δ →
-                  x ⦂[ m ] S ∈ Δ ++ Γ′ →
-                  Γ ∤[ m₀ ] Γ′ →
-                  -----------------------
-                  x ⦂[ m ] S ∈ Δ ++ Γ
-∤⁻¹-preserves-∈ []      (here Γ′Del)    (keep _ ∷ Γ∤) = here (∤⁻¹-preserves-is-all-del Γ′Del Γ∤)
-∤⁻¹-preserves-∈ []      (there dDel x∈) (d∤ ∷ Γ∤)     = there (∤d⁻¹-preserves-is-del dDel d∤) (∤⁻¹-preserves-∈ [] x∈ Γ∤)
-∤⁻¹-preserves-∈ (_ ∷ Δ) (here ΔΓ′Del)   Γ∤            = here (All.++⁺ (All.++⁻ˡ Δ ΔΓ′Del) (∤⁻¹-preserves-is-all-del (All.++⁻ʳ Δ ΔΓ′Del) Γ∤))
-∤⁻¹-preserves-∈ (_ ∷ Δ) (there dDel x∈) Γ∤            = there dDel (∤⁻¹-preserves-∈ Δ x∈ Γ∤)
-
-∤⁻¹-preserves-⊢ : ∀ Δ →
-                  Δ ++ Γ′ ⊢[ m ] L ⦂ S →
-                  Γ ∤[ m₀ ] Γ′ →
-                  -----------------------
-                  Δ ++ Γ ⊢[ m ] L ⦂ S
-∤⁻¹-preserves-⊢ Δ (`unit ΔΓ′Del)                          Γ∤ = `unit (All.++⁺ (All.++⁻ˡ Δ ΔΓ′Del) (∤⁻¹-preserves-is-all-del (All.++⁻ʳ Δ ΔΓ′Del) Γ∤))
-∤⁻¹-preserves-⊢ Δ (`λ⦂-∘ ⊢L)                              Γ∤ = `λ⦂-∘ (∤⁻¹-preserves-⊢ (_ ∷ Δ) ⊢L Γ∤)
-∤⁻¹-preserves-⊢ Δ (ΔΓ′~ ⊢ ⊢L ⦂ ⊢⊸ `$ ⊢M)                  Γ∤
-  with _ , _ , _ , _ , refl , refl , Δ~ , Γ′~ ← ~⊞-preserves-++ Δ ΔΓ′~
-    with _ , _ , Γ~ , Γ₀∤ , Γ₁∤ ← ∤⁻¹-preserves-~⊞ Γ′~ Γ∤    = ~⊞-++⁺ Δ~ Γ~ ⊢ ∤⁻¹-preserves-⊢ _ ⊢L Γ₀∤ ⦂ ⊢⊸ `$ ∤⁻¹-preserves-⊢ _ ⊢M Γ₁∤
-∤⁻¹-preserves-⊢ Δ (`lift[-⇒-] ⊢L)                         Γ∤ = `lift[-⇒-] ∤⁻¹-preserves-⊢ Δ ⊢L Γ∤
-∤⁻¹-preserves-⊢ Δ (ΔΓ′∤ ⊢`unlift[-⇒-] ⊢L ⦂ ⊢↑)            Γ∤
-  with _ , _ , refl , Δ∤ , Γ′∤ ← ∤-preserves-++ Δ ΔΓ′∤
-    with _ , Γ∤′ , ∤Γ″ ← assoc-∤ Γ∤ Γ′∤                      = ∤-++⁺ Δ∤ Γ∤′ ⊢`unlift[-⇒-] ∤⁻¹-preserves-⊢ _ ⊢L ∤Γ″ ⦂ ⊢↑
-∤⁻¹-preserves-⊢ Δ (ΔΓ′∤ ⊢`return[-⇒-] ⊢L)                 Γ∤
-  with _ , _ , refl , Δ∤ , Γ′∤ ← ∤-preserves-++ Δ ΔΓ′∤
-    with _ , Γ∤′ , ∤Γ″ ← assoc-∤ Γ∤ Γ′∤                      = ∤-++⁺ Δ∤ Γ∤′ ⊢`return[-⇒-] ∤⁻¹-preserves-⊢ _ ⊢L ∤Γ″
-∤⁻¹-preserves-⊢ Δ (ΔΓ′~ ⊢`let-return[-⇒-] ⊢L ⦂ ⊢↓ `in ⊢M) Γ∤
-  with _ , _ , _ , _ , refl , refl , Δ~ , Γ′~ ← ~⊞-preserves-++ Δ ΔΓ′~
-    with _ , _ , Γ~ , Γ₀∤ , Γ₁∤ ← ∤⁻¹-preserves-~⊞ Γ′~ Γ∤    = ~⊞-++⁺ Δ~ Γ~ ⊢`let-return[-⇒-] ∤⁻¹-preserves-⊢ _ ⊢L Γ₀∤ ⦂ ⊢↓ `in ∤⁻¹-preserves-⊢ _ ⊢M Γ₁∤
-∤⁻¹-preserves-⊢ Δ (`# x∈)                                 Γ∤ = `# ∤⁻¹-preserves-∈ Δ x∈ Γ∤
+len∈-inversion : ∀ Δ →
+                 length Δ ⦂[ m ] S ∈ Δ ++ (T , m₀ , d) ∷ Γ →
+                 (Δ ++ Γ) is-all-del × T ≡ S × m₀ ≡ m × d ≡ true
+len∈-inversion []      (here ΓDel) = ΓDel , refl , refl , refl
+len∈-inversion (_ ∷ Δ) (there dDel lenΔ∈)
+  with ΔΓDel , refl , refl , refl ← len∈-inversion Δ lenΔ∈ = dDel ∷ ΔΓDel , refl , refl , refl
 
 ∈⇒+-∈-++ : Ψ is-all-del →
            x ⦂[ m ] S ∈ Γ →
@@ -430,13 +317,6 @@ assoc-∤ (d∤ ∷ Γ∤) (d′∤ ∷ Γ′∤)
 ≥∧∈-++⇒+-∈-++-++                     []      ΨDel x∈              x≥       = ∈⇒+-∈-++ ΨDel x∈
 ≥∧∈-++⇒+-∈-++-++ {Ψ = Ψ} {x = suc x} (e ∷ Δ) ΨDel (there eDel x∈) (s≤s x≥)
   rewrite ℕ.+-suc (length Ψ) x                                             = there eDel (≥∧∈-++⇒+-∈-++-++ Δ ΨDel x∈ x≥)
-
-len∈-inversion : ∀ Δ →
-                 length Δ ⦂[ m ] S ∈ Δ ++ (T , m₀ , d) ∷ Γ →
-                 (Δ ++ Γ) is-all-del × T ≡ S × m₀ ≡ m × d ≡ true
-len∈-inversion []      (here ΓDel) = ΓDel , refl , refl , refl
-len∈-inversion (_ ∷ Δ) (there dDel lenΔ∈)
-  with ΔΓDel , refl , refl , refl ← len∈-inversion Δ lenΔ∈ = dDel ∷ ΔΓDel , refl , refl , refl
 
 <∧∈-++-++⇒∈-++ : ∀ Δ Γ →
                  x ⦂[ m ] T ∈ Δ ++ Γ ++ Ψ →
@@ -473,3 +353,206 @@ len∈-inversion (_ ∷ Δ) (there dDel lenΔ∈)
                     Δ is-all-del
 ≥∧∈-++⇒is-all-del []      x∈              x≥       = []
 ≥∧∈-++⇒is-all-del (_ ∷ Δ) (there dDel x∈) (s≤s x≥) = dDel ∷ ≥∧∈-++⇒is-all-del Δ x∈ x≥
+
+~⊞-is-all-del∧∈⇒∈ : Γ ~ Γ₀ ⊞ Γ₁ →
+                    Γ₀ is-all-del →
+                    x ⦂[ m ] S ∈ Γ₁ →
+                    ----------------------
+                    x ⦂[ m ] S ∈ Γ
+~⊞-is-all-del∧∈⇒∈ (contraction Co∈m ∷ Γ~) (d₀Del ∷ Γ₀Del) (here Γ₁Del)     = here (~⊞⁻¹-preserves-is-all-del Γ₀Del Γ₁Del Γ~)
+~⊞-is-all-del∧∈⇒∈ (to-right         ∷ Γ~) (d₀Del ∷ Γ₀Del) (here Γ₁Del)     = here (~⊞⁻¹-preserves-is-all-del Γ₀Del Γ₁Del Γ~)
+~⊞-is-all-del∧∈⇒∈ (d~               ∷ Γ~) (d₀Del ∷ Γ₀Del) (there d₁Del x∈) = there (~d⊞⁻¹-preserves-is-del d₀Del d₁Del d~) (~⊞-is-all-del∧∈⇒∈ Γ~ Γ₀Del x∈)
+
+∤⁻¹-preserves-∈ : ∀ Δ →
+                  x ⦂[ m ] S ∈ Δ ++ Γ′ →
+                  Γ ∤[ m₀ ] Γ′ →
+                  -----------------------
+                  x ⦂[ m ] S ∈ Δ ++ Γ
+∤⁻¹-preserves-∈ []      (here Γ′Del)    (keep _ ∷ Γ∤) = here (∤⁻¹-preserves-is-all-del Γ′Del Γ∤)
+∤⁻¹-preserves-∈ []      (there dDel x∈) (d∤ ∷ Γ∤)     = there (∤d⁻¹-preserves-is-del dDel d∤) (∤⁻¹-preserves-∈ [] x∈ Γ∤)
+∤⁻¹-preserves-∈ (_ ∷ Δ) (here ΔΓ′Del)   Γ∤            = here (All.++⁺ (All.++⁻ˡ Δ ΔΓ′Del) (∤⁻¹-preserves-is-all-del (All.++⁻ʳ Δ ΔΓ′Del) Γ∤))
+∤⁻¹-preserves-∈ (_ ∷ Δ) (there dDel x∈) Γ∤            = there dDel (∤⁻¹-preserves-∈ Δ x∈ Γ∤)
+
+⊢d∧<ₘ⇒⊢d : [ m₀ ]⊢[ m ]d d →
+           m′ <ₘ m →
+           ------------------
+           [ m₀ ]⊢[ m′ ]d d
+⊢d∧<ₘ⇒⊢d (valid m≤) <m = valid (≤-trans (<⇒≤ <m) m≤)
+⊢d∧<ₘ⇒⊢d unusable   <m = unusable
+
+⊢∧<ₘ⇒⊢ : ⊢[ m ] Γ →
+         m₀ <ₘ m →
+         -----------
+         ⊢[ m₀ ] Γ
+⊢∧<ₘ⇒⊢ []               <m = []
+⊢∧<ₘ⇒⊢ ((⊢S , ⊢d) ∷ ⊢Γ) <m = (⊢S , ⊢d∧<ₘ⇒⊢d ⊢d <m) ∷ ⊢∧<ₘ⇒⊢ ⊢Γ <m
+
+⊢d∧Wk≤⇒is-del : [ m₀ ]⊢[ m ]d d →
+                m′ ≤ₘ m →
+                Bool.T (stₘ m′ ``Wk) →
+                d [ m₀ ]is-del
+⊢d∧Wk≤⇒is-del (valid m≤) m′≤ Wk∈m′ = weakening (isWellStructured _ _ ``Wk m≤ (isWellStructured _ _ ``Wk m′≤ Wk∈m′))
+⊢d∧Wk≤⇒is-del unusable   m′≤ Wk∈m′ = unusable
+
+⊢∧Wk≤⇒is-all-del : ⊢[ m ] Γ →
+                   m′ ≤ₘ m →
+                   Bool.T (stₘ m′ ``Wk) →
+                   Γ is-all-del
+⊢∧Wk≤⇒is-all-del []               m′≤ Wk∈m′ = []
+⊢∧Wk≤⇒is-all-del ((⊢S , ⊢d) ∷ ⊢Γ) m′≤ Wk∈m′ = ⊢d∧Wk≤⇒is-del ⊢d m′≤ Wk∈m′ ∷ ⊢∧Wk≤⇒is-all-del ⊢Γ m′≤ Wk∈m′
+
+⊢d∧-~d⊞-⇒⊢d : [ m₀ ]⊢[ m ]d dS →
+              dS [ m₀ ]~d dS₀ ⊞ dS₁ →
+              --------------------------------------
+              [ m₀ ]⊢[ m ]d dS₀ × [ m₀ ]⊢[ m ]d dS₁
+⊢d∧-~d⊞-⇒⊢d ⊢d         (contraction Co∈m₀) = ⊢d , ⊢d
+⊢d∧-~d⊞-⇒⊢d (valid m≤) to-left             = valid m≤ , unusable
+⊢d∧-~d⊞-⇒⊢d (valid m≤) to-right            = unusable , valid m≤
+⊢d∧-~d⊞-⇒⊢d ⊢d         unusable            = ⊢d , ⊢d
+
+⊢∧-~⊞-⇒⊢ : ⊢[ m ] Γ →
+           Γ ~ Γ₀ ⊞ Γ₁ →
+           ----------------------
+           ⊢[ m ] Γ₀ × ⊢[ m ] Γ₁
+⊢∧-~⊞-⇒⊢ []        []        = [] , []
+⊢∧-~⊞-⇒⊢ ((⊢S , ⊢d) ∷ ⊢Γ) (d~ ∷ Γ~)
+  with ⊢d₀ , ⊢d₁ ← ⊢d∧-~d⊞-⇒⊢d ⊢d d~
+     | ⊢Γ₀ , ⊢Γ₁ ← ⊢∧-~⊞-⇒⊢ ⊢Γ Γ~    = (⊢S , ⊢d₀) ∷ ⊢Γ₀ , (⊢S , ⊢d₁) ∷ ⊢Γ₁
+
+⊢∧-~⊞-⇒⊢₀ : ⊢[ m ] Γ →
+             Γ ~ Γ₀ ⊞ Γ₁ →
+             --------------
+             ⊢[ m ] Γ₀
+⊢∧-~⊞-⇒⊢₀ ⊢Γ Γ~ = proj₁ (⊢∧-~⊞-⇒⊢ ⊢Γ Γ~)
+
+⊢∧-~⊞-⇒⊢₁ : ⊢[ m ] Γ →
+             Γ ~ Γ₀ ⊞ Γ₁ →
+             --------------
+             ⊢[ m ] Γ₁
+⊢∧-~⊞-⇒⊢₁ ⊢Γ Γ~ = proj₂ (⊢∧-~⊞-⇒⊢ ⊢Γ Γ~)
+
+~⊞-is-all-del∧⊢⇒⊢ : Γ ~ Γ₀ ⊞ Γ₁ →
+                    Γ₀ is-all-del →
+                    Γ₁ ⊢[ m ] L ⦂ S →
+                    ----------------------
+                    Γ ⊢[ m ] L ⦂ S
+
+~⊞-is-all-del∧⊢⇒⊢                           Γ~ Γ₀Del (`unit Γ₁Del)                          = `unit ΓDel
+  where
+    ΓDel = ~⊞⁻¹-preserves-is-all-del Γ₀Del Γ₁Del Γ~
+
+~⊞-is-all-del∧⊢⇒⊢                           Γ~ Γ₀Del (`λ⦂-∘ ⊢L)                             = `λ⦂-∘ ⊢L′
+  where
+    ⊢L′ = ~⊞-is-all-del∧⊢⇒⊢ (to-right ∷ Γ~) (unusable ∷ Γ₀Del) ⊢L
+
+~⊞-is-all-del∧⊢⇒⊢                           Γ~ Γ₀Del (Γ₁~ ⊢ ⊢L ⦂ ⊢⊸ `$ ⊢M)
+  with _ , Γ₁′~ , Γ~′ ← ~⊞-assoc (~⊞-swap Γ~) (~⊞-swap Γ₁~)                                 = ~⊞-swap Γ~′ ⊢ ⊢L′ ⦂ ⊢⊸ `$ ⊢M
+  where
+    ⊢L′ = ~⊞-is-all-del∧⊢⇒⊢ (~⊞-swap Γ₁′~) Γ₀Del ⊢L
+
+~⊞-is-all-del∧⊢⇒⊢                           Γ~ Γ₀Del (`lift[-⇒-] ⊢L)                        = `lift[-⇒-] ⊢L′
+  where
+    ⊢L′ = ~⊞-is-all-del∧⊢⇒⊢ Γ~ Γ₀Del ⊢L
+
+~⊞-is-all-del∧⊢⇒⊢ {L = `unlift[ m₀ ⇒ _ ] L} Γ~ Γ₀Del (Γ₁∤ ⊢`unlift[-⇒-] ⊢L ⦂ ⊢↑)
+  with _ , Γ₀∤ , Γ₀′Del ← is-all-del⇒∤ m₀ Γ₀Del
+    with _ , Γ∤ , Γ′~ ← ~⊞⁻¹-preserves-∤ Γ₀∤ Γ₁∤ Γ~                                         = Γ∤ ⊢`unlift[-⇒-] ⊢L′ ⦂ ⊢↑
+  where
+    ⊢L′ = ~⊞-is-all-del∧⊢⇒⊢ Γ′~ Γ₀′Del ⊢L
+
+~⊞-is-all-del∧⊢⇒⊢ {L = `return[ m₀ ⇒ _ ] L} Γ~ Γ₀Del (Γ₁∤ ⊢`return[-⇒-] ⊢L)
+  with _ , Γ₀∤ , Γ₀′Del ← is-all-del⇒∤ m₀ Γ₀Del
+    with _ , Γ∤ , Γ′~ ← ~⊞⁻¹-preserves-∤ Γ₀∤ Γ₁∤ Γ~                                         = Γ∤ ⊢`return[-⇒-] ⊢L′
+  where
+    ⊢L′ = ~⊞-is-all-del∧⊢⇒⊢ Γ′~ Γ₀′Del ⊢L
+
+~⊞-is-all-del∧⊢⇒⊢                           Γ~ Γ₀Del (Γ₁~ ⊢`let-return[-⇒-] ⊢L ⦂ ⊢↓ `in ⊢M)
+  with _ , Γ₁′~ , Γ~′ ← ~⊞-assoc (~⊞-swap Γ~) (~⊞-swap Γ₁~)                                 = ~⊞-swap Γ~′ ⊢`let-return[-⇒-] ⊢L′ ⦂ ⊢↓ `in ⊢M
+  where
+    ⊢L′ = ~⊞-is-all-del∧⊢⇒⊢ (~⊞-swap Γ₁′~) Γ₀Del ⊢L
+
+~⊞-is-all-del∧⊢⇒⊢                           Γ~ Γ₀Del (`# x∈)                                = `# x∈′
+  where
+    x∈′ = ~⊞-is-all-del∧∈⇒∈ Γ~ Γ₀Del x∈
+
+⊢d∧∤d⇒⊢d : [ m₀ ]⊢[ m ]d d →
+           d [ m₀ ]∤[ m′ ]d d′ →
+           ----------------------
+           [ m₀ ]⊢[ m′ ]d d′
+⊢d∧∤d⇒⊢d ⊢d         (delete m′≰ dDel) = unusable
+⊢d∧∤d⇒⊢d (valid m≤) (keep m′≤)        = valid m′≤
+⊢d∧∤d⇒⊢d (unusable) (keep m′≤)        = unusable
+
+⊢∧∤⇒⊢ : ⊢[ m ] Γ →
+        Γ ∤[ m₀ ] Γ′ →
+        ----------------
+        ⊢[ m₀ ] Γ′
+⊢∧∤⇒⊢ []        []        = []
+⊢∧∤⇒⊢ ((⊢S , ⊢d) ∷ ⊢Γ) (d∤ ∷ Γ∤) = (⊢S , ⊢d∧∤d⇒⊢d ⊢d d∤) ∷ ⊢∧∤⇒⊢ ⊢Γ Γ∤
+
+⊢d∧≤⇒∤d : [ m₀ ]⊢[ m ]d d →
+          m′ ≤ₘ m →
+          d [ m₀ ]∤[ m′ ]d d
+⊢d∧≤⇒∤d                (valid m≤) ≤m = keep (≤-trans ≤m m≤)
+⊢d∧≤⇒∤d {m₀} {m′ = m′} unusable   ≤m
+  with m′ ≤?ₘ m₀
+...  | no  m′≰ = delete m′≰ unusable
+...  | yes m′≤ = keep m′≤
+
+⊢∧≤⇒∤ : ⊢[ m ] Γ →
+        m′ ≤ₘ m →
+        Γ ∤[ m′ ] Γ
+⊢∧≤⇒∤ []               ≤m = []
+⊢∧≤⇒∤ ((⊢S , ⊢d) ∷ ⊢Γ) ≤m = ⊢d∧≤⇒∤d ⊢d ≤m ∷ ⊢∧≤⇒∤ ⊢Γ ≤m
+
+∤⁻¹-preserves-⊢ : ∀ Δ →
+                  Δ ++ Γ′ ⊢[ m ] L ⦂ S →
+                  Γ ∤[ m₀ ] Γ′ →
+                  -----------------------
+                  Δ ++ Γ ⊢[ m ] L ⦂ S
+
+∤⁻¹-preserves-⊢ Δ (`unit ΔΓ′Del)                          Γ∤ = `unit ΔΓDel
+  where
+    ΔΓDel = All.++⁺ (All.++⁻ˡ Δ ΔΓ′Del) (∤⁻¹-preserves-is-all-del (All.++⁻ʳ Δ ΔΓ′Del) Γ∤)
+
+∤⁻¹-preserves-⊢ Δ (`λ⦂-∘ ⊢L)                              Γ∤ = `λ⦂-∘ ⊢L′
+  where
+    ⊢L′ = ∤⁻¹-preserves-⊢ (_ ∷ Δ) ⊢L Γ∤
+
+∤⁻¹-preserves-⊢ Δ (ΔΓ′~ ⊢ ⊢L ⦂ ⊢⊸ `$ ⊢M)                  Γ∤
+  with _ , _ , _ , _ , refl , refl , Δ~ , Γ′~ ← ~⊞-preserves-++ Δ ΔΓ′~
+    with _ , _ , Γ~ , Γ₀∤ , Γ₁∤ ← ∤⁻¹-preserves-~⊞ Γ′~ Γ∤    = ΔΓ~ ⊢ ⊢L′ ⦂ ⊢⊸ `$ ⊢M′
+  where
+    ΔΓ~ = ~⊞-++⁺ Δ~ Γ~
+    ⊢L′ = ∤⁻¹-preserves-⊢ _ ⊢L Γ₀∤
+    ⊢M′ = ∤⁻¹-preserves-⊢ _ ⊢M Γ₁∤
+
+∤⁻¹-preserves-⊢ Δ (`lift[-⇒-] ⊢L)                         Γ∤ = `lift[-⇒-] ⊢L′
+  where
+    ⊢L′ = ∤⁻¹-preserves-⊢ Δ ⊢L Γ∤
+
+∤⁻¹-preserves-⊢ Δ (ΔΓ′∤ ⊢`unlift[-⇒-] ⊢L ⦂ ⊢↑)            Γ∤
+  with _ , _ , refl , Δ∤ , Γ′∤ ← ∤-preserves-++ Δ ΔΓ′∤
+    with _ , Γ∤′ , ∤Γ″ ← assoc-∤ Γ∤ Γ′∤                      = ΔΓ∤ ⊢`unlift[-⇒-] ⊢L′ ⦂ ⊢↑
+  where
+    ΔΓ∤ = ∤-++⁺ Δ∤ Γ∤′
+    ⊢L′ = ∤⁻¹-preserves-⊢ _ ⊢L ∤Γ″
+
+∤⁻¹-preserves-⊢ Δ (ΔΓ′∤ ⊢`return[-⇒-] ⊢L)                 Γ∤
+  with _ , _ , refl , Δ∤ , Γ′∤ ← ∤-preserves-++ Δ ΔΓ′∤
+    with _ , Γ∤′ , ∤Γ″ ← assoc-∤ Γ∤ Γ′∤                      = ΔΓ∤ ⊢`return[-⇒-] ⊢L′
+  where
+    ΔΓ∤ = ∤-++⁺ Δ∤ Γ∤′
+    ⊢L′ = ∤⁻¹-preserves-⊢ _ ⊢L ∤Γ″
+
+∤⁻¹-preserves-⊢ Δ (ΔΓ′~ ⊢`let-return[-⇒-] ⊢L ⦂ ⊢↓ `in ⊢M) Γ∤
+  with _ , _ , _ , _ , refl , refl , Δ~ , Γ′~ ← ~⊞-preserves-++ Δ ΔΓ′~
+    with _ , _ , Γ~ , Γ₀∤ , Γ₁∤ ← ∤⁻¹-preserves-~⊞ Γ′~ Γ∤    = ΔΓ~ ⊢`let-return[-⇒-] ⊢L′ ⦂ ⊢↓ `in ⊢M′
+  where
+    ΔΓ~ = ~⊞-++⁺ Δ~ Γ~
+    ⊢L′ = ∤⁻¹-preserves-⊢ _ ⊢L Γ₀∤
+    ⊢M′ = ∤⁻¹-preserves-⊢ _ ⊢M Γ₁∤
+
+∤⁻¹-preserves-⊢ Δ (`# x∈)                                 Γ∤ = `# x∈′
+  where
+    x∈′ = ∤⁻¹-preserves-∈ Δ x∈ Γ∤
