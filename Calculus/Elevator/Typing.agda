@@ -60,16 +60,16 @@ data [_]⊢[_]d_ : Mode → Mode → Useable → Set (ℓ₁ ⊔ ℓ₂) where
 ⊢[_]_ : Mode → Context → Set (ℓ₁ ⊔ ℓ₂)
 ⊢[ m ] Γ = All (λ (S , m₀ , d) → ⊢[ m₀ ] S ⦂⋆ × [ m₀ ]⊢[ m ]d d) Γ
 
-data _[_]is-deletable : Useable → Mode → Set ℓ₁ where
+data _[_]is-del : Useable → Mode → Set ℓ₁ where
   unusable  : -----------------------------
-              false [ m ]is-deletable
+              false [ m ]is-del
 
   weakening : Bool.T (stₘ m ``Wk) →
               ----------------------------
-              true [ m ]is-deletable
+              true [ m ]is-del
 
-_is-all-deletable : Context → Set ℓ₁
-_is-all-deletable = All (λ (_ , m , d) → d [ m ]is-deletable)
+_is-all-del : Context → Set ℓ₁
+_is-all-del = All (λ (_ , m , d) → d [ m ]is-del)
 
 data _[_]~d_⊞_ : Useable → Mode → Useable → Useable → Set ℓ₁ where
   contraction : Bool.T (stₘ m ``Co) →
@@ -96,7 +96,7 @@ data _~_⊞_ : Context → Context → Context → Set ℓ₁ where
 
 data _[_]∤[_]d_ : Useable → Mode → Mode → Useable → Set (ℓ₁ ⊔ ℓ₂) where
   delete : ¬ (m ≤ₘ m₀) →
-           d [ m₀ ]is-deletable →
+           d [ m₀ ]is-del →
            ------------------------
            d [ m₀ ]∤[ m ]d false
 
@@ -114,17 +114,17 @@ data _∤[_]_ : Context → Mode → Context → Set (ℓ₁ ⊔ ℓ₂) where
         (S , m₀ , d) ∷ Γ ∤[ m ] (S , m₀ , d′) ∷ Γ′
 
 data _⦂[_]_∈_ : ℕ → Mode → Type → Context → Set ℓ₁ where
-  here  : Γ is-all-deletable →
+  here  : Γ is-all-del →
           --------------------------------
           0 ⦂[ m ] S ∈ (S , m , true) ∷ Γ
 
-  there : dT [ m₀ ]is-deletable →
+  there : dT [ m₀ ]is-del →
           x ⦂[ m ] S ∈ Γ →
           -----------------------------------
           suc x ⦂[ m ] S ∈ (T , m₀ , dT) ∷ Γ
 
 data _⊢[_]_⦂_ : Context → Mode → Term → Type → Set (ℓ₁ ⊔ ℓ₂) where
-  `unit                     : Γ is-all-deletable →
+  `unit                     : Γ is-all-del →
                               ---------------------
                               Γ ⊢[ m ] `unit ⦂ `⊤
 

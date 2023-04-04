@@ -10,10 +10,10 @@ open import Data.Empty as ⊥ using (⊥)
 open import Data.List as List using (List; []; _∷_)
 open import Data.List.Relation.Unary.All as All using (All)
 open import Data.Nat as ℕ using (ℕ; suc; _+_)
-open import Data.Product as × using (_×_; _,_)
-open import Data.Unit as ⊤ using (⊤)
-open import Relation.Nullary using (yes; no; ¬_)
-open import Relation.Binary.PropositionalEquality using (_≡_; _≢_)
+open import Data.Product as × using (_×_; _,_; ∃; ∃₂)
+open import Data.Unit as ⊤ using (⊤; tt)
+open import Relation.Nullary using (Dec; yes; no; ¬_)
+open import Relation.Binary.PropositionalEquality using (_≡_; refl; _≢_)
 
 open import Calculus.Elevator.Syntax ℓ₁ ℓ₂ ℳ
 
@@ -25,7 +25,7 @@ data WeakNorm where
   `unit                 : WeakNorm `unit
   `lift[_⇒_]            : ∀ m₀ m₁ → TermWORedex[ m₁ ≤] L → WeakNorm (`lift[ m₀ ⇒ m₁ ] L)
   `return[_⇒_]          : ∀ m₀ m₁ → WeakNorm L → WeakNorm (`return[ m₀ ⇒ m₁ ] L)
-  `λ⦂_∘_                : ∀ m S L → WeakNorm (`λ⦂[ m ] S ∘ L)
+  `λ⦂[_]_∘_             : ∀ m S L → WeakNorm (`λ⦂[ m ] S ∘ L)
 
   `neut                 : WeakNeut L → WeakNorm L
 
@@ -45,6 +45,26 @@ data WeakNeut where
 ≢lift[-⇒-] (L `$ M) = ⊤
 ≢lift[-⇒-] (`# x) = ⊤
 
+≢lift[-⇒-]? : (L : Term) → Dec (≢lift[-⇒-] L)
+≢lift[-⇒-]? `unit = yes tt
+≢lift[-⇒-]? (`lift[ m₀ ⇒ m₁ ] L) = no (λ x → x)
+≢lift[-⇒-]? (`unlift[ m₀ ⇒ m₁ ] L) = yes tt
+≢lift[-⇒-]? (`return[ m₀ ⇒ m₁ ] L) = yes tt
+≢lift[-⇒-]? (`let-return[ m₀ ⇒ m₁ ] L `in L₁) = yes tt
+≢lift[-⇒-]? (`λ⦂[ m ] S ∘ L) = yes tt
+≢lift[-⇒-]? (L `$ L₁) = yes tt
+≢lift[-⇒-]? (`# x) = yes tt
+
+¬≢lift[-⇒-]⇒≡lift[-⇒-] : (L : Term) → ¬ (≢lift[-⇒-] L) → ∃ (λ m₀ → ∃₂ (λ m₁ L′ → L ≡ `lift[ m₀ ⇒ m₁ ] L′))
+¬≢lift[-⇒-]⇒≡lift[-⇒-] `unit ¬≢lift with () ← ¬≢lift tt
+¬≢lift[-⇒-]⇒≡lift[-⇒-] (`lift[ m₀ ⇒ m₁ ] L) ¬≢lift = _ , _ , _ , refl
+¬≢lift[-⇒-]⇒≡lift[-⇒-] (`unlift[ m₀ ⇒ m₁ ] L) ¬≢lift with () ← ¬≢lift tt
+¬≢lift[-⇒-]⇒≡lift[-⇒-] (`return[ m₀ ⇒ m₁ ] L) ¬≢lift with () ← ¬≢lift tt
+¬≢lift[-⇒-]⇒≡lift[-⇒-] (`let-return[ m₀ ⇒ m₁ ] L `in L₁) ¬≢lift with () ← ¬≢lift tt
+¬≢lift[-⇒-]⇒≡lift[-⇒-] (`λ⦂[ m ] S ∘ L) ¬≢lift with () ← ¬≢lift tt
+¬≢lift[-⇒-]⇒≡lift[-⇒-] (L `$ L₁) ¬≢lift with () ← ¬≢lift tt
+¬≢lift[-⇒-]⇒≡lift[-⇒-] (`# x) ¬≢lift with () ← ¬≢lift tt
+
 data TermWORedex[_≤] where
   `unit                 : TermWORedex[ m ≤] `unit
 
@@ -56,7 +76,7 @@ data TermWORedex[_≤] where
   `return[≤_⇒_]         : m ≤ₘ m₀ → ∀ m₁ → WeakNorm L → TermWORedex[ m ≤] (`return[ m₀ ⇒ m₁ ] L)
   `let-return[_⇒_]_`in_ : ∀ m₀ m₁ → TermWORedex[ m ≤] L → TermWORedex[ m ≤] M → TermWORedex[ m ≤] (`let-return[ m₀ ⇒ m₁ ] L `in M)
 
-  `λ⦂_∘_                : ∀ m S → TermWORedex[ m ≤] L → TermWORedex[ m ≤] (`λ⦂[ m ] S ∘ L)
+  `λ⦂[_]_∘_             : ∀ m₀ S → TermWORedex[ m ≤] L → TermWORedex[ m ≤] (`λ⦂[ m₀ ] S ∘ L)
   _`$_                  : TermWORedex[ m ≤] L → TermWORedex[ m ≤] M → TermWORedex[ m ≤] (L `$ M)
 
   `#_                   : ∀ x → TermWORedex[ m ≤] (`# x)
@@ -86,11 +106,11 @@ wk_ = wk[ 1 ↑ 0 ]_
 [ L /[ m ] x ] `unlift[ m₀ ⇒ m₁ ] M
   with m₀ ≤?ₘ m
 ...  | yes _ = `unlift[ m₀ ⇒ m₁ ] ([ L /[ m ] x ] M)
-...  | no  _ = `unlift[ m₀ ⇒ m₁ ] ([ `# x /[ m ] x ] M) -- no-op substitution
+...  | no  _ = `unlift[ m₀ ⇒ m₁ ] ([ `unlift[ m₀ ⇒ m₁ ] `unit /[ m ] x ] M) -- strengthening substitution (note that the argument is ill-typed)
 [ L /[ m ] x ] `return[ m₀ ⇒ m₁ ] M
   with m₀ ≤?ₘ m
 ...  | yes _ = `return[ m₀ ⇒ m₁ ] ([ L /[ m ] x ] M)
-...  | no  _ = `return[ m₀ ⇒ m₁ ] ([ `# x /[ m ] x ] M) -- no-op substitution
+...  | no  _ = `return[ m₀ ⇒ m₁ ] ([ `unlift[ m₀ ⇒ m₁ ] `unit /[ m ] x ] M) -- strengthening substitution
 [ L /[ m ] x ] (`let-return[ m₀ ⇒ m₁ ] M `in N) = `let-return[ m₀ ⇒ m₁ ] [ L /[ m ] x ] M `in [ wk L /[ m ] suc x ] N
 [ L /[ m ] x ] (`λ⦂[ m′ ] S ∘ M) = `λ⦂[ m′ ] S ∘ [ wk L /[ m ] suc x ] M
 [ L /[ m ] x ] (M `$ N) = [ L /[ m ] x ] M `$ [ L /[ m ] x ] N
