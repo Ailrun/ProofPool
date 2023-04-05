@@ -1,18 +1,16 @@
-{-# OPTIONS --safe --without-K #-}
+{-# OPTIONS --safe #-}
 open import Calculus.Elevator.ModeSpec
 
 module Calculus.Elevator.Typing ℓ₁ ℓ₂ (ℳ : ModeSpec ℓ₁ ℓ₂) where
 open ModeSpec ℳ
 
 open import Agda.Primitive
-open import Data.Bool as Bool using (Bool; true; false)
-open import Data.List as List using (List; []; _∷_)
+open import Data.Bool as Bool using (true; false)
+open import Data.List as List using ([]; _∷_)
 open import Data.List.Relation.Unary.All as All using (All)
 open import Data.Nat as ℕ using (ℕ; suc)
 open import Data.Product as × using (_×_; _,_)
-open import Data.Unit as ⊤ using (⊤)
 open import Relation.Nullary using (¬_)
-open import Relation.Binary.PropositionalEquality using (_≡_; _≢_)
 
 open import Calculus.Elevator.Syntax ℓ₁ ℓ₂ ℳ
 

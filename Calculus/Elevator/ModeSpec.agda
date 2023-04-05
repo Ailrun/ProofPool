@@ -1,4 +1,4 @@
-{-# OPTIONS --safe --without-K #-}
+{-# OPTIONS --safe #-}
 module Calculus.Elevator.ModeSpec where
 
 open import Agda.Primitive
@@ -19,22 +19,20 @@ record ModeSpec ℓ₁ ℓ₂ : Set (lsuc (ℓ₁ ⊔ ℓ₂)) where
   field
     Mode : Set ℓ₁
     _≤ₘ_ : Rel Mode (ℓ₁ ⊔ ℓ₂)
-    isDecPartialOrder : IsDecPartialOrder _≡_ _≤ₘ_
+    isDecPartialOrderₘ : IsDecPartialOrder _≡_ _≤ₘ_
     stₘ : Mode → ModeSpecSt → Bool
     opₘ : Mode → ModeSpecOp → Bool
-    isWellStructured : ∀ m₁ m₂ s → m₁ ≤ₘ m₂ → Bool.T (stₘ m₁ s) → Bool.T (stₘ m₂ s)
+    isWellStructuredₘ : ∀ m₁ m₂ s → m₁ ≤ₘ m₂ → Bool.T (stₘ m₁ s) → Bool.T (stₘ m₂ s)
 
-  _≤?ₘ_ = isDecPartialOrder .IsDecPartialOrder._≤?_
   _<ₘ_ = Strict._<_ _≡_ _≤ₘ_
-  <⇒≤ = proj₁
+  <ₘ⇒≤ₘ = proj₁
 
-  decPoset : DecPoset ℓ₁ ℓ₁ (ℓ₁ ⊔ ℓ₂)
-  decPoset = record
+  decPosetₘ : DecPoset ℓ₁ ℓ₁ (ℓ₁ ⊔ ℓ₂)
+  decPosetₘ = record
     { Carrier = Mode
     ; _≈_ = _≡_
     ; _≤_ = _≤ₘ_
-    ; isDecPartialOrder = isDecPartialOrder
+    ; isDecPartialOrder = isDecPartialOrderₘ
     }
 
-  open DecPoset decPoset hiding (_≟_; _≤?_) renaming (refl to ≤-refl; trans to ≤-trans) public
-  open import Relation.Binary.Properties.Poset poset public
+  open DecPoset decPosetₘ using () renaming (refl to ≤ₘ-refl; trans to ≤ₘ-trans; _≟_ to _≟ₘ_; _≤?_ to _≤?ₘ_) public

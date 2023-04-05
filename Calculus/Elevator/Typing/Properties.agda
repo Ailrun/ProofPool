@@ -2,26 +2,18 @@
 open import Calculus.Elevator.ModeSpec
 
 module Calculus.Elevator.Typing.Properties ℓ₁ ℓ₂ (ℳ : ModeSpec ℓ₁ ℓ₂) where
-private
-  module ℳ = ModeSpec ℳ
-open ℳ
+open ModeSpec ℳ
 
-open import Agda.Primitive
-open import Data.Bool as Bool using (Bool; true; false)
-import Data.Bool.Properties as Bool
-open import Data.Empty as ⊥ using (⊥)
-open import Data.List as List using (List; []; _∷_; _++_; length)
+open import Data.Bool as Bool using (true; false)
+open import Data.List as List using ([]; _∷_; _++_; length)
 import Data.List.Properties as List
-open import Data.List.Relation.Unary.All as All using (All; []; _∷_)
+open import Data.List.Relation.Unary.All as All using ([]; _∷_)
 import Data.List.Relation.Unary.All.Properties as All
-open import Data.Nat as ℕ using (ℕ; suc; _+_; s≤s)
+open import Data.Nat as ℕ using (suc; _+_; s≤s)
 import Data.Nat.Properties as ℕ
 open import Data.Product as × using (_×_; _,_; proj₁; proj₂; ∃; ∃₂)
-open import Data.Unit as ⊤ using (⊤)
-import Function.Equivalence as FE
-open import Relation.Nullary using (yes; no; ¬_)
-open import Relation.Binary.Definitions using (Monotonic₂)
-open import Relation.Binary.PropositionalEquality using (_≡_; refl; sym; cong; subst; subst₂; _≢_; ≢-sym)
+open import Relation.Nullary using (yes; no)
+open import Relation.Binary.PropositionalEquality using (_≡_; refl; cong)
 
 import Calculus.Elevator.Syntax as S
 import Calculus.Elevator.Typing as T
@@ -104,7 +96,7 @@ length-respects-~⊞ (_ ∷ Γ~)
 ~d⊞-contraction-assoc (contraction Co∈m₀) to-left         ⊢d         Co∈m = _ , _ , contraction Co∈m₀ , to-right , contraction Co∈m₀
 ~d⊞-contraction-assoc (contraction Co∈m₀) to-right        ⊢d         Co∈m = _ , _ , to-right , contraction Co∈m₀ , contraction Co∈m₀
 ~d⊞-contraction-assoc to-left             d₀~             ⊢d         Co∈m = _ , _ , ~d⊞-identityʳ _ , ~d⊞-identityʳ _ , d₀~
-~d⊞-contraction-assoc to-right            unusable        (valid m≤) Co∈m = _ , _ , to-right , to-right , contraction (isWellStructured _ _ ``Co m≤ Co∈m)
+~d⊞-contraction-assoc to-right            unusable        (valid m≤) Co∈m = _ , _ , to-right , to-right , contraction (isWellStructuredₘ _ _ ``Co m≤ Co∈m)
 ~d⊞-contraction-assoc unusable            d₀~             ⊢d         Co∈m = _ , _ , ~d⊞-identityʳ _ , ~d⊞-identityʳ _ , d₀~
 
 ~⊞-assoc : Γ ~ Γ₀ ⊞ Γ₁ →
@@ -377,7 +369,7 @@ len∈-inversion (_ ∷ Δ) (there dDel lenΔ∈)
            m′ <ₘ m →
            ------------------
            [ m₀ ]⊢[ m′ ]d d
-⊢d∧<ₘ⇒⊢d (valid m≤) <m = valid (≤-trans (<⇒≤ <m) m≤)
+⊢d∧<ₘ⇒⊢d (valid m≤) <m = valid (≤ₘ-trans (<ₘ⇒≤ₘ <m) m≤)
 ⊢d∧<ₘ⇒⊢d unusable   <m = unusable
 
 ⊢∧<ₘ⇒⊢ : ⊢[ m ] Γ →
@@ -391,7 +383,7 @@ len∈-inversion (_ ∷ Δ) (there dDel lenΔ∈)
                 m′ ≤ₘ m →
                 Bool.T (stₘ m′ ``Wk) →
                 d [ m₀ ]is-del
-⊢d∧Wk≤⇒is-del (valid m≤) m′≤ Wk∈m′ = weakening (isWellStructured _ _ ``Wk m≤ (isWellStructured _ _ ``Wk m′≤ Wk∈m′))
+⊢d∧Wk≤⇒is-del (valid m≤) m′≤ Wk∈m′ = weakening (isWellStructuredₘ _ _ ``Wk m≤ (isWellStructuredₘ _ _ ``Wk m′≤ Wk∈m′))
 ⊢d∧Wk≤⇒is-del unusable   m′≤ Wk∈m′ = unusable
 
 ⊢∧Wk≤⇒is-all-del : ⊢[ m ] Γ →
@@ -493,7 +485,7 @@ len∈-inversion (_ ∷ Δ) (there dDel lenΔ∈)
 ⊢d∧≤⇒∤d : [ m₀ ]⊢[ m ]d d →
           m′ ≤ₘ m →
           d [ m₀ ]∤[ m′ ]d d
-⊢d∧≤⇒∤d                (valid m≤) ≤m = keep (≤-trans ≤m m≤)
+⊢d∧≤⇒∤d                (valid m≤) ≤m = keep (≤ₘ-trans ≤m m≤)
 ⊢d∧≤⇒∤d {m₀} {m′ = m′} unusable   ≤m
   with m′ ≤?ₘ m₀
 ...  | no  m′≰ = delete m′≰ unusable

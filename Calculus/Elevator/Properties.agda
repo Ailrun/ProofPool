@@ -2,28 +2,20 @@
 open import Calculus.Elevator.ModeSpec
 
 module Calculus.Elevator.Properties ℓ₁ ℓ₂ (ℳ : ModeSpec ℓ₁ ℓ₂) where
-private
-  module ℳ = ModeSpec ℳ
-open ℳ
+open ModeSpec ℳ
 
-open import Agda.Primitive
-open import Data.Bool as Bool using (Bool; true; false)
-import Data.Bool.Properties as Bool
-open import Data.Empty as ⊥ using (⊥)
-open import Data.List as List using (List; []; _∷_; _++_; length)
+open import Data.Bool as Bool using (true; false)
+open import Data.List as List using ([]; _∷_; _++_; length)
 import Data.List.Properties as List
-open import Data.List.Relation.Unary.All as All using (All; []; _∷_)
+open import Data.List.Relation.Unary.All as All using ([]; _∷_)
 import Data.List.Relation.Unary.All.Properties as All
-open import Data.Nat as ℕ using (ℕ; suc; _+_; s≤s)
+open import Data.Nat as ℕ using (suc)
 import Data.Nat.Properties as ℕ
 open import Data.Product as × using (_×_; _,_; proj₁; proj₂; ∃; ∃₂)
 open import Data.Sum as ⊎ using (_⊎_; inj₁; inj₂)
-open import Data.Unit as ⊤ using (⊤)
-import Function.Equivalence as FE
-open import Relation.Nullary using (yes; no; ¬_)
+open import Relation.Nullary using (yes; no)
 open import Relation.Nullary.Decidable using (dec-yes; dec-no)
-open import Relation.Binary.Definitions using (Monotonic₂)
-open import Relation.Binary.PropositionalEquality using (_≡_; refl; sym; trans; cong; subst; subst₂; _≢_; ≢-sym)
+open import Relation.Binary.PropositionalEquality using (_≡_; refl; sym; cong; subst; subst₂; ≢-sym)
 
 import Calculus.Elevator.Syntax as S
 import Calculus.Elevator.Typing as T
@@ -199,7 +191,7 @@ true⊢[/] : ∀ Δ₀ →
 true⊢[/]                                    Δ₀ Γ~ ⊢Γ₁ ⊢L ⊢T (`unit Δ₀dΨ₀Del)
   with Δ₀Del , weakening Wk∈m₀ ∷ Ψ₀Del ← All.++⁻ Δ₀ Δ₀dΨ₀Del                                                           = `unit ΓDel
   where
-    ΓDel = ~⊞⁻¹-preserves-is-all-del (All.++⁺ Δ₀Del Ψ₀Del) (⊢∧Wk≤⇒is-all-del ⊢Γ₁ ℳ.≤-refl Wk∈m₀) Γ~
+    ΓDel = ~⊞⁻¹-preserves-is-all-del (All.++⁺ Δ₀Del Ψ₀Del) (⊢∧Wk≤⇒is-all-del ⊢Γ₁ ≤ₘ-refl Wk∈m₀) Γ~
 
 true⊢[/]                                    Δ₀ Γ~ ⊢Γ₁ ⊢L (⊢T₀ `⊸[ _ ] ⊢T₁) (`λ⦂-∘ ⊢M)                                  = `λ⦂-∘ ⊢L′
   where
@@ -239,7 +231,7 @@ true⊢[/] {M = `unlift[ _ ⇒ _ ] M}           Δ₀ Γ~ ⊢Γ₁ ⊢L ⊢T    
             with ⊢M′ ← subst-[/-] eqΔ₀′ M (true⊢[/] _ Γ′~ ⊢Γ₁ ⊢L ⊢↑ ⊢M)                                                = Γ∤ ⊢`unlift[-⇒-] ⊢M′ ⦂ ⊢↑
 ...      | delete m₁≰ (weakening Wk∈m₀)
         rewrite dec-no (_ ≤?ₘ _) m₁≰
-          with Γ₁Del ← ⊢∧Wk≤⇒is-all-del ⊢Γ₁ ℳ.≤-refl Wk∈m₀
+          with Γ₁Del ← ⊢∧Wk≤⇒is-all-del ⊢Γ₁ ≤ₘ-refl Wk∈m₀
              | ⊢M′ ← subst-[/-] eqΔ₀′ M (false⊢[/] _ ⊢↑ ⊢M)                                                            = ~⊞-is-all-del∧⊢⇒⊢ (~⊞-swap Γ~) Γ₁Del (Δ₀Ψ₀∤ ⊢`unlift[-⇒-] ⊢M′ ⦂ ⊢↑)
 
 true⊢[/] {M = `return[ _ ⇒ _ ] M}           Δ₀ Γ~ ⊢Γ₁ ⊢L (`↓[-⇒ _ ][ _ ] ⊢T) (Δ₀dΨ₀∤ ⊢`return[-⇒-] ⊢M)
@@ -253,7 +245,7 @@ true⊢[/] {M = `return[ _ ⇒ _ ] M}           Δ₀ Γ~ ⊢Γ₁ ⊢L (`↓[-�
             with ⊢M′ ← subst-[/-] eqΔ₀′ M (true⊢[/] _ Γ′~ ⊢Γ₁ ⊢L ⊢T ⊢M)                                                = Γ∤ ⊢`return[-⇒-] ⊢M′
 ...      | delete m₁≰ (weakening Wk∈m₀)
         rewrite dec-no (_ ≤?ₘ _) m₁≰
-          with Γ₁Del ← ⊢∧Wk≤⇒is-all-del ⊢Γ₁ ℳ.≤-refl Wk∈m₀
+          with Γ₁Del ← ⊢∧Wk≤⇒is-all-del ⊢Γ₁ ≤ₘ-refl Wk∈m₀
              | ⊢M′ ← subst-[/-] eqΔ₀′ M (false⊢[/] _ ⊢T ⊢M)                                                            = ~⊞-is-all-del∧⊢⇒⊢ (~⊞-swap Γ~) Γ₁Del (Δ₀Ψ₀∤ ⊢`return[-⇒-] ⊢M′)
 
 true⊢[/] {M = `let-return[ _ ⇒ _ ] M `in N} Δ₀ Γ~ ⊢Γ₁ ⊢L ⊢T                  (Δ₀dΨ₀~ ⊢`let-return[-⇒-] ⊢M ⦂ ⊢↓ `in ⊢N)
@@ -283,7 +275,7 @@ true⊢[/]                                    Δ₀ Γ~ ⊢Γ₁ ⊢L ⊢T      
     with y< ← ℕ.≰⇒> y≱
       with weakening Wk∈m₀ ∷ _ ← <∧∈-++⇒is-all-del Δ₀ y∈ y<
          | y∈′ ← <∧∈-++-++⇒∈-++ Δ₀ (_ ∷ []) y∈ y<
-        with y∈″ ← ~⊞-is-all-del∧∈⇒∈ (~⊞-swap Γ~) (⊢∧Wk≤⇒is-all-del ⊢Γ₁ ℳ.≤-refl Wk∈m₀) y∈′                            = `# y∈″
+        with y∈″ ← ~⊞-is-all-del∧∈⇒∈ (~⊞-swap Γ~) (⊢∧Wk≤⇒is-all-del ⊢Γ₁ ≤ₘ-refl Wk∈m₀) y∈′                             = `# y∈″
 ...  | yes y≥
     with y ℕ.≟ length Δ₀
 ...    | yes refl
@@ -294,7 +286,7 @@ true⊢[/]                                    Δ₀ Γ~ ⊢Γ₁ ⊢L ⊢T      
         with y∈″ ← ≥∧∈-++-++⇒∈-++ Δ₀ (_ ∷ []) y∈ y>
            | Δ₀dDel ← ≥∧∈-++⇒is-all-del _ y∈′ (subst (y ℕ.≥_) (sym (List.length-++ Δ₀)) y>)
           with weakening Wk∈m₀ ∷ _ ← All.++⁻ʳ Δ₀ Δ₀dDel
-            with y∈‴ ← ~⊞-is-all-del∧∈⇒∈ (~⊞-swap Γ~) (⊢∧Wk≤⇒is-all-del ⊢Γ₁ ℳ.≤-refl Wk∈m₀) y∈″                        = `# y∈‴
+            with y∈‴ ← ~⊞-is-all-del∧∈⇒∈ (~⊞-swap Γ~) (⊢∧Wk≤⇒is-all-del ⊢Γ₁ ≤ₘ-refl Wk∈m₀) y∈″                         = `# y∈‴
 
 
 preservation    : ⊢[ m ] Γ →
@@ -380,11 +372,11 @@ preservation[≤] ⊢Γ ⊢S                   (Γ~ ⊢`let-return[-⇒-] ⊢L �
 preservation[≤] ⊢Γ ⊢S                   (Γ~ ⊢`let-return[-⇒-] ⊢L ⦂ ⊢↓ `in ⊢M) (ξ-`let-return[-⇒-]! WL `in M⟶[≤])
   with `↓[-⇒ m< ][ _ ] ⊢T ← ⊢↓                                                                                   = Γ~ ⊢`let-return[-⇒-] ⊢L ⦂ ⊢↓ `in ⊢M′
   where
-    ⊢M′ = preservation[≤] ((⊢T , valid (ℳ.<⇒≤ m<)) ∷ ⊢∧-~⊞-⇒⊢₁ ⊢Γ Γ~) ⊢S ⊢M M⟶[≤]
+    ⊢M′ = preservation[≤] ((⊢T , valid (<ₘ⇒≤ₘ m<)) ∷ ⊢∧-~⊞-⇒⊢₁ ⊢Γ Γ~) ⊢S ⊢M M⟶[≤]
 
 preservation[≤] ⊢Γ (⊢S `⊸[ _ ] ⊢T)      (`λ⦂-∘ ⊢L)                            (ξ-`λ⦂[-]-∘ L⟶[≤])                 = `λ⦂-∘ ⊢L′
   where
-    ⊢L′ = preservation[≤] ((⊢S , valid ℳ.≤-refl) ∷ ⊢Γ) ⊢T ⊢L L⟶[≤]
+    ⊢L′ = preservation[≤] ((⊢S , valid ≤ₘ-refl) ∷ ⊢Γ) ⊢T ⊢L L⟶[≤]
 
 
 canonoical-⊸ : Γ ⊢[ m ] L ⦂ S `⊸ T →
@@ -470,7 +462,7 @@ progress ⊢Γ ⊢S                            (`# x∈)                        
 
 progress[≤]                           m₀ ⊢Γ ⊢S                    (`unit ΓDel)                         = inj₁ `unit
 progress[≤]                           m₀ ⊢Γ (⊢S `⊸[ _ ] ⊢T)       (`λ⦂-∘ ⊢L)
-  with progress[≤] m₀ ((⊢S , valid ℳ.≤-refl) ∷ ⊢Γ) ⊢T ⊢L
+  with progress[≤] m₀ ((⊢S , valid ≤ₘ-refl) ∷ ⊢Γ) ⊢T ⊢L
 ...  | inj₂ (_ , L⟶[≤])                                                                                = inj₂ (_ , ξ-`λ⦂[-]-∘ L⟶[≤])
 ...  | inj₁ WL                                                                                         = inj₁ (`λ⦂[ _ ] _ ∘ WL)
 
@@ -527,7 +519,7 @@ progress[≤]                           m₀ ⊢Γ ⊢S                   (Γ~ �
     with progress[≤] m₀ ⊢Γ₀ ⊢↓ ⊢L
 ...    | inj₂ (_ , L⟶[≤])                                                                              = inj₂ (_ , ξ-`let-return[-⇒-] L⟶[≤] `in?)
 ...    | inj₁ WL
-      with progress[≤] m₀ ((⊢T , valid (ℳ.<⇒≤ m<)) ∷ ⊢Γ₁) ⊢S ⊢M
+      with progress[≤] m₀ ((⊢T , valid (<ₘ⇒≤ₘ m<)) ∷ ⊢Γ₁) ⊢S ⊢M
 ...      | inj₂ (_ , M⟶[≤])                                                                            = inj₂ (_ , ξ-`let-return[-⇒-]! WL `in M⟶[≤])
 ...      | inj₁ WM                                                                                     = inj₁ (`let-return[ _ ⇒ _ ] WL `in WM)
 

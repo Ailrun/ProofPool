@@ -1,19 +1,18 @@
-{-# OPTIONS --safe --without-K #-}
+{-# OPTIONS --safe #-}
 open import Calculus.Elevator.ModeSpec
 
 module Calculus.Elevator.OpSem ℓ₁ ℓ₂ (ℳ : ModeSpec ℓ₁ ℓ₂) where
 open ModeSpec ℳ
 
 open import Agda.Primitive
-open import Data.Bool as Bool using (Bool; true; false)
+open import Data.Bool as Bool using (true; false)
 open import Data.Empty as ⊥ using (⊥)
-open import Data.List as List using (List; []; _∷_)
-open import Data.List.Relation.Unary.All as All using (All)
+open import Data.List as List using ([]; _∷_)
 open import Data.Nat as ℕ using (ℕ; suc; _+_)
-open import Data.Product as × using (_×_; _,_; ∃; ∃₂)
+open import Data.Product as × using (_,_; ∃; ∃₂)
 open import Data.Unit as ⊤ using (⊤; tt)
 open import Relation.Nullary using (Dec; yes; no; ¬_)
-open import Relation.Binary.PropositionalEquality using (_≡_; refl; _≢_)
+open import Relation.Binary.PropositionalEquality using (_≡_; refl)
 
 open import Calculus.Elevator.Syntax ℓ₁ ℓ₂ ℳ
 
@@ -47,7 +46,7 @@ data WeakNeut where
 
 ≢lift[-⇒-]? : (L : Term) → Dec (≢lift[-⇒-] L)
 ≢lift[-⇒-]? `unit = yes tt
-≢lift[-⇒-]? (`lift[ m₀ ⇒ m₁ ] L) = no (λ x → x)
+≢lift[-⇒-]? (`lift[ m₀ ⇒ m₁ ] L) = no λ x → x
 ≢lift[-⇒-]? (`unlift[ m₀ ⇒ m₁ ] L) = yes tt
 ≢lift[-⇒-]? (`return[ m₀ ⇒ m₁ ] L) = yes tt
 ≢lift[-⇒-]? (`let-return[ m₀ ⇒ m₁ ] L `in L₁) = yes tt

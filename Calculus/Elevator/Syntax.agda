@@ -1,4 +1,4 @@
-{-# OPTIONS --safe --without-K #-}
+{-# OPTIONS --safe #-}
 open import Calculus.Elevator.ModeSpec
 
 module Calculus.Elevator.Syntax ℓ₁ ℓ₂ (ℳ : ModeSpec ℓ₁ ℓ₂) where
