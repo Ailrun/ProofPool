@@ -1,7 +1,7 @@
 {-# OPTIONS --safe #-}
 open import Calculus.Elevator.ModeSpec
 
-module Calculus.Elevator.Typing ℓ₁ ℓ₂ (ℳ : ModeSpec ℓ₁ ℓ₂) where
+module Calculus.Elevator.Typing {ℓ₁ ℓ₂} (ℳ : ModeSpec ℓ₁ ℓ₂) where
 open ModeSpec ℳ
 
 open import Agda.Primitive
@@ -12,7 +12,7 @@ open import Data.Nat as ℕ using (ℕ; suc)
 open import Data.Product as × using (_×_; _,_)
 open import Relation.Nullary using (¬_)
 
-open import Calculus.Elevator.Syntax ℓ₁ ℓ₂ ℳ
+open import Calculus.Elevator.Syntax ℳ
 
 infix   4 ⊢[_]_⦂⋆
 infix   4 [_]⊢[_]d_

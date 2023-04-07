@@ -1,7 +1,7 @@
 {-# OPTIONS --safe #-}
 open import Calculus.Elevator.ModeSpec
 
-module Calculus.Elevator.Syntax ℓ₁ ℓ₂ (ℳ : ModeSpec ℓ₁ ℓ₂) where
+module Calculus.Elevator.Syntax {ℓ₁ ℓ₂} (ℳ : ModeSpec ℓ₁ ℓ₂) where
 open ModeSpec ℳ
 
 open import Agda.Primitive

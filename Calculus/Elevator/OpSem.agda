@@ -1,7 +1,7 @@
 {-# OPTIONS --safe #-}
 open import Calculus.Elevator.ModeSpec
 
-module Calculus.Elevator.OpSem ℓ₁ ℓ₂ (ℳ : ModeSpec ℓ₁ ℓ₂) where
+module Calculus.Elevator.OpSem {ℓ₁ ℓ₂} (ℳ : ModeSpec ℓ₁ ℓ₂) where
 open ModeSpec ℳ
 
 open import Agda.Primitive
@@ -9,12 +9,13 @@ open import Data.Bool as Bool using (true; false)
 open import Data.Empty as ⊥ using (⊥)
 open import Data.List as List using ([]; _∷_)
 open import Data.Nat as ℕ using (ℕ; suc; _+_)
-open import Data.Product as × using (_,_; ∃; ∃₂)
+open import Data.Product as × using (_,_; ∃; ∃₂; -,_)
 open import Data.Unit as ⊤ using (⊤; tt)
 open import Relation.Nullary using (Dec; yes; no; ¬_)
 open import Relation.Binary.PropositionalEquality using (_≡_; refl)
 
-open import Calculus.Elevator.Syntax ℓ₁ ℓ₂ ℳ
+open import Calculus.GeneralOpSem
+open import Calculus.Elevator.Syntax ℳ
 
 data WeakNorm : Term → Set (ℓ₁ ⊔ ℓ₂)
 data WeakNeut : Term → Set (ℓ₁ ⊔ ℓ₂)
@@ -56,7 +57,7 @@ data WeakNeut where
 
 ¬≢lift[-⇒-]⇒≡lift[-⇒-] : (L : Term) → ¬ (≢lift[-⇒-] L) → ∃ (λ m₀ → ∃₂ (λ m₁ L′ → L ≡ `lift[ m₀ ⇒ m₁ ] L′))
 ¬≢lift[-⇒-]⇒≡lift[-⇒-] `unit ¬≢lift with () ← ¬≢lift tt
-¬≢lift[-⇒-]⇒≡lift[-⇒-] (`lift[ m₀ ⇒ m₁ ] L) ¬≢lift = _ , _ , _ , refl
+¬≢lift[-⇒-]⇒≡lift[-⇒-] (`lift[ m₀ ⇒ m₁ ] L) ¬≢lift = -, -, -, refl
 ¬≢lift[-⇒-]⇒≡lift[-⇒-] (`unlift[ m₀ ⇒ m₁ ] L) ¬≢lift with () ← ¬≢lift tt
 ¬≢lift[-⇒-]⇒≡lift[-⇒-] (`return[ m₀ ⇒ m₁ ] L) ¬≢lift with () ← ¬≢lift tt
 ¬≢lift[-⇒-]⇒≡lift[-⇒-] (`let-return[ m₀ ⇒ m₁ ] L `in L₁) ¬≢lift with () ← ¬≢lift tt
@@ -92,10 +93,7 @@ wk[ n ↑ x ] `return[ m₀ ⇒ m₁ ] L = `return[ m₀ ⇒ m₁ ] (wk[ n ↑ x
 wk[ n ↑ x ] (`let-return[ m₀ ⇒ m₁ ] L `in M) = `let-return[ m₀ ⇒ m₁ ] wk[ n ↑ x ] L `in wk[ n ↑ suc x ] M
 wk[ n ↑ x ] (`λ⦂[ m ] S ∘ L) = `λ⦂[ m ] S ∘ wk[ n ↑ suc x ] L
 wk[ n ↑ x ] (L `$ M) = wk[ n ↑ x ] L `$ wk[ n ↑ x ] M
-wk[ n ↑ x ] (`# y)
-  with y ℕ.≥? x
-...  | no  _ = `# y
-...  | yes _ = `# (n + y)
+wk[ n ↑ x ] (`# y) = `# wkidx[ n ↑ x ] y
 
 wk_ = wk[ 1 ↑ 0 ]_
 
@@ -113,13 +111,7 @@ wk_ = wk[ 1 ↑ 0 ]_
 [ L /[ m ] x ] (`let-return[ m₀ ⇒ m₁ ] M `in N) = `let-return[ m₀ ⇒ m₁ ] [ L /[ m ] x ] M `in [ wk L /[ m ] suc x ] N
 [ L /[ m ] x ] (`λ⦂[ m′ ] S ∘ M) = `λ⦂[ m′ ] S ∘ [ wk L /[ m ] suc x ] M
 [ L /[ m ] x ] (M `$ N) = [ L /[ m ] x ] M `$ [ L /[ m ] x ] N
-[ L /[ m ] x ] (`# y)
-  with y ℕ.≥? x
-...  | no  _ = `# y
-...  | yes _
-    with y ℕ.≟ x
-...    | no  _ = `# (ℕ.pred y)
-...    | yes _ = L
+[ L /[ m ] x ] (`# y) = idx[ L / x ] y along `#_
 
 infix   4 _⟶_
 infix   4 _⟶[_≤]_
@@ -137,7 +129,7 @@ data _⟶_ where
                             ---------------------------------------------
                             `unlift[ m₀ ⇒ m₁ ] L ⟶ `unlift[ m₀ ⇒ m₁ ] L′
 
-  β-↑                     : TermWORedex[ m₁ ≤] L →
+  β-`↑                    : TermWORedex[ m₁ ≤] L →
                             --------------------------------------------
                             `unlift[ m₁ ⇒ m₀ ] (`lift[ m₀ ⇒ m₁ ] L) ⟶ L
 
@@ -150,7 +142,7 @@ data _⟶_ where
                             -----------------------------------------------------------------
                             `let-return[ m₀ ⇒ m₁ ] L `in M ⟶ `let-return[ m₀ ⇒ m₁ ] L′ `in M
 
-  β-↓                     : WeakNorm L →
+  β-`↓                    : WeakNorm L →
                             ------------------------------------------------------------------------
                             `let-return[ m₁ ⇒ m₀ ] (`return[ m₀ ⇒ m₁ ] L) `in M ⟶ [ L /[ m₀ ] 0 ] M
 
@@ -164,7 +156,8 @@ data _⟶_ where
                             -----------------
                             L `$ M ⟶ L `$ M′
 
-  β-⊸                     : -----------------------------------------
+  β-`⊸                    : WeakNorm M →
+                            -----------------------------------------
                             (`λ⦂[ m ] S ∘ L) `$ M ⟶ [ M /[ m ] 0 ] L
 
 data _⟶[_≤]_ where
@@ -182,7 +175,7 @@ data _⟶[_≤]_ where
                              ---------------------------------------------------
                              `unlift[ m₀ ⇒ m₁ ] L ⟶[ m ≤] `unlift[ m₀ ⇒ m₁ ] L′
 
-  β-↑                      : m ≤ₘ m₁ →
+  β-`↑                     : m ≤ₘ m₁ →
                              TermWORedex[ m₁ ≤] L →
                              --------------------------------------------------
                              `unlift[ m₁ ⇒ m₀ ] (`lift[ m₀ ⇒ m₁ ] L) ⟶[ m ≤] L
@@ -220,3 +213,14 @@ data _⟶[_≤]_ where
   ξ-`λ⦂[-]-∘_              : L ⟶[ m ≤] L′ →
                              -----------------------------------------
                              `λ⦂[ m₀ ] S ∘ L ⟶[ m ≤] `λ⦂[ m₀ ] S ∘ L′
+
+open ⟶* _⟶_ public
+
+_⟶*[_≤]_ : Term → Mode → Term → Set (ℓ₁ ⊔ ℓ₂)
+L ⟶*[ m ≤] L′ = ⟶*._⟶*_ _⟶[ m ≤]_ L L′
+
+ξ-of-⟶*[_≤] : ∀ m →
+              (f : Term → Term) →
+              (∀ {L L′} → L ⟶[ m ≤] L′ → f L ⟶[ m ≤] f L′) →
+              ∀ {L L′} → L ⟶*[ m ≤] L′ → f L ⟶*[ m ≤] f L′
+ξ-of-⟶*[ m ≤] = ⟶*.ξ-of-⟶* _⟶[ m ≤]_

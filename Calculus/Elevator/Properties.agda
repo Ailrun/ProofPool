@@ -1,7 +1,7 @@
 {-# OPTIONS --safe #-}
 open import Calculus.Elevator.ModeSpec
 
-module Calculus.Elevator.Properties ℓ₁ ℓ₂ (ℳ : ModeSpec ℓ₁ ℓ₂) where
+module Calculus.Elevator.Properties {ℓ₁ ℓ₂} (ℳ : ModeSpec ℓ₁ ℓ₂) where
 open ModeSpec ℳ
 
 open import Data.Bool as Bool using (true; false)
@@ -11,7 +11,7 @@ open import Data.List.Relation.Unary.All as All using ([]; _∷_)
 import Data.List.Relation.Unary.All.Properties as All
 open import Data.Nat as ℕ using (suc)
 import Data.Nat.Properties as ℕ
-open import Data.Product as × using (_×_; _,_; proj₁; proj₂; ∃; ∃₂)
+open import Data.Product as × using (_×_; _,_; proj₁; proj₂; ∃; ∃₂; -,_)
 open import Data.Sum as ⊎ using (_⊎_; inj₁; inj₂)
 open import Relation.Nullary using (yes; no)
 open import Relation.Nullary.Decidable using (dec-yes; dec-no)
@@ -21,10 +21,10 @@ import Calculus.Elevator.Syntax as S
 import Calculus.Elevator.Typing as T
 import Calculus.Elevator.Typing.Properties as TP
 import Calculus.Elevator.OpSem as O
-open S ℓ₁ ℓ₂ ℳ
-open T ℓ₁ ℓ₂ ℳ
-open TP ℓ₁ ℓ₂ ℳ
-open O ℓ₁ ℓ₂ ℳ
+open S ℳ
+open T ℳ
+open TP ℳ
+open O ℳ
 
 subst-wk[-↑-] : x ≡ x′ →
                 k ≡ k′ →
@@ -311,7 +311,7 @@ preservation ⊢Γ ⊢S                     (Γ~ ⊢ ⊢L ⦂ ⊢⊸ `$ ⊢M)   
   where
     ⊢M′ = preservation (⊢∧-~⊞-⇒⊢₁ ⊢Γ Γ~) ⊢T ⊢M M⟶
 
-preservation ⊢Γ ⊢S                     (Γ~ ⊢ `λ⦂-∘ ⊢L ⦂ ⊢⊸ `$ ⊢M)                                β-⊸                        = true⊢[/] [] Γ~ (⊢∧-~⊞-⇒⊢₁ ⊢Γ Γ~) ⊢M ⊢S ⊢L
+preservation ⊢Γ ⊢S                     (Γ~ ⊢ `λ⦂-∘ ⊢L ⦂ ⊢⊸ `$ ⊢M)                                (β-`⊸ VM)                  = true⊢[/] [] Γ~ (⊢∧-~⊞-⇒⊢₁ ⊢Γ Γ~) ⊢M ⊢S ⊢L
 preservation ⊢Γ (`↑[-⇒ <m ][ ↑∈m ] ⊢S) (`lift[-⇒-] ⊢L)                                           (ξ-`lift[-⇒-] L⟶[≤])       = `lift[-⇒-] ⊢L′
   where
     ⊢L′ = preservation[≤] (⊢∧<ₘ⇒⊢ ⊢Γ <m) ⊢S ⊢L L⟶[≤]
@@ -320,7 +320,7 @@ preservation ⊢Γ ⊢S                     (Γ∤ ⊢`unlift[-⇒-] ⊢L ⦂ �
   where
     ⊢L′ = preservation (⊢∧∤⇒⊢ ⊢Γ Γ∤) ⊢↑ ⊢L L⟶
 
-preservation ⊢Γ ⊢S                     (Γ∤ ⊢`unlift[-⇒-] `lift[-⇒-] ⊢L ⦂ ⊢↑)                     (β-↑ WL)                   = ∤⁻¹-preserves-⊢ [] ⊢L Γ∤
+preservation ⊢Γ ⊢S                     (Γ∤ ⊢`unlift[-⇒-] `lift[-⇒-] ⊢L ⦂ ⊢↑)                     (β-`↑ WL)                  = ∤⁻¹-preserves-⊢ [] ⊢L Γ∤
 preservation ⊢Γ (`↓[-⇒ m< ][ ↓∈m ] ⊢S) (Γ∤ ⊢`return[-⇒-] ⊢L)                                     (ξ-`return[-⇒-] L⟶)        = Γ∤ ⊢`return[-⇒-] ⊢L′
   where
     ⊢L′ = preservation (⊢∧∤⇒⊢ ⊢Γ Γ∤) ⊢S ⊢L L⟶
@@ -329,7 +329,7 @@ preservation ⊢Γ ⊢S                     (Γ~ ⊢`let-return[-⇒-] ⊢L ⦂ 
   where
     ⊢L′ = preservation (⊢∧-~⊞-⇒⊢₀ ⊢Γ Γ~) ⊢↓ ⊢L L⟶
 
-preservation ⊢Γ ⊢S                     (Γ~ ⊢`let-return[-⇒-] (Γ₀∤ ⊢`return[-⇒-] ⊢L) ⦂ ⊢↓ `in ⊢M) (β-↓ VL)
+preservation ⊢Γ ⊢S                     (Γ~ ⊢`let-return[-⇒-] (Γ₀∤ ⊢`return[-⇒-] ⊢L) ⦂ ⊢↓ `in ⊢M) (β-`↓ VL)
   with Γ₀₁ , Γ₀~ , Γ₀₁Del ← ∤⇒~⊞-is-del Γ₀∤
     with Γ″ , Γ″~ , Γ~′ ← ~⊞-assoc Γ~ Γ₀~                                                                                   = true⊢[/] [] (~⊞-swap Γ~′) (⊢∧∤⇒⊢ (⊢∧-~⊞-⇒⊢₀ ⊢Γ Γ~) Γ₀∤) ⊢L ⊢S (~⊞-is-all-del∧⊢⇒⊢ (to-right ∷ Γ″~) (unusable ∷ Γ₀₁Del) ⊢M)
 
@@ -355,7 +355,7 @@ preservation[≤] ⊢Γ ⊢S                   (Γ∤ ⊢`unlift[-⇒-] ⊢L ⦂
   where
     ⊢L′ = preservation (⊢∧∤⇒⊢ ⊢Γ Γ∤) ⊢↑ ⊢L L⟶
 
-preservation[≤] ⊢Γ ⊢S                   (Γ∤ ⊢`unlift[-⇒-] `lift[-⇒-] ⊢L ⦂ ⊢↑) (β-↑ m₀≤ WL)                       = ∤⁻¹-preserves-⊢ [] ⊢L Γ∤
+preservation[≤] ⊢Γ ⊢S                   (Γ∤ ⊢`unlift[-⇒-] `lift[-⇒-] ⊢L ⦂ ⊢↑) (β-`↑ m₀≤ WL)                      = ∤⁻¹-preserves-⊢ [] ⊢L Γ∤
 
 preservation[≤] ⊢Γ (`↓[-⇒ _ ][ _ ] ⊢S)  (Γ∤ ⊢`return[-⇒-] ⊢L)                 (ξ-`return[≰ ≰m₀ ⇒-] L⟶[≤])        = Γ∤ ⊢`return[-⇒-] ⊢L′
   where
@@ -383,21 +383,21 @@ canonoical-⊸ : Γ ⊢[ m ] L ⦂ S `⊸ T →
                WeakNorm L →
                -----------------------------------------------
                ∃₂ (λ S L′ → L ≡ `λ⦂[ m ] S ∘ L′) ⊎ WeakNeut L
-canonoical-⊸ (`λ⦂-∘ ⊢L) (`λ⦂[ _ ] _ ∘ _) = inj₁ (_ , _ , refl)
+canonoical-⊸ (`λ⦂-∘ ⊢L) (`λ⦂[ _ ] _ ∘ _) = inj₁ (-, -, refl)
 canonoical-⊸ _          (`neut NL)       = inj₂ NL
 
 canonoical-↑ : Γ ⊢[ m ] L ⦂ `↑[ m₀ ⇒ m ] S →
                WeakNorm L →
                ----------------------------------------------------------------------
                ∃ (λ L′ → L ≡ `lift[ m₀ ⇒ m ] L′ × TermWORedex[ m ≤] L′) ⊎ WeakNeut L
-canonoical-↑ (`lift[-⇒-] ⊢L) (`lift[ _ ⇒ _ ] WL) = inj₁ (_ , refl , WL)
+canonoical-↑ (`lift[-⇒-] ⊢L) (`lift[ _ ⇒ _ ] WL) = inj₁ (-, refl , WL)
 canonoical-↑ _               (`neut NL)          = inj₂ NL
 
 canonoical-↓ : Γ ⊢[ m ] L ⦂ `↓[ m₀ ⇒ m ] S →
                WeakNorm L →
                ---------------------------------------------------------------
                ∃ (λ L′ → L ≡ `return[ m₀ ⇒ m ] L′ × WeakNorm L′) ⊎ WeakNeut L
-canonoical-↓ (_ ⊢`return[-⇒-] ⊢L) (`return[ _ ⇒ _ ] VL) = inj₁ (_ , refl , VL)
+canonoical-↓ (_ ⊢`return[-⇒-] ⊢L) (`return[ _ ⇒ _ ] VL) = inj₁ (-, refl , VL)
 canonoical-↓ _                    (`neut NL)            = inj₂ NL
 
 
@@ -420,42 +420,42 @@ progress ⊢Γ ⊢S                            (Γ~ ⊢ ⊢L ⦂ ⊢⊸ `$ ⊢M)
   with ⊢T `⊸[ _ ] _ ← ⊢⊸
      | ⊢Γ₀ , ⊢Γ₁ ← ⊢∧-~⊞-⇒⊢ ⊢Γ Γ~
     with progress ⊢Γ₀ ⊢⊸ ⊢L
-...    | inj₂ (_ , L⟶)                                                          = inj₂ (_ , ξ- L⟶ `$?)
+...    | inj₂ (_ , L⟶)                                                          = inj₂ (-, ξ- L⟶ `$?)
 ...    | inj₁ VL
       with progress ⊢Γ₁ ⊢T ⊢M
-...      | inj₂ (_ , M⟶)                                                        = inj₂ (_ , ξ-! VL `$ M⟶)
+...      | inj₂ (_ , M⟶)                                                        = inj₂ (-, ξ-! VL `$ M⟶)
 ...      | inj₁ VM
         with canonoical-⊸ ⊢L VL
 ...        | inj₂ NL                                                            = inj₁ (`neut (NL `$ VM))
-...        | inj₁ (_ , _ , refl)                                                = inj₂ (_ , β-⊸)
+...        | inj₁ (_ , _ , refl)                                                = inj₂ (-, β-`⊸ VM)
 
 progress ⊢Γ (`↑[-⇒_][_]_ {m = m} <m _ ⊢S) (`lift[-⇒-] ⊢L)
   with progress[≤] m (⊢∧<ₘ⇒⊢ ⊢Γ <m) ⊢S ⊢L
-...  | inj₂ (_ , L⟶[≤])                                                         = inj₂ (_ , ξ-`lift[-⇒-] L⟶[≤])
+...  | inj₂ (_ , L⟶[≤])                                                         = inj₂ (-, ξ-`lift[-⇒-] L⟶[≤])
 ...  | inj₁ WL                                                                  = inj₁ (`lift[ _ ⇒ _ ] WL)
 
 progress ⊢Γ ⊢S                            (Γ∤ ⊢`unlift[-⇒-] ⊢L ⦂ ⊢↑)
   with progress (⊢∧∤⇒⊢ ⊢Γ Γ∤) ⊢↑ ⊢L
-...  | inj₂ (_ , L⟶)                                                            = inj₂ (_ , ξ-`unlift[-⇒-] L⟶)
+...  | inj₂ (_ , L⟶)                                                            = inj₂ (-, ξ-`unlift[-⇒-] L⟶)
 ...  | inj₁ VL
     with canonoical-↑ ⊢L VL
 ...    | inj₂ NL                                                                = inj₁ (`neut (`unlift[ _ ⇒ _ ] NL))
-...    | inj₁ (_ , refl , WL′)                                                  = inj₂ (_ , β-↑ WL′)
+...    | inj₁ (_ , refl , WL′)                                                  = inj₂ (-, β-`↑ WL′)
 
 progress ⊢Γ (`↓[-⇒ _ ][ _ ] ⊢S)           (Γ∤ ⊢`return[-⇒-] ⊢L)
   with progress (⊢∧∤⇒⊢ ⊢Γ Γ∤) ⊢S ⊢L
-...  | inj₂ (_ , L⟶) = inj₂ (_ , ξ-`return[-⇒-] L⟶)
-...  | inj₁ VL       = inj₁ (`return[ _ ⇒ _ ] VL)
+...  | inj₂ (_ , L⟶)                                                            = inj₂ (-, ξ-`return[-⇒-] L⟶)
+...  | inj₁ VL                                                                  = inj₁ (`return[ _ ⇒ _ ] VL)
 
 progress ⊢Γ ⊢S                            (Γ~ ⊢`let-return[-⇒-] ⊢L ⦂ ⊢↓ `in ⊢M)
   with `↓[-⇒ _ ][ _ ] ⊢T ← ⊢↓
      | ⊢Γ₀ , ⊢Γ₁ ← ⊢∧-~⊞-⇒⊢ ⊢Γ Γ~
     with progress ⊢Γ₀ ⊢↓ ⊢L
-...    | inj₂ (_ , L⟶)                                                          = inj₂ (_ , ξ-`let-return[-⇒-] L⟶ `in-)
+...    | inj₂ (_ , L⟶)                                                          = inj₂ (-, ξ-`let-return[-⇒-] L⟶ `in-)
 ...    | inj₁ VL
       with canonoical-↓ ⊢L VL
 ...      | inj₂ NL                                                              = inj₁ (`neut (`let-return[ _ ⇒ _ ] NL `in _))
-...      | inj₁ (_ , refl , VL′)                                                = inj₂ (_ , β-↓ VL′)
+...      | inj₁ (_ , refl , VL′)                                                = inj₂ (-, β-`↓ VL′)
 
 progress ⊢Γ ⊢S                            (`# x∈)                               = inj₁ (`neut (`# _))
 
@@ -463,64 +463,64 @@ progress ⊢Γ ⊢S                            (`# x∈)                        
 progress[≤]                           m₀ ⊢Γ ⊢S                    (`unit ΓDel)                         = inj₁ `unit
 progress[≤]                           m₀ ⊢Γ (⊢S `⊸[ _ ] ⊢T)       (`λ⦂-∘ ⊢L)
   with progress[≤] m₀ ((⊢S , valid ≤ₘ-refl) ∷ ⊢Γ) ⊢T ⊢L
-...  | inj₂ (_ , L⟶[≤])                                                                                = inj₂ (_ , ξ-`λ⦂[-]-∘ L⟶[≤])
+...  | inj₂ (_ , L⟶[≤])                                                                                = inj₂ (-, ξ-`λ⦂[-]-∘ L⟶[≤])
 ...  | inj₁ WL                                                                                         = inj₁ (`λ⦂[ _ ] _ ∘ WL)
 
 progress[≤]                           m₀ ⊢Γ ⊢S                    (Γ~ ⊢ ⊢L ⦂ ⊢⊸ `$ ⊢M)
   with ⊢T `⊸[ _ ] _ ← ⊢⊸
      | ⊢Γ₀ , ⊢Γ₁ ← ⊢∧-~⊞-⇒⊢ ⊢Γ Γ~
     with progress[≤] m₀ ⊢Γ₀ ⊢⊸ ⊢L
-...    | inj₂ (_ , L⟶[≤])                                                                              = inj₂ (_ , ξ- L⟶[≤] `$?)
+...    | inj₂ (_ , L⟶[≤])                                                                              = inj₂ (-, ξ- L⟶[≤] `$?)
 ...    | inj₁ WL
       with progress[≤] m₀ ⊢Γ₁ ⊢T ⊢M
-...      | inj₂ (_ , M⟶[≤])                                                                            = inj₂ (_ , ξ-! WL `$ M⟶[≤])
+...      | inj₂ (_ , M⟶[≤])                                                                            = inj₂ (-, ξ-! WL `$ M⟶[≤])
 ...      | inj₁ WM                                                                                     = inj₁ (WL `$ WM)
 
 progress[≤]                           m₀ ⊢Γ (`↑[-⇒ <m ][ _ ] ⊢S) (`lift[-⇒-] ⊢L)
   with progress[≤] m₀ (⊢∧<ₘ⇒⊢ ⊢Γ <m) ⊢S ⊢L
-...  | inj₂ (_ , L⟶[≤])                                                                                = inj₂ (_ , ξ-`lift[-⇒-] L⟶[≤])
+...  | inj₂ (_ , L⟶[≤])                                                                                = inj₂ (-, ξ-`lift[-⇒-] L⟶[≤])
 ...  | inj₁ WL                                                                                         = inj₁ (`lift[ _ ⇒ _ ] WL)
 
 progress[≤] {L = `unlift[ m₁ ⇒ _ ] L} m₀ ⊢Γ ⊢S                   (Γ∤ ⊢`unlift[-⇒-] ⊢L ⦂ ⊢↑)
   with m₀ ≤?ₘ m₁
 ...  | no  m₀≰
     with progress[≤] m₀ (⊢∧∤⇒⊢ ⊢Γ Γ∤) ⊢↑ ⊢L
-...    | inj₂ (_ , L⟶[≤])                                                                              = inj₂ (_ , (ξ-`unlift[≰ m₀≰ ⇒-] L⟶[≤]))
+...    | inj₂ (_ , L⟶[≤])                                                                              = inj₂ (-, (ξ-`unlift[≰ m₀≰ ⇒-] L⟶[≤]))
 ...    | inj₁ WL                                                                                       = inj₁ (`unlift[≰ m₀≰ ⇒ _ ] WL)
 
 progress[≤] {L = `unlift[ m₁ ⇒ _ ] L} m₀ ⊢Γ ⊢S                   (Γ∤ ⊢`unlift[-⇒-] ⊢L ⦂ ⊢↑)
      | yes m₀≤
     with progress (⊢∧∤⇒⊢ ⊢Γ Γ∤) ⊢↑ ⊢L
-...    | inj₂ (_ , L⟶)                                                                                 = inj₂ (_ , ξ-`unlift[≤ m₀≤ ⇒-] L⟶)
+...    | inj₂ (_ , L⟶)                                                                                 = inj₂ (-, ξ-`unlift[≤ m₀≤ ⇒-] L⟶)
 ...    | inj₁ VL
       with ≢lift[-⇒-]? L
 ...      | no ¬≢liftL
         with _ , _ , _ , refl ← ¬≢lift[-⇒-]⇒≡lift[-⇒-] L ¬≢liftL
           with `lift[-⇒-] ⊢L′ ← ⊢L
-             | `lift[ _ ⇒ _ ] VL′ ← VL                                                                 = inj₂ (_ , β-↑ m₀≤ VL′)
+             | `lift[ _ ⇒ _ ] VL′ ← VL                                                                 = inj₂ (-, β-`↑ m₀≤ VL′)
 ...      | yes ≢liftL                                                                                  = inj₁ (`unlift[≤ m₀≤ ⇒ _ ] VL ≢liftL)
 
 progress[≤] {L = `return[ m₁ ⇒ _ ] L} m₀ ⊢Γ (`↓[-⇒ _ ][ _ ] ⊢S)  (Γ∤ ⊢`return[-⇒-] ⊢L)
   with m₀ ≤?ₘ m₁
 ...  | no  m₀≰
     with progress[≤] m₀ (⊢∧∤⇒⊢ ⊢Γ Γ∤) ⊢S ⊢L
-...    | inj₂ (_ , L⟶[≤])                                                                              = inj₂ (_ , (ξ-`return[≰ m₀≰ ⇒-] L⟶[≤]))
+...    | inj₂ (_ , L⟶[≤])                                                                              = inj₂ (-, (ξ-`return[≰ m₀≰ ⇒-] L⟶[≤]))
 ...    | inj₁ WL                                                                                       = inj₁ (`return[≰ m₀≰ ⇒ _ ] WL)
 
 progress[≤] {L = `return[ m₁ ⇒ _ ] L} m₀ ⊢Γ (`↓[-⇒ _ ][ _ ] ⊢S)  (Γ∤ ⊢`return[-⇒-] ⊢L)
      | yes m₀≤
     with progress (⊢∧∤⇒⊢ ⊢Γ Γ∤) ⊢S ⊢L
-...    | inj₂ (_ , L⟶)                                                                                 = inj₂ (_ , ξ-`return[≤ m₀≤ ⇒-] L⟶)
+...    | inj₂ (_ , L⟶)                                                                                 = inj₂ (-, ξ-`return[≤ m₀≤ ⇒-] L⟶)
 ...    | inj₁ VL                                                                                       = inj₁ (`return[≤ m₀≤ ⇒ _ ] VL)
 
 progress[≤]                           m₀ ⊢Γ ⊢S                   (Γ~ ⊢`let-return[-⇒-] ⊢L ⦂ ⊢↓ `in ⊢M)
   with `↓[-⇒ m< ][ _ ] ⊢T ← ⊢↓
      | ⊢Γ₀ , ⊢Γ₁ ← ⊢∧-~⊞-⇒⊢ ⊢Γ Γ~
     with progress[≤] m₀ ⊢Γ₀ ⊢↓ ⊢L
-...    | inj₂ (_ , L⟶[≤])                                                                              = inj₂ (_ , ξ-`let-return[-⇒-] L⟶[≤] `in?)
+...    | inj₂ (_ , L⟶[≤])                                                                              = inj₂ (-, ξ-`let-return[-⇒-] L⟶[≤] `in?)
 ...    | inj₁ WL
       with progress[≤] m₀ ((⊢T , valid (<ₘ⇒≤ₘ m<)) ∷ ⊢Γ₁) ⊢S ⊢M
-...      | inj₂ (_ , M⟶[≤])                                                                            = inj₂ (_ , ξ-`let-return[-⇒-]! WL `in M⟶[≤])
+...      | inj₂ (_ , M⟶[≤])                                                                            = inj₂ (-, ξ-`let-return[-⇒-]! WL `in M⟶[≤])
 ...      | inj₁ WM                                                                                     = inj₁ (`let-return[ _ ⇒ _ ] WL `in WM)
 
 progress[≤]                          m₀ ⊢Γ ⊢S                   (`# x∈)                                = inj₁ (`# _)

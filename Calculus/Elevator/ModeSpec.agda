@@ -4,10 +4,10 @@ module Calculus.Elevator.ModeSpec where
 open import Agda.Primitive
 open import Data.Bool as Bool using (Bool)
 open import Data.Product using (_×_; proj₁)
-open import Relation.Nullary
 open import Relation.Binary
 import Relation.Binary.Construct.NonStrictToStrict as Strict
 open import Relation.Binary.PropositionalEquality using (_≡_; _≢_)
+open import Relation.Nullary
 
 data ModeSpecSt : Set where
   ``Wk ``Co : ModeSpecSt
