@@ -12,9 +12,11 @@ open import Data.Nat as ℕ using (ℕ; suc; _+_)
 open import Data.Product as × using (_,_; ∃; ∃₂; -,_)
 open import Data.Unit as ⊤ using (⊤; tt)
 open import Relation.Nullary using (Dec; yes; no; ¬_)
+open import Relation.Binary using (Rel)
 open import Relation.Binary.PropositionalEquality using (_≡_; refl)
 
-open import Calculus.GeneralOpSem
+open import Calculus.GeneralOpSem using (wkidx[_↑_]_; idx[_/_]_along_)
+open import Calculus.GeneralOpSem using (module ⟶*) public
 open import Calculus.Elevator.Syntax ℳ
 
 data WeakNorm : Term → Set (ℓ₁ ⊔ ℓ₂)
@@ -70,7 +72,7 @@ data TermWORedex[_≤] where
 
   `lift[_⇒_]            : ∀ m₀ m₁ → TermWORedex[ m ≤] L → TermWORedex[ m ≤] (`lift[ m₀ ⇒ m₁ ] L)
   `unlift[≰_⇒_]         : ¬ (m ≤ₘ m₀) → ∀ m₁ → TermWORedex[ m ≤] L → TermWORedex[ m ≤] (`unlift[ m₀ ⇒ m₁ ] L)
-  `unlift[≤_⇒_]         : m ≤ₘ m₀ → ∀ m₁ → WeakNorm L → ≢lift[-⇒-] L → TermWORedex[ m ≤] (`unlift[ m₀ ⇒ m₁ ] L)
+  `unlift[≤_⇒_]         : m ≤ₘ m₀ → ∀ m₁ → WeakNorm L → {≢lift[-⇒-] L} → TermWORedex[ m ≤] (`unlift[ m₀ ⇒ m₁ ] L)
 
   `return[≰_⇒_]         : ¬ (m ≤ₘ m₀) → ∀ m₁ → TermWORedex[ m ≤] L → TermWORedex[ m ≤] (`return[ m₀ ⇒ m₁ ] L)
   `return[≤_⇒_]         : m ≤ₘ m₀ → ∀ m₁ → WeakNorm L → TermWORedex[ m ≤] (`return[ m₀ ⇒ m₁ ] L)
@@ -214,13 +216,22 @@ data _⟶[_≤]_ where
                              -----------------------------------------
                              `λ⦂[ m₀ ] S ∘ L ⟶[ m ≤] `λ⦂[ m₀ ] S ∘ L′
 
-open ⟶* _⟶_ public
+open ⟶* _⟶_ using (_⟶*_; ε; _◅_; ξ-of-⟶*; ξ-of-↝*-⟶*) public
 
-_⟶*[_≤]_ : Term → Mode → Term → Set (ℓ₁ ⊔ ℓ₂)
-L ⟶*[ m ≤] L′ = ⟶*._⟶*_ _⟶[ m ≤]_ L L′
+infix   4 _⟶[_≤]*_
 
-ξ-of-⟶*[_≤] : ∀ m →
+_⟶[_≤]*_ : Term → Mode → Term → Set (ℓ₁ ⊔ ℓ₂)
+L ⟶[ m ≤]* L′ = ⟶*._⟶*_ _⟶[ m ≤]_ L L′
+
+ξ-of-⟶[_≤]* : ∀ m →
               (f : Term → Term) →
               (∀ {L L′} → L ⟶[ m ≤] L′ → f L ⟶[ m ≤] f L′) →
-              ∀ {L L′} → L ⟶*[ m ≤] L′ → f L ⟶*[ m ≤] f L′
-ξ-of-⟶*[ m ≤] = ⟶*.ξ-of-⟶* _⟶[ m ≤]_
+              ∀ {L L′} → L ⟶[ m ≤]* L′ → f L ⟶[ m ≤]* f L′
+ξ-of-⟶[ m ≤]* = ⟶*.ξ-of-⟶* _⟶[ m ≤]_
+
+ξ-of-↝*-⟶[_≤]* : ∀ m →
+                 (_↝_ : Rel Term (ℓ₁ ⊔ ℓ₂))
+                 (f : Term → Term) →
+                 (∀ {L L′} → L ↝ L′ → f L ⟶[ m ≤] f L′) →
+                 ∀ {L L′} → ⟶*.Star _↝_ L L′ → f L ⟶[ m ≤]* f L′
+ξ-of-↝*-⟶[ m ≤]* _↝_ = ⟶*.ξ-of-↝*-⟶* _⟶[ m ≤]_ _↝_

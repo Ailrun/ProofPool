@@ -25,15 +25,20 @@ idx[ L / x ] y along `#_
 ...    | yes _ = L
 
 module ⟶* {ℓ ℓ′} {A : Set ℓ} (_⟶_ : Rel A ℓ′) where
-  open import Relation.Binary.Construct.Closure.ReflexiveTransitive using (Star)
-  open import Relation.Binary.Construct.Closure.ReflexiveTransitive using (ε; _◅_) public 
+  open import Relation.Binary.Construct.Closure.ReflexiveTransitive using (Star; ε; _◅_) public
+  open import Relation.Binary.Construct.Closure.ReflexiveTransitive public
 
   infix   4 _⟶*_
 
   _⟶*_ = Star _⟶_
 
+  ξ-of-↝*-⟶* : ∀ {ℓ″} (_↝_ : Rel A ℓ″) (f : A → A) →
+               (∀ {L L′} → L ↝ L′ → f L ⟶ f L′) →
+               ∀ {L L′} → Star _↝_ L L′ → f L ⟶* f L′
+  ξ-of-↝*-⟶* _↝_ f ξ-rule ε           = ε
+  ξ-of-↝*-⟶* _↝_ f ξ-rule (L⟶ ◅ L′⟶*) = ξ-rule L⟶ ◅ ξ-of-↝*-⟶* _↝_ f ξ-rule L′⟶*
+
   ξ-of-⟶* : (f : A → A) →
             (∀ {L L′} → L ⟶ L′ → f L ⟶ f L′) →
             ∀ {L L′} → L ⟶* L′ → f L ⟶* f L′
-  ξ-of-⟶* f ξ-rule ε           = ε
-  ξ-of-⟶* f ξ-rule (L⟶ ◅ L′⟶*) = ξ-rule L⟶ ◅ ξ-of-⟶* f ξ-rule L′⟶*
+  ξ-of-⟶* = ξ-of-↝*-⟶* _⟶_
