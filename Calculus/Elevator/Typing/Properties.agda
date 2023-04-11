@@ -34,6 +34,16 @@ left-bias-~⊞ ((S , m , d) ∷ Γ)
   with _ , d~ ← left-bias-~d⊞ m d
      | _ , Γ~ ← left-bias-~⊞ Γ = -, d~ ∷ Γ~
 
+left-bias-~d⊞-is-del : ∀ m d →
+                       proj₁ (left-bias-~d⊞ m d) [ m ]is-del
+left-bias-~d⊞-is-del m false = unusable
+left-bias-~d⊞-is-del m true  = unusable
+
+left-bias-~⊞-is-all-del : ∀ Γ →
+                          proj₁ (left-bias-~⊞ Γ) is-all-del
+left-bias-~⊞-is-all-del []                = []
+left-bias-~⊞-is-all-del ((S , m , d) ∷ Γ) = left-bias-~d⊞-is-del m d ∷ left-bias-~⊞-is-all-del Γ
+
 length-respects-~⊞ : Γ ~ Γ₀ ⊞ Γ₁ →
                      length Γ₀ ≡ length Γ × length Γ₁ ≡ length Γ
 length-respects-~⊞ []       = refl , refl
