@@ -187,13 +187,13 @@ is-all-del⇒∤ m (dDel ∷ ΓDel)
 ∤d⇒~d⊞-is-del (delete ≰m₀ dDel) = -, ~d⊞-identityˡ _ , dDel
 ∤d⇒~d⊞-is-del (keep ≤m₀)        = -, ~d⊞-identityʳ _ , unusable
 
-∤⇒~⊞-is-del : Γ ∤[ m ] Γ′ →
-              ---------------------------------------
-              ∃ (λ Γ₁ → Γ ~ Γ′ ⊞ Γ₁ × Γ₁ is-all-del)
-∤⇒~⊞-is-del []        = -, [] , []
-∤⇒~⊞-is-del (d∤ ∷ Γ∤)
+∤⇒~⊞-is-all-del : Γ ∤[ m ] Γ′ →
+                  ---------------------------------------
+                  ∃ (λ Γ₁ → Γ ~ Γ′ ⊞ Γ₁ × Γ₁ is-all-del)
+∤⇒~⊞-is-all-del []        = -, [] , []
+∤⇒~⊞-is-all-del (d∤ ∷ Γ∤)
   with _ , d~ , d₁Del ← ∤d⇒~d⊞-is-del d∤
-     | _ , Γ~ , Γ₁Del ← ∤⇒~⊞-is-del Γ∤ = -, d~ ∷ Γ~ , d₁Del ∷ Γ₁Del
+     | _ , Γ~ , Γ₁Del ← ∤⇒~⊞-is-all-del Γ∤ = -, d~ ∷ Γ~ , d₁Del ∷ Γ₁Del
 
 length-respects-∤ : Γ ∤[ m ] Γ′ →
                     length Γ′ ≡ length Γ

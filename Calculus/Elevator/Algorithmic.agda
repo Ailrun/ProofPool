@@ -38,6 +38,9 @@ data _[_]is-used-by_ : Useable → Mode → Useable → Set where
   used      : --------------------------
               true [ m ]is-used-by true
 
+  unusable  : ----------------------------
+              false [ m ]is-used-by false
+
   weakening : Bool.T (stₘ m ``Wk) →
               ---------------------------
               true [ m ]is-used-by false

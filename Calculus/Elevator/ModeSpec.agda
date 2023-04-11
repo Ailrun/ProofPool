@@ -35,4 +35,13 @@ record ModeSpec ℓ₁ ℓ₂ : Set (lsuc (ℓ₁ ⊔ ℓ₂)) where
     ; isDecPartialOrder = isDecPartialOrderₘ
     }
 
+  decStrictPartialOrderₘ : DecStrictPartialOrder ℓ₁ ℓ₁ (ℓ₁ ⊔ ℓ₂)
+  decStrictPartialOrderₘ = record
+    { Carrier = Mode
+    ; _≈_ = _≡_
+    ; _<_ = _<ₘ_
+    ; isDecStrictPartialOrder = Strict.<-isDecStrictPartialOrder _≡_ _≤ₘ_ isDecPartialOrderₘ
+    }
+
   open DecPoset decPosetₘ using () renaming (refl to ≤ₘ-refl; trans to ≤ₘ-trans; _≟_ to _≟ₘ_; _≤?_ to _≤?ₘ_) public
+  open DecStrictPartialOrder decStrictPartialOrderₘ using () renaming (_<?_ to _<?ₘ_) public
