@@ -9,7 +9,7 @@ open import Data.List as List using ([]; _∷_; _++_; length)
 import Data.List.Properties as List
 open import Data.List.Relation.Unary.All as All using ([]; _∷_)
 import Data.List.Relation.Unary.All.Properties as All
-open import Data.Nat as ℕ using (suc; _+_; s≤s)
+open import Data.Nat as ℕ using (zero; suc; _+_; s≤s)
 import Data.Nat.Properties as ℕ
 open import Data.Product as × using (_×_; _,_; proj₁; proj₂; ∃; ∃₂; -,_)
 open import Data.Sum as ⊎ using (_⊎_; inj₁; inj₂)
@@ -434,15 +434,15 @@ _Type≟_ : ∀ (S T : Type) → Dec (S ≡ T)
                                           (m₀ ≟ₘ m₂ ×-dec m₁ ≟ₘ m₃ ×-dec S Type≟ T)
 
 ?[_]~d_⊞_ : ∀ m d₀ d₁ → Dec (∃ (λ d → d [ m ]~d d₀ ⊞ d₁))
-?[ m ]~d false ⊞ d₁    = yes (_ , ~d⊞-identityˡ _)
-?[ m ]~d true  ⊞ false = yes (_ , to-left)
-?[ m ]~d true  ⊞ true  = Dec.map′ (λ Co∈m → _ , contraction Co∈m) (λ{ (_ , contraction Co∈m) → Co∈m }) (Bool.T? (stₘ m ``Co))
+?[ m ]~d false ⊞ d₁    = yes (-, ~d⊞-identityˡ _)
+?[ m ]~d true  ⊞ false = yes (-, to-left)
+?[ m ]~d true  ⊞ true  = Dec.map′ (λ Co∈m → -, contraction Co∈m) (λ{ (_ , contraction Co∈m) → Co∈m }) (Bool.T? (stₘ m ``Co))
 
 ?~_⊞_ : ∀ Δ₀ Δ₁ → Dec (∃ (λ Δ → Δ ~ Δ₀ ⊞ Δ₁))
-?~ []                    ⊞ []                    = yes (_ , [])
+?~ []                    ⊞ []                    = yes (-, [])
 ?~ []                    ⊞ (_              ∷ Δ₁) = no λ()
 ?~ (_              ∷ Δ₀) ⊞ []                    = no λ()
-?~ ((S₀ , m₀ , d₀) ∷ Δ₀) ⊞ ((S₁ , m₁ , d₁) ∷ Δ₁) = Dec.map′ (λ{ (refl , refl , (_ , d~) , _ , Δ~) → _ , d~ ∷ Δ~ }) (λ{ (_ , d~ ∷ Δ~) → refl , refl , (_ , d~) , _ , Δ~ }) (S₀ Type≟ S₁ ×-dec m₀ ≟ₘ m₁ ×-dec ?[ m₀ ]~d d₀ ⊞ d₁ ×-dec ?~ Δ₀ ⊞ Δ₁)
+?~ ((S₀ , m₀ , d₀) ∷ Δ₀) ⊞ ((S₁ , m₁ , d₁) ∷ Δ₁) = Dec.map′ (λ{ (refl , refl , (_ , d~) , _ , Δ~) → -, d~ ∷ Δ~ }) (λ{ (_ , d~ ∷ Δ~) → refl , refl , (-, d~) , -, Δ~ }) (S₀ Type≟ S₁ ×-dec m₀ ≟ₘ m₁ ×-dec ?[ m₀ ]~d d₀ ⊞ d₁ ×-dec ?~ Δ₀ ⊞ Δ₁)
 
 ⊢[_]_?⦂⋆ : ∀ m S → Dec (⊢[ m ] S ⦂⋆)
 ⊢[ m ] `⊤              ?⦂⋆ = Dec.map′
@@ -468,31 +468,46 @@ false [ m ]is-used-by? true  = no λ()
 true  [ m ]is-used-by? false = Dec.map′ weakening (λ{ (weakening Wk∈m) → Wk∈m }) (Bool.T? (stₘ m ``Wk))
 true  [ m ]is-used-by? true  = yes used
 
+_is-all-used-by?_ : ∀ Γ Δ → Dec (Γ is-all-used-by Δ)
+[]                is-all-used-by? []                   = yes []
+[]                is-all-used-by? (_              ∷ Δ) = no λ()
+(_           ∷ Γ) is-all-used-by? []                   = no λ()
+((S , m , d) ∷ Γ) is-all-used-by? ((S′ , m′ , dS) ∷ Δ) = Dec.map′
+                                                           (λ{ (refl , refl , dUsed , ΓUsed) → dUsed ∷ ΓUsed })
+                                                           (λ{ (dUsed ∷ ΓUsed) → refl , refl , dUsed , ΓUsed })
+                                                           (S Type≟ S′ ×-dec m ≟ₘ m′ ×-dec d [ m ]is-used-by? dS ×-dec Γ is-all-used-by? Δ)
+
+_⦂[_]?∈_⇒? : ∀ x m Γ → Dec (∃₂ (λ S Δ → x ⦂[ m ] S ∈ Γ ⇒ Δ))
+x     ⦂[ m ]?∈ []                   ⇒? = no λ()
+zero  ⦂[ m ]?∈ (S , m₀ , true)  ∷ Γ ⇒? = Dec.map′ (λ{ refl → -, -, here }) (λ{ (_ , _ , here) → refl }) (m ≟ₘ m₀)
+zero  ⦂[ m ]?∈ (S , m₀ , false) ∷ Γ ⇒? = no λ()
+suc x ⦂[ m ]?∈ _                ∷ Γ ⇒? = Dec.map′ (λ{ (_ , _ , x∈) → -, -, there x∈ }) (λ{ (_ , _ , there x∈) → -, -, x∈ }) (x ⦂[ m ]?∈ Γ ⇒?)
+
 _⊢[_]_⦂?⇒? : ∀ Γ m L → Dec (∃₂ (λ S Δ → Γ ⊢[ m ] L ⦂ S ⇒ Δ))
-Γ ⊢[ m ] `unit ⦂?⇒? = yes (_ , _ , `unit)
+Γ ⊢[ m ] `unit ⦂?⇒? = yes (-, -, `unit)
 Γ ⊢[ m ] `lift[ m₀ ⇒ m₁ ] L ⦂?⇒? = Dec.map′ (λ{ (refl , _ , _ , ⊢L) → -, -, `lift[-⇒-] ⊢L }) (λ{ (_ , _ , `lift[-⇒-] ⊢L) → refl , -, -, ⊢L }) (m ≟ₘ m₁ ×-dec Γ ⊢[ m₀ ] L ⦂?⇒?)
 Γ ⊢[ m ] `unlift[ m₀ ⇒ m₁ ] L ⦂?⇒?
   with m ≟ₘ m₁
 ...  | no  m≢m₁ = no λ{ (_ , _ , `unlift[-⇒-] _ ⦂ _) → m≢m₁ refl }
 ...  | yes refl
     with Γ drop[ m₀ ]⇒ ⊢[ m₀ ] L ⦂?⇒?
-...    | no ⊬L             = no λ{ (_ , _ , `unlift[-⇒-] ⊢L ⦂ _) → ⊬L (_ , _ , ⊢L) }
+...    | no ⊬L             = no λ{ (_ , _ , `unlift[-⇒-] ⊢L ⦂ _) → ⊬L (-, -, ⊢L) }
 ...    | yes (↑T , _ , ⊢L)
       with ↑T
 ...      | `⊤            = no λ{ (_ , _ , `unlift[-⇒-] ⊢L′ ⦂ _) → case (⊢-det ⊢L ⊢L′) of λ() }
 ...      | `↓[ _ ⇒ _ ] _ = no λ{ (_ , _ , `unlift[-⇒-] ⊢L′ ⦂ _) → case (⊢-det ⊢L ⊢L′) of λ() }
 ...      | _ `⊸ _        = no λ{ (_ , _ , `unlift[-⇒-] ⊢L′ ⦂ _) → case (⊢-det ⊢L ⊢L′) of λ() }
 ...      | ↑T@(`↑[ m₂ ⇒ m₃ ] T) = Dec.map′
-                                    (λ{ (refl , ⊢↑@(`↑[-⇒ _ ][ _ ] _)) → _ , _ , `unlift[-⇒-] ⊢L ⦂ ⊢↑ })
+                                    (λ{ (refl , ⊢↑@(`↑[-⇒ _ ][ _ ] _)) → -, -, `unlift[-⇒-] ⊢L ⦂ ⊢↑ })
                                     (λ{ (_ , _ , `unlift[-⇒-] ⊢L′ ⦂ ⊢↑) → case (⊢-det ⊢L ⊢L′) of λ{ (refl , refl) → refl , ⊢↑ } })
                                     (m ≟ₘ m₂ ×-dec ⊢[ m₀ ] ↑T ?⦂⋆)
-Γ ⊢[ m ] `return[ m₀ ⇒ m₁ ] L ⦂?⇒? = Dec.map′ (λ{ (refl , _ , _ , ⊢L) → _ , _ , `return[-⇒-] ⊢L }) (λ{ (_ , _ , `return[-⇒-] ⊢L′) → refl , _ , _ , ⊢L′ }) (m ≟ₘ m₁ ×-dec Γ drop[ m₀ ]⇒ ⊢[ m₀ ] L ⦂?⇒?)
+Γ ⊢[ m ] `return[ m₀ ⇒ m₁ ] L ⦂?⇒? = Dec.map′ (λ{ (refl , _ , _ , ⊢L) → -, -, `return[-⇒-] ⊢L }) (λ{ (_ , _ , `return[-⇒-] ⊢L′) → refl , -, -, ⊢L′ }) (m ≟ₘ m₁ ×-dec Γ drop[ m₀ ]⇒ ⊢[ m₀ ] L ⦂?⇒?)
 Γ ⊢[ m ] `let-return[ m₀ ⇒ m₁ ] L `in M ⦂?⇒?
   with m ≟ₘ m₀
 ...  | no m≢m₀             = no λ{ (_ , _ , _ ⊢`let-return[-⇒ _ ] _ ⦂ _ `in _) → m≢m₀ refl }
 ...  | yes refl
     with Γ ⊢[ m ] L ⦂?⇒?
-...    | no  ⊬L              = no λ{ (_ , _ , _ ⊢`let-return[-⇒ _ ] ⊢L ⦂ _ `in _) → ⊬L (_ , _ , ⊢L) }
+...    | no  ⊬L              = no λ{ (_ , _ , _ ⊢`let-return[-⇒ _ ] ⊢L ⦂ _ `in _) → ⊬L (-, -, ⊢L) }
 ...    | yes (↓T , Δ₀ , ⊢L)
       with ↓T
 ...      | `⊤            = no λ{ (_ , _ , _ ⊢`let-return[-⇒ _ ] ⊢L′ ⦂ _ `in _) → case (⊢-det ⊢L ⊢L′) of λ() }
@@ -506,24 +521,24 @@ _⊢[_]_⦂?⇒? : ∀ Γ m L → Dec (∃₂ (λ S Δ → Γ ⊢[ m ] L ⦂ S �
 ...          | no ⊬↓  = no λ{ (_ , _ , _ ⊢`let-return[-⇒ _ ] ⊢L′ ⦂ ⊢↓ `in _) → case (⊢-det ⊢L ⊢L′) of λ{ (refl , refl) → ⊬↓ ⊢↓ } }
 ...          | yes ⊢↓@(`↓[-⇒ _ ][ _ ] _)
           with (T , m₁ , true) ∷ Γ ⊢[ m ] M ⦂?⇒?
-...          | no  ⊬M            = no λ{ (_ , _ , _ ⊢`let-return[-⇒ _ ] ⊢L′ ⦂ _ `in ⊢M) → case (⊢-det ⊢L ⊢L′) of λ{ (refl , refl) → ⊬M (_ , _ , ⊢M) } }
+...          | no  ⊬M            = no λ{ (_ , _ , _ ⊢`let-return[-⇒ _ ] ⊢L′ ⦂ _ `in ⊢M) → case (⊢-det ⊢L ⊢L′) of λ{ (refl , refl) → ⊬M (-, -, ⊢M) } }
 ...          | yes (_ , TΔ₁ , ⊢M)
             with TΔ₁
 ...            | []                  = no λ{ (_ , _ , _ ⊢`let-return[-⇒ _ ] ⊢L′ ⦂ _ `in ⊢M′) → case (⊢-det ⊢L ⊢L′) of λ{ (refl , refl) → case (⊢-det ⊢M ⊢M′) of λ() } }
-...            | (T′ , m₁′ , d) ∷ Δ₁ = Dec.map′ (λ{ ((_ , Δ~) , refl , refl , dUsed) → _ , _ , Δ~ ⊢`let-return[-⇒ dUsed ] ⊢L ⦂ ⊢↓ `in ⊢M }) (λ{ (_ , _ , Δ~ ⊢`let-return[-⇒ dUsed ] ⊢L′ ⦂ _ `in ⊢M′) → case (⊢-det ⊢L ⊢L′) of λ{ (refl , refl) → case (⊢-det ⊢M ⊢M′) of λ{ (refl , refl) → (_ , Δ~) , refl , refl , dUsed } }}) (?~ Δ₀ ⊞ Δ₁ ×-dec T Type≟ T′ ×-dec m₁ ≟ₘ m₁′ ×-dec true [ m₁ ]is-used-by? d)
+...            | (T′ , m₁′ , d) ∷ Δ₁ = Dec.map′ (λ{ ((_ , Δ~) , refl , refl , dUsed) → -, -, Δ~ ⊢`let-return[-⇒ dUsed ] ⊢L ⦂ ⊢↓ `in ⊢M }) (λ{ (_ , _ , Δ~ ⊢`let-return[-⇒ dUsed ] ⊢L′ ⦂ _ `in ⊢M′) → case (⊢-det ⊢L ⊢L′) of λ{ (refl , refl) → case (⊢-det ⊢M ⊢M′) of λ{ (refl , refl) → (-, Δ~) , refl , refl , dUsed } }}) (?~ Δ₀ ⊞ Δ₁ ×-dec T Type≟ T′ ×-dec m₁ ≟ₘ m₁′ ×-dec true [ m₁ ]is-used-by? d)
 Γ ⊢[ m ] `λ⦂[ m′ ] S ∘ L ⦂?⇒?
   with m ≟ₘ m′
 ...  | no  m≢m′ = no λ{ (_ , _ , `λ⦂[ _ ]-∘ _) → m≢m′ refl }
 ...  | yes refl
     with (S , m , true) ∷ Γ ⊢[ m ] L ⦂?⇒?
-...    | no  ⊬L           = no λ{ (_ , _ , `λ⦂[ _ ]-∘ ⊢L) → ⊬L (_ , _ , ⊢L) }
+...    | no  ⊬L           = no λ{ (_ , _ , `λ⦂[ _ ]-∘ ⊢L) → ⊬L (-, -, ⊢L) }
 ...    | yes (_ , Δ , ⊢L)
       with Δ
 ...      | []                 = no λ{ (_ , _ , `λ⦂[ _ ]-∘ ⊢L′) → case (⊢-det ⊢L ⊢L′) of λ() }
-...      | (S′ , m′ , d) ∷ Δ′ = Dec.map′ (λ{ (refl , refl , dUsed) → _ , _ , `λ⦂[ dUsed ]-∘ ⊢L }) (λ{ (_ , _ , `λ⦂[ dUsed ]-∘ ⊢L′) → case (⊢-det ⊢L ⊢L′) of λ{ (refl , refl) → refl , refl , dUsed } }) (S Type≟ S′ ×-dec m ≟ₘ m′ ×-dec true [ m ]is-used-by? d)
+...      | (S′ , m′ , d) ∷ Δ′ = Dec.map′ (λ{ (refl , refl , dUsed) → -, -, `λ⦂[ dUsed ]-∘ ⊢L }) (λ{ (_ , _ , `λ⦂[ dUsed ]-∘ ⊢L′) → case (⊢-det ⊢L ⊢L′) of λ{ (refl , refl) → refl , refl , dUsed } }) (S Type≟ S′ ×-dec m ≟ₘ m′ ×-dec true [ m ]is-used-by? d)
 Γ ⊢[ m ] L `$ M ⦂?⇒?
   with Γ ⊢[ m ] L ⦂?⇒?
-...  | no  ⊬L              = no λ{ (_ , _ , _ ⊢ ⊢L ⦂ _ `$ _) → ⊬L (_ , _ , ⊢L) }
+...  | no  ⊬L              = no λ{ (_ , _ , _ ⊢ ⊢L ⦂ _ `$ _) → ⊬L (-, -, ⊢L) }
 ...  | yes (T⊸S , Δ₀ , ⊢L)
     with T⊸S
 ...    | `⊤            = no λ{ (_ , _ , _ ⊢ ⊢L′ ⦂ _ `$ _) → case (⊢-det ⊢L ⊢L′) of λ() }
@@ -531,12 +546,30 @@ _⊢[_]_⦂?⇒? : ∀ Γ m L → Dec (∃₂ (λ S Δ → Γ ⊢[ m ] L ⦂ S �
 ...    | `↓[ _ ⇒ _ ] _ = no λ{ (_ , _ , _ ⊢ ⊢L′ ⦂ _ `$ _) → case (⊢-det ⊢L ⊢L′) of λ() }
 ...    | T⊸S@(T `⊸ _)
       with ⊢[ m ] T⊸S ?⦂⋆
-...      | no  ⊬⊸ = no λ{ (_ , _ , _ ⊢ ⊢L′ ⦂ ⊢⊸ `$ _) → case (⊢-det ⊢L ⊢L′) of λ{ (refl , refl) → ⊬⊸ ⊢⊸ } }
+...      | no  ⊬⊸               = no λ{ (_ , _ , _ ⊢ ⊢L′ ⦂ ⊢⊸ `$ _) → case (⊢-det ⊢L ⊢L′) of λ{ (refl , refl) → ⊬⊸ ⊢⊸ } }
 ...      | yes ⊢⊸
         with Γ ⊢[ m ] M ⦂?⇒?
-...        | no  ⊬M            = no λ{ (_ , _ , _ ⊢ _ ⦂ _ `$ ⊢M) → ⊬M (_ , _ , ⊢M) }
-...        | yes (T′ , Δ₁ , ⊢M) = Dec.map′ (λ{ ((_ , Δ~) , refl) → _ , _ , Δ~ ⊢ ⊢L ⦂ ⊢⊸ `$ ⊢M }) (λ{ (_ , _ , Δ~ ⊢ ⊢L′ ⦂ _ `$ ⊢M′) → case (⊢-det ⊢L ⊢L′) of λ{ (refl , refl) → case (⊢-det ⊢M ⊢M′) of λ{ (refl , refl) → (_ , Δ~) , refl } } }) (?~ Δ₀ ⊞ Δ₁ ×-dec T Type≟ T′)
-Γ ⊢[ m ] `# x ⦂?⇒? = {!!}
+...        | no  ⊬M             = no λ{ (_ , _ , _ ⊢ _ ⦂ _ `$ ⊢M) → ⊬M (-, -, ⊢M) }
+...        | yes (T′ , Δ₁ , ⊢M) = Dec.map′
+                                    (λ{ ((_ , Δ~) , refl) → -, -, Δ~ ⊢ ⊢L ⦂ ⊢⊸ `$ ⊢M })
+                                    (λ{ (_ , _ , Δ~ ⊢ ⊢L′ ⦂ _ `$ ⊢M′) →
+                                          case (⊢-det ⊢L ⊢L′) of
+                                            λ{ (refl , refl) →
+                                              case (⊢-det ⊢M ⊢M′) of
+                                                λ{ (refl , refl) → (-, Δ~) , refl }
+                                            }
+                                    })
+                                    (?~ Δ₀ ⊞ Δ₁ ×-dec T Type≟ T′)
+Γ ⊢[ m ] `# x ⦂?⇒? = Dec.map′ (λ{ (_ , _ , x∈) → -, -, `# x∈ }) (λ{ (_ , _ , `# x∈) → -, -, x∈ }) (x ⦂[ m ]?∈ Γ ⇒?)
 
 _A⊢[_]_⦂? : ∀ Γ m L → Dec (∃ (λ S → Γ A⊢[ m ] L ⦂ S))
-Γ A⊢[ m ] L ⦂? = {!!}
+Γ A⊢[ m ] L ⦂?
+  with Γ ⊢[ m ] L ⦂?⇒?
+...  | no  ⊬L           = no (λ{ (_ , _ , ⊢L , _) → ⊬L (-, -, ⊢L) })
+...  | yes (_ , Δ , ⊢L) = Dec.map′
+                            (λ{ ΓUsed → _ , Δ , ⊢L , ΓUsed })
+                            (λ{ (_ , _ , ⊢L′ , ΓUsed) →
+                                case (⊢-det ⊢L ⊢L′) of
+                                  λ{ (refl , refl) → ΓUsed }
+                            })
+                            (Γ is-all-used-by? Δ)
