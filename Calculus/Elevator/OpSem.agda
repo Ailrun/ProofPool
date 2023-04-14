@@ -21,11 +21,11 @@ open import Calculus.Elevator.Syntax ℳ
 
 data WeakNorm : Term → Set (ℓ₁ ⊔ ℓ₂)
 data WeakNeut : Term → Set (ℓ₁ ⊔ ℓ₂)
-data TermWORedex[_≤] : Mode → Term → Set (ℓ₁ ⊔ ℓ₂)
+data DeferredTerm[_≤] : Mode → Term → Set (ℓ₁ ⊔ ℓ₂)
 
 data WeakNorm where
   `unit                 : WeakNorm `unit
-  `lift[_⇒_]            : ∀ m₀ m₁ → TermWORedex[ m₁ ≤] L → WeakNorm (`lift[ m₀ ⇒ m₁ ] L)
+  `lift[_⇒_]            : ∀ m₀ m₁ → DeferredTerm[ m₁ ≤] L → WeakNorm (`lift[ m₀ ⇒ m₁ ] L)
   `return[_⇒_]          : ∀ m₀ m₁ → WeakNorm L → WeakNorm (`return[ m₀ ⇒ m₁ ] L)
   `λ⦂[_]_∘_             : ∀ m S L → WeakNorm (`λ⦂[ m ] S ∘ L)
 
@@ -67,21 +67,21 @@ data WeakNeut where
 ¬≢lift[-⇒-]⇒≡lift[-⇒-] (L `$ L₁) ¬≢lift with () ← ¬≢lift tt
 ¬≢lift[-⇒-]⇒≡lift[-⇒-] (`# x) ¬≢lift with () ← ¬≢lift tt
 
-data TermWORedex[_≤] where
-  `unit                 : TermWORedex[ m ≤] `unit
+data DeferredTerm[_≤] where
+  `unit                 : DeferredTerm[ m ≤] `unit
 
-  `lift[_⇒_]            : ∀ m₀ m₁ → TermWORedex[ m ≤] L → TermWORedex[ m ≤] (`lift[ m₀ ⇒ m₁ ] L)
-  `unlift[≰_⇒_]         : ¬ (m ≤ₘ m₀) → ∀ m₁ → TermWORedex[ m ≤] L → TermWORedex[ m ≤] (`unlift[ m₀ ⇒ m₁ ] L)
-  `unlift[≤_⇒_]         : m ≤ₘ m₀ → ∀ m₁ → WeakNorm L → {≢lift[-⇒-] L} → TermWORedex[ m ≤] (`unlift[ m₀ ⇒ m₁ ] L)
+  `lift[_⇒_]            : ∀ m₀ m₁ → DeferredTerm[ m ≤] L → DeferredTerm[ m ≤] (`lift[ m₀ ⇒ m₁ ] L)
+  `unlift[≰_⇒_]         : ¬ (m ≤ₘ m₀) → ∀ m₁ → DeferredTerm[ m ≤] L → DeferredTerm[ m ≤] (`unlift[ m₀ ⇒ m₁ ] L)
+  `unlift[≤_⇒_]         : m ≤ₘ m₀ → ∀ m₁ → WeakNorm L → {≢lift[-⇒-] L} → DeferredTerm[ m ≤] (`unlift[ m₀ ⇒ m₁ ] L)
 
-  `return[≰_⇒_]         : ¬ (m ≤ₘ m₀) → ∀ m₁ → TermWORedex[ m ≤] L → TermWORedex[ m ≤] (`return[ m₀ ⇒ m₁ ] L)
-  `return[≤_⇒_]         : m ≤ₘ m₀ → ∀ m₁ → WeakNorm L → TermWORedex[ m ≤] (`return[ m₀ ⇒ m₁ ] L)
-  `let-return[_⇒_]_`in_ : ∀ m₀ m₁ → TermWORedex[ m ≤] L → TermWORedex[ m ≤] M → TermWORedex[ m ≤] (`let-return[ m₀ ⇒ m₁ ] L `in M)
+  `return[≰_⇒_]         : ¬ (m ≤ₘ m₀) → ∀ m₁ → DeferredTerm[ m ≤] L → DeferredTerm[ m ≤] (`return[ m₀ ⇒ m₁ ] L)
+  `return[≤_⇒_]         : m ≤ₘ m₀ → ∀ m₁ → WeakNorm L → DeferredTerm[ m ≤] (`return[ m₀ ⇒ m₁ ] L)
+  `let-return[_⇒_]_`in_ : ∀ m₀ m₁ → DeferredTerm[ m ≤] L → DeferredTerm[ m ≤] M → DeferredTerm[ m ≤] (`let-return[ m₀ ⇒ m₁ ] L `in M)
 
-  `λ⦂[_]_∘_             : ∀ m₀ S → TermWORedex[ m ≤] L → TermWORedex[ m ≤] (`λ⦂[ m₀ ] S ∘ L)
-  _`$_                  : TermWORedex[ m ≤] L → TermWORedex[ m ≤] M → TermWORedex[ m ≤] (L `$ M)
+  `λ⦂[_]_∘_             : ∀ m₀ S → DeferredTerm[ m ≤] L → DeferredTerm[ m ≤] (`λ⦂[ m₀ ] S ∘ L)
+  _`$_                  : DeferredTerm[ m ≤] L → DeferredTerm[ m ≤] M → DeferredTerm[ m ≤] (L `$ M)
 
-  `#_                   : ∀ x → TermWORedex[ m ≤] (`# x)
+  `#_                   : ∀ x → DeferredTerm[ m ≤] (`# x)
 
 infixr 25 wk[_↑_]_
 infixr 25 wk_
@@ -131,7 +131,7 @@ data _⟶_ where
                             ---------------------------------------------
                             `unlift[ m₀ ⇒ m₁ ] L ⟶ `unlift[ m₀ ⇒ m₁ ] L′
 
-  β-`↑                    : TermWORedex[ m₁ ≤] L →
+  β-`↑                    : DeferredTerm[ m₁ ≤] L →
                             --------------------------------------------
                             `unlift[ m₁ ⇒ m₀ ] (`lift[ m₀ ⇒ m₁ ] L) ⟶ L
 
@@ -178,7 +178,7 @@ data _⟶[_≤]_ where
                              `unlift[ m₀ ⇒ m₁ ] L ⟶[ m ≤] `unlift[ m₀ ⇒ m₁ ] L′
 
   β-`↑                     : m ≤ₘ m₁ →
-                             TermWORedex[ m₁ ≤] L →
+                             DeferredTerm[ m₁ ≤] L →
                              --------------------------------------------------
                              `unlift[ m₁ ⇒ m₀ ] (`lift[ m₀ ⇒ m₁ ] L) ⟶[ m ≤] L
 
@@ -197,7 +197,7 @@ data _⟶[_≤]_ where
                              -----------------------------------------------------------------------
                              `let-return[ m₀ ⇒ m₁ ] L `in M ⟶[ m ≤] `let-return[ m₀ ⇒ m₁ ] L′ `in M
 
-  ξ-`let-return[-⇒-]!_`in_ : TermWORedex[ m ≤] L →
+  ξ-`let-return[-⇒-]!_`in_ : DeferredTerm[ m ≤] L →
                              M ⟶[ m ≤] M′ →
                              -----------------------------------------------------------------------
                              `let-return[ m₀ ⇒ m₁ ] L `in M ⟶[ m ≤] `let-return[ m₀ ⇒ m₁ ] L `in M′
@@ -207,7 +207,7 @@ data _⟶[_≤]_ where
                              -----------------------
                              L `$ M ⟶[ m ≤] L′ `$ M
 
-  ξ-!_`$_                  : TermWORedex[ m ≤] L →
+  ξ-!_`$_                  : DeferredTerm[ m ≤] L →
                              M ⟶[ m ≤] M′ →
                              -----------------------
                              L `$ M ⟶[ m ≤] L `$ M′

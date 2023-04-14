@@ -389,7 +389,7 @@ canonoical-⊸ _          (`neut NL)       = inj₂ NL
 canonoical-↑ : Γ ⊢[ m ] L ⦂ `↑[ m₀ ⇒ m ] S →
                WeakNorm L →
                ----------------------------------------------------------------------
-               ∃ (λ L′ → L ≡ `lift[ m₀ ⇒ m ] L′ × TermWORedex[ m ≤] L′) ⊎ WeakNeut L
+               ∃ (λ L′ → L ≡ `lift[ m₀ ⇒ m ] L′ × DeferredTerm[ m ≤] L′) ⊎ WeakNeut L
 canonoical-↑ (`lift[-⇒-] ⊢L) (`lift[ _ ⇒ _ ] WL) = inj₁ (-, refl , WL)
 canonoical-↑ _               (`neut NL)          = inj₂ NL
 
@@ -411,7 +411,7 @@ progress[≤] : ∀ m₀ →
               ⊢[ m ] S ⦂⋆ →
               Γ ⊢[ m ] L ⦂ S →
               ------------------------------------------------
-              TermWORedex[ m₀ ≤] L ⊎ ∃ (λ L′ → L ⟶[ m₀ ≤] L′)
+              DeferredTerm[ m₀ ≤] L ⊎ ∃ (λ L′ → L ⟶[ m₀ ≤] L′)
 
 
 progress ⊢Γ ⊢S                            (`unit ΓDel)                          = inj₁ `unit
