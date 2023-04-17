@@ -1,3 +1,7 @@
+------------------------------------------------------------
+-- Dynamic Rules for Elevator
+------------------------------------------------------------
+
 {-# OPTIONS --safe #-}
 open import Calculus.Elevator.ModeSpec
 

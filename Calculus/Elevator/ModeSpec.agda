@@ -1,3 +1,7 @@
+------------------------------------------------------------
+-- Mode Specification of Elevator
+------------------------------------------------------------
+
 {-# OPTIONS --safe #-}
 module Calculus.Elevator.ModeSpec where
 

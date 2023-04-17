@@ -1,3 +1,7 @@
+------------------------------------------------------------
+-- Properties of (Declarative) Static Rules for Elevator
+------------------------------------------------------------
+
 {-# OPTIONS --safe #-}
 open import Calculus.Elevator.ModeSpec
 

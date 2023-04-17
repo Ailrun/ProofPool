@@ -1,3 +1,13 @@
+------------------------------------------------------------
+-- Properties of Algorithmic Static Rules for Elevator
+------------------------------------------------------------
+--
+-- This module includes the proofs of the completeness and soundness of
+-- algorithmic static rules regarding its declarative version and
+-- the proof of decidability of algorithmic static rules, whose algorithm
+-- does not require back-tracking.
+--
+
 {-# OPTIONS --safe #-}
 open import Calculus.Elevator.ModeSpec
 

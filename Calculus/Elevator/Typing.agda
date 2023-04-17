@@ -1,3 +1,7 @@
+------------------------------------------------------------
+-- (Declarative) Static Rules for Elevator
+------------------------------------------------------------
+
 {-# OPTIONS --safe #-}
 open import Calculus.Elevator.ModeSpec
 
@@ -24,6 +28,8 @@ infix   4 _∤[_]_
 infix   4 _⦂[_]_∈_
 infix   4 _⊢[_]_⦂_
 
+-- Type Well-modedness
+--
 data ⊢[_]_⦂⋆ : Mode → Type → Set (ℓ₁ ⊔ ℓ₂) where
   `⊤[_]       : Bool.T (opₘ m ``⊤) →
                 ---------------------
@@ -47,6 +53,8 @@ data ⊢[_]_⦂⋆ : Mode → Type → Set (ℓ₁ ⊔ ℓ₂) where
                 -------------------------
                 ⊢[ m ] `↓[ m₀ ⇒ m ] S ⦂⋆
 
+-- Context Well-modedness
+--
 data [_]⊢[_]d_ : Mode → Mode → Useable → Set (ℓ₁ ⊔ ℓ₂) where
   valid    : m ≤ₘ m₀ →
              -------------------
@@ -58,6 +66,8 @@ data [_]⊢[_]d_ : Mode → Mode → Useable → Set (ℓ₁ ⊔ ℓ₂) where
 ⊢[_]_ : Mode → Context → Set (ℓ₁ ⊔ ℓ₂)
 ⊢[ m ] Γ = All (λ (S , m₀ , d) → ⊢[ m₀ ] S ⦂⋆ × [ m₀ ]⊢[ m ]d d) Γ
 
+-- Weakenable Opeartions
+--
 data _[_]is-del : Useable → Mode → Set ℓ₁ where
   unusable  : -----------------------------
               false [ m ]is-del
@@ -69,6 +79,8 @@ data _[_]is-del : Useable → Mode → Set ℓ₁ where
 _is-all-del : Context → Set ℓ₁
 _is-all-del = All (λ (_ , m , d) → d [ m ]is-del)
 
+-- Splitting Opeartions
+--
 data _[_]~d_⊞_ : Useable → Mode → Useable → Useable → Set ℓ₁ where
   contraction : Bool.T (stₘ m ``Co) →
                 -------------------------
@@ -92,6 +104,8 @@ data _~_⊞_ : Context → Context → Context → Set ℓ₁ where
         -----------------------------------------------------------
         (S , m , d) ∷ Γ ~ (S , m , d₀) ∷ Γ₀ ⊞ (S , m , d₁) ∷ Γ₁
 
+-- Cutting Opeartions
+--
 data _[_]∤[_]d_ : Useable → Mode → Mode → Useable → Set (ℓ₁ ⊔ ℓ₂) where
   delete : ¬ (m ≤ₘ m₀) →
            d [ m₀ ]is-del →
@@ -111,6 +125,8 @@ data _∤[_]_ : Context → Mode → Context → Set (ℓ₁ ⊔ ℓ₂) where
         ---------------------------------------------
         (S , m₀ , d) ∷ Γ ∤[ m ] (S , m₀ , d′) ∷ Γ′
 
+-- Variable-Context Membership
+--
 data _⦂[_]_∈_ : ℕ → Mode → Type → Context → Set ℓ₁ where
   here  : Γ is-all-del →
           --------------------------------
@@ -121,6 +137,8 @@ data _⦂[_]_∈_ : ℕ → Mode → Type → Context → Set ℓ₁ where
           -----------------------------------
           suc x ⦂[ m ] S ∈ (T , m₀ , dT) ∷ Γ
 
+-- Term Typing
+--
 data _⊢[_]_⦂_ : Context → Mode → Term → Type → Set (ℓ₁ ⊔ ℓ₂) where
   `unit                     : Γ is-all-del →
                               ---------------------

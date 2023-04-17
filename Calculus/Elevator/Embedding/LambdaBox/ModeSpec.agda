@@ -1,3 +1,7 @@
+------------------------------------------------------------
+-- An Instance of Mode Specification for λ↑↓₂
+------------------------------------------------------------
+
 module Calculus.Elevator.Embedding.LambdaBox.ModeSpec where
 
 open import Agda.Primitive

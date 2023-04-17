@@ -1,3 +1,13 @@
+------------------------------------------------------------
+-- Algorithmic Static Rules for Elevator
+------------------------------------------------------------
+--
+-- Note that ⊢[_]_⦂⋆ (type well-modedness) and ⊢[_]_ (context well-modedness)
+-- is already syntax-directed and algorithmic as long as mode spec ℳ provides
+-- a decidable _≤ₘ_. Thus, we only need to define algorithmic version of
+-- ⊢[_]_⦂_ (term typing)
+--
+
 {-# OPTIONS --safe #-}
 open import Calculus.Elevator.ModeSpec
 

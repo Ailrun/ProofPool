@@ -1,3 +1,10 @@
+------------------------------------------------------------
+-- Main Properties of Elevator
+------------------------------------------------------------
+--
+-- This module includes the proof for the type safety of Elevator.
+--
+
 {-# OPTIONS --safe #-}
 open import Calculus.Elevator.ModeSpec
 
