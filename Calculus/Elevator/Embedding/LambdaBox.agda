@@ -4,17 +4,18 @@ open import Agda.Primitive
 open import Data.Bool using (true; false)
 open import Data.List using ([]; _∷_; _++_; length)
 open import Data.List.Relation.Unary.All using ([]; _∷_)
-open import Data.Nat as ℕ using (ℕ; zero; suc; z≤n; s≤s; _+_)
+open import Data.Nat as ℕ using (ℕ; zero; suc; z≤n; s≤s; _+_; _∸_)
 import Data.Nat.Properties as ℕ
 import Data.Nat.Induction as ℕ
 open import Data.Product using (_×_; _,_; proj₁; proj₂; Σ; ∃; ∃₂; -,_)
 open import Induction.WellFounded using (Acc; acc)
 open import Relation.Binary using (Rel; Antisymmetric; IsPartialOrder; IsDecPartialOrder)
-open import Relation.Binary.PropositionalEquality using (_≡_; refl; sym; cong; cong₂; subst)
+open import Relation.Binary.PropositionalEquality using (_≡_; refl; sym; cong; cong₂; subst; ≢-sym)
 open import Relation.Nullary using (¬_; Dec; yes; no)
 open import Relation.Nullary.Decidable using (dec-yes; dec-no)
 
-open import Calculus.GeneralOpSem using (wkidx[_↑_]_; idx[_/_]_along_) public
+open import Calculus.GeneralOpSem using (wkidx[_↑_]_; idx[_/_]_along_)
+open import Calculus.GeneralOpSem.Properties
 open import Calculus.Elevator.Embedding.LambdaBox.ModeSpec
 import Calculus.Elevator.Syntax as S
 import Calculus.Elevator.Typing as T
@@ -347,12 +348,12 @@ extractˣ⁻ᶜ-idempotent (?∷ᵖ kk′~) = cong ?∷ᵖ_ (extractˣ⁻ᶜ-ide
                     (u< : u ℕ.< length DP.Δ) →
                     u DP.⦂ DP.S ∈ DP.Δ →
                     idxˣ⁻ᶜ (eraseˣ ~Γ) u< ⦂[ cMode ] `↑ S ∈ Γ
+∈ᶜ⇒idxˣ⁻ᶜ-eraseˣ∈                 (?∷ᵖ ~Γ) ~S u<       u∈            = there unusable (∈ᶜ⇒idxˣ⁻ᶜ-eraseˣ∈ ~Γ ~S u< u∈)
+∈ᶜ⇒idxˣ⁻ᶜ-eraseˣ∈             (_   !∷ᵖ ~Γ) ~S u<       u∈            = there (weakening _) (∈ᶜ⇒idxˣ⁻ᶜ-eraseˣ∈ ~Γ ~S u< u∈)
+∈ᶜ⇒idxˣ⁻ᶜ-eraseˣ∈                 (?∷ᶜ ~Γ) ~S u<       u∈            = there unusable (∈ᶜ⇒idxˣ⁻ᶜ-eraseˣ∈ ~Γ ~S u< u∈)
 ∈ᶜ⇒idxˣ⁻ᶜ-eraseˣ∈ {u = zero}  (~S′ !∷ᶜ ~Γ) ~S (s≤s u<) DP.here
   rewrite ~ᵀ-det ~S′ ~S                                              = here (is-all-del² _)
 ∈ᶜ⇒idxˣ⁻ᶜ-eraseˣ∈ {u = suc _} (_   !∷ᶜ ~Γ) ~S (s≤s u<) (DP.there u∈) = there (weakening _) (∈ᶜ⇒idxˣ⁻ᶜ-eraseˣ∈ ~Γ ~S u< u∈)
-∈ᶜ⇒idxˣ⁻ᶜ-eraseˣ∈                 (?∷ᶜ ~Γ) ~S u<       u∈            = there unusable (∈ᶜ⇒idxˣ⁻ᶜ-eraseˣ∈ ~Γ ~S u< u∈)
-∈ᶜ⇒idxˣ⁻ᶜ-eraseˣ∈             (_   !∷ᵖ ~Γ) ~S u<       u∈            = there (weakening _) (∈ᶜ⇒idxˣ⁻ᶜ-eraseˣ∈ ~Γ ~S u< u∈)
-∈ᶜ⇒idxˣ⁻ᶜ-eraseˣ∈                 (?∷ᵖ ~Γ) ~S u<       u∈            = there unusable (∈ᶜ⇒idxˣ⁻ᶜ-eraseˣ∈ ~Γ ~S u< u∈)
 
 idxˣ⁻ᶜ-eraseˣ∈⇒∈ᶜ : ∀ {u : ℕ} →
                     (~Γ : DP.Δ ⍮ DP.Γ ~ˣ Γ) →
@@ -373,12 +374,12 @@ idxˣ⁻ᶜ-eraseˣ∈⇒∈ᶜ {u = suc _} (~S′ !∷ᶜ ~Γ) ~S (s≤s u<) (t
                     (x< : x ℕ.< length DP.Γ) →
                     x DP.⦂ DP.S ∈ DP.Γ →
                     idxˣ⁻ᵖ (eraseˣ ~Γ) x< ⦂[ pMode ] S ∈ Γ
+∈ᵖ⇒idxˣ⁻ᵖ-eraseˣ∈                 (?∷ᶜ ~Γ) ~S x<       x∈            = there unusable (∈ᵖ⇒idxˣ⁻ᵖ-eraseˣ∈ ~Γ ~S x< x∈)
+∈ᵖ⇒idxˣ⁻ᵖ-eraseˣ∈             (_   !∷ᶜ ~Γ) ~S x<       x∈            = there (weakening _) (∈ᵖ⇒idxˣ⁻ᵖ-eraseˣ∈ ~Γ ~S x< x∈)
+∈ᵖ⇒idxˣ⁻ᵖ-eraseˣ∈                 (?∷ᵖ ~Γ) ~S x<       x∈            = there unusable (∈ᵖ⇒idxˣ⁻ᵖ-eraseˣ∈ ~Γ ~S x< x∈)
 ∈ᵖ⇒idxˣ⁻ᵖ-eraseˣ∈ {x = zero}  (~S′ !∷ᵖ ~Γ) ~S (s≤s x<) DP.here
   rewrite ~ᵀ-det ~S′ ~S                                              = here (is-all-del² _)
 ∈ᵖ⇒idxˣ⁻ᵖ-eraseˣ∈ {x = suc _} (_   !∷ᵖ ~Γ) ~S (s≤s x<) (DP.there x∈) = there (weakening _) (∈ᵖ⇒idxˣ⁻ᵖ-eraseˣ∈ ~Γ ~S x< x∈)
-∈ᵖ⇒idxˣ⁻ᵖ-eraseˣ∈                 (?∷ᵖ ~Γ) ~S x<       x∈            = there unusable (∈ᵖ⇒idxˣ⁻ᵖ-eraseˣ∈ ~Γ ~S x< x∈)
-∈ᵖ⇒idxˣ⁻ᵖ-eraseˣ∈             (_   !∷ᶜ ~Γ) ~S x<       x∈            = there (weakening _) (∈ᵖ⇒idxˣ⁻ᵖ-eraseˣ∈ ~Γ ~S x< x∈)
-∈ᵖ⇒idxˣ⁻ᵖ-eraseˣ∈                 (?∷ᶜ ~Γ) ~S x<       x∈            = there unusable (∈ᵖ⇒idxˣ⁻ᵖ-eraseˣ∈ ~Γ ~S x< x∈)
 
 idxˣ⁻ᵖ-eraseˣ∈⇒∈ᵖ : ∀ {x : ℕ} →
                     (~Γ : DP.Δ ⍮ DP.Γ ~ˣ Γ) →
@@ -386,28 +387,83 @@ idxˣ⁻ᵖ-eraseˣ∈⇒∈ᵖ : ∀ {x : ℕ} →
                     (x< : x ℕ.< length DP.Γ) →
                     idxˣ⁻ᵖ (eraseˣ ~Γ) x< ⦂[ pMode ] S ∈ Γ →
                     x DP.⦂ DP.S ∈ DP.Γ
+idxˣ⁻ᵖ-eraseˣ∈⇒∈ᵖ                 (?∷ᶜ ~Γ) ~S x<       (there _ x∈) = idxˣ⁻ᵖ-eraseˣ∈⇒∈ᵖ ~Γ ~S x< x∈
+idxˣ⁻ᵖ-eraseˣ∈⇒∈ᵖ             (_   !∷ᶜ ~Γ) ~S x<       (there _ x∈) = idxˣ⁻ᵖ-eraseˣ∈⇒∈ᵖ ~Γ ~S x< x∈
+idxˣ⁻ᵖ-eraseˣ∈⇒∈ᵖ                 (?∷ᵖ ~Γ) ~S x<       (there _ x∈) = idxˣ⁻ᵖ-eraseˣ∈⇒∈ᵖ ~Γ ~S x< x∈
 idxˣ⁻ᵖ-eraseˣ∈⇒∈ᵖ {x = zero}  (~S′ !∷ᵖ ~Γ) ~S (s≤s x<) (here _)
   rewrite ~ᵀ-inj ~S′ ~S                                             = DP.here
 idxˣ⁻ᵖ-eraseˣ∈⇒∈ᵖ {x = suc _} (_   !∷ᵖ ~Γ) ~S (s≤s x<) (there _ x∈) = DP.there (idxˣ⁻ᵖ-eraseˣ∈⇒∈ᵖ ~Γ ~S x< x∈)
-idxˣ⁻ᵖ-eraseˣ∈⇒∈ᵖ                 (?∷ᵖ ~Γ) ~S x<       (there _ x∈) = idxˣ⁻ᵖ-eraseˣ∈⇒∈ᵖ ~Γ ~S x< x∈
-idxˣ⁻ᵖ-eraseˣ∈⇒∈ᵖ             (_   !∷ᶜ ~Γ) ~S x<       (there _ x∈) = idxˣ⁻ᵖ-eraseˣ∈⇒∈ᵖ ~Γ ~S x< x∈
-idxˣ⁻ᵖ-eraseˣ∈⇒∈ᵖ                 (?∷ᶜ ~Γ) ~S x<       (there _ x∈) = idxˣ⁻ᵖ-eraseˣ∈⇒∈ᵖ ~Γ ~S x< x∈
 
-idxˣ⁻ᶜ⇒idxˣ⁻ᶜ-++ˣ⁻ : (kk′~ : k ⍮ k′ ~ˣ⁻) (k″k‴~ : k″ ⍮ k‴ ~ˣ⁻) (u< : DP.u ℕ.< k) (u<′ : DP.u ℕ.< k + k″) →
-                     idxˣ⁻ᶜ kk′~ u< ≡ idxˣ⁻ᶜ (kk′~ ++ˣ⁻ k″k‴~) u<′
-idxˣ⁻ᶜ⇒idxˣ⁻ᶜ-++ˣ⁻             (!∷ᵖ kk′~) k″k‴~ u<        u<′       = cong suc (idxˣ⁻ᶜ⇒idxˣ⁻ᶜ-++ˣ⁻ kk′~ k″k‴~ u< u<′)
-idxˣ⁻ᶜ⇒idxˣ⁻ᶜ-++ˣ⁻             (?∷ᵖ kk′~) k″k‴~ u<        u<′       = cong suc (idxˣ⁻ᶜ⇒idxˣ⁻ᶜ-++ˣ⁻ kk′~ k″k‴~ u< u<′)
-idxˣ⁻ᶜ⇒idxˣ⁻ᶜ-++ˣ⁻             (?∷ᶜ kk′~) k″k‴~ u<        u<′       = cong suc (idxˣ⁻ᶜ⇒idxˣ⁻ᶜ-++ˣ⁻ kk′~ k″k‴~ u< u<′)
-idxˣ⁻ᶜ⇒idxˣ⁻ᶜ-++ˣ⁻ {u = zero}  (!∷ᶜ kk′~) k″k‴~ (s≤s u<)  (s≤s u<′) = refl
-idxˣ⁻ᶜ⇒idxˣ⁻ᶜ-++ˣ⁻ {u = suc _} (!∷ᶜ kk′~) k″k‴~ (s≤s u<)  (s≤s u<′) = cong suc (idxˣ⁻ᶜ⇒idxˣ⁻ᶜ-++ˣ⁻ kk′~ k″k‴~ u< u<′)
+<⇒idxˣ⁻ᶜ≡idxˣ⁻ᶜ-++ˣ⁻ : (kk′~ : k ⍮ k′ ~ˣ⁻) (k″k‴~ : k″ ⍮ k‴ ~ˣ⁻) (u< : DP.u ℕ.< k) (u<′ : DP.u ℕ.< k + k″) →
+                       idxˣ⁻ᶜ kk′~ u< ≡ idxˣ⁻ᶜ (kk′~ ++ˣ⁻ k″k‴~) u<′
+<⇒idxˣ⁻ᶜ≡idxˣ⁻ᶜ-++ˣ⁻             (!∷ᵖ kk′~) k″k‴~ u<        u<′       = cong suc (<⇒idxˣ⁻ᶜ≡idxˣ⁻ᶜ-++ˣ⁻ kk′~ k″k‴~ u< u<′)
+<⇒idxˣ⁻ᶜ≡idxˣ⁻ᶜ-++ˣ⁻             (?∷ᵖ kk′~) k″k‴~ u<        u<′       = cong suc (<⇒idxˣ⁻ᶜ≡idxˣ⁻ᶜ-++ˣ⁻ kk′~ k″k‴~ u< u<′)
+<⇒idxˣ⁻ᶜ≡idxˣ⁻ᶜ-++ˣ⁻             (?∷ᶜ kk′~) k″k‴~ u<        u<′       = cong suc (<⇒idxˣ⁻ᶜ≡idxˣ⁻ᶜ-++ˣ⁻ kk′~ k″k‴~ u< u<′)
+<⇒idxˣ⁻ᶜ≡idxˣ⁻ᶜ-++ˣ⁻ {u = zero}  (!∷ᶜ kk′~) k″k‴~ (s≤s u<)  (s≤s u<′) = refl
+<⇒idxˣ⁻ᶜ≡idxˣ⁻ᶜ-++ˣ⁻ {u = suc _} (!∷ᶜ kk′~) k″k‴~ (s≤s u<)  (s≤s u<′) = cong suc (<⇒idxˣ⁻ᶜ≡idxˣ⁻ᶜ-++ˣ⁻ kk′~ k″k‴~ u< u<′)
 
-idxˣ⁻ᵖ⇒idxˣ⁻ᵖ-++ˣ⁻ : (kk′~ : k ⍮ k′ ~ˣ⁻) (k″k‴~ : k″ ⍮ k‴ ~ˣ⁻) (x< : DP.x ℕ.< k′) (x<′ : DP.x ℕ.< k′ + k‴) →
-                     idxˣ⁻ᵖ kk′~ x< ≡ idxˣ⁻ᵖ (kk′~ ++ˣ⁻ k″k‴~) x<′
-idxˣ⁻ᵖ⇒idxˣ⁻ᵖ-++ˣ⁻             (!∷ᶜ kk′~) k″k‴~ x<        x<′       = cong suc (idxˣ⁻ᵖ⇒idxˣ⁻ᵖ-++ˣ⁻ kk′~ k″k‴~ x< x<′)
-idxˣ⁻ᵖ⇒idxˣ⁻ᵖ-++ˣ⁻             (?∷ᶜ kk′~) k″k‴~ x<        x<′       = cong suc (idxˣ⁻ᵖ⇒idxˣ⁻ᵖ-++ˣ⁻ kk′~ k″k‴~ x< x<′)
-idxˣ⁻ᵖ⇒idxˣ⁻ᵖ-++ˣ⁻             (?∷ᵖ kk′~) k″k‴~ x<        x<′       = cong suc (idxˣ⁻ᵖ⇒idxˣ⁻ᵖ-++ˣ⁻ kk′~ k″k‴~ x< x<′)
-idxˣ⁻ᵖ⇒idxˣ⁻ᵖ-++ˣ⁻ {x = zero}  (!∷ᵖ kk′~) k″k‴~ (s≤s x<)  (s≤s x<′) = refl
-idxˣ⁻ᵖ⇒idxˣ⁻ᵖ-++ˣ⁻ {x = suc _} (!∷ᵖ kk′~) k″k‴~ (s≤s x<)  (s≤s x<′) = cong suc (idxˣ⁻ᵖ⇒idxˣ⁻ᵖ-++ˣ⁻ kk′~ k″k‴~ x< x<′)
+idxˣ⁻ᶜ-<-irrelevant : (kk′~ : k ⍮ k′ ~ˣ⁻) (u< : DP.u ℕ.< k) (u<′ : DP.u ℕ.< k) →
+                      idxˣ⁻ᶜ kk′~ u< ≡ idxˣ⁻ᶜ kk′~ u<′
+idxˣ⁻ᶜ-<-irrelevant             (?∷ᵖ kk′~) u<        u<′      = cong suc (idxˣ⁻ᶜ-<-irrelevant kk′~ u< u<′)
+idxˣ⁻ᶜ-<-irrelevant             (!∷ᵖ kk′~) u<        u<′      = cong suc (idxˣ⁻ᶜ-<-irrelevant kk′~ u< u<′)
+idxˣ⁻ᶜ-<-irrelevant             (?∷ᶜ kk′~) u<        u<′      = cong suc (idxˣ⁻ᶜ-<-irrelevant kk′~ u< u<′)
+idxˣ⁻ᶜ-<-irrelevant {u = zero}  (!∷ᶜ kk′~) (s≤s u<) (s≤s u<′) = refl
+idxˣ⁻ᶜ-<-irrelevant {u = suc u} (!∷ᶜ kk′~) (s≤s u<) (s≤s u<′) = cong suc (idxˣ⁻ᶜ-<-irrelevant kk′~ u< u<′)
+
+idxˣ⁻ᶜ<lengthˣ⁻ : ∀ {u} →
+                  (kk′~ : k ⍮ k′ ~ˣ⁻) →
+                  (u< : u ℕ.< k) →
+                  idxˣ⁻ᶜ kk′~ u< ℕ.< lengthˣ⁻ kk′~
+idxˣ⁻ᶜ<lengthˣ⁻             (?∷ᵖ kk′~) u<       = s≤s (idxˣ⁻ᶜ<lengthˣ⁻ kk′~ u<)
+idxˣ⁻ᶜ<lengthˣ⁻             (!∷ᵖ kk′~) u<       = s≤s (idxˣ⁻ᶜ<lengthˣ⁻ kk′~ u<)
+idxˣ⁻ᶜ<lengthˣ⁻             (?∷ᶜ kk′~) u<       = s≤s (idxˣ⁻ᶜ<lengthˣ⁻ kk′~ u<)
+idxˣ⁻ᶜ<lengthˣ⁻ {u = zero}  (!∷ᶜ kk′~) (s≤s u<) = s≤s z≤n
+idxˣ⁻ᶜ<lengthˣ⁻ {u = suc u} (!∷ᶜ kk′~) (s≤s u<) = s≤s (idxˣ⁻ᶜ<lengthˣ⁻ kk′~ u<)
+
+≥⇒lengthˣ⁻+idxˣ⁻ᶜ≡idxˣ⁻ᶜ-++ˣ⁻ : (kk′~ : k ⍮ k′ ~ˣ⁻) (k″k‴~ : k″ ⍮ k‴ ~ˣ⁻) →
+                                DP.u ℕ.≥ k →
+                                (u<′ : DP.u ℕ.< k + k″) (u<″ : DP.u ∸ k ℕ.< k″) →
+                                lengthˣ⁻ kk′~ + idxˣ⁻ᶜ k″k‴~ u<″ ≡ idxˣ⁻ᶜ (kk′~ ++ˣ⁻ k″k‴~) u<′
+≥⇒lengthˣ⁻+idxˣ⁻ᶜ≡idxˣ⁻ᶜ-++ˣ⁻             []         k″k‴~ u≥       u<′       u<″ = idxˣ⁻ᶜ-<-irrelevant k″k‴~ u<″ u<′
+≥⇒lengthˣ⁻+idxˣ⁻ᶜ≡idxˣ⁻ᶜ-++ˣ⁻             (?∷ᵖ kk′~) k″k‴~ u≥       u<′       u<″ = cong suc (≥⇒lengthˣ⁻+idxˣ⁻ᶜ≡idxˣ⁻ᶜ-++ˣ⁻ kk′~ k″k‴~ u≥ u<′ u<″)
+≥⇒lengthˣ⁻+idxˣ⁻ᶜ≡idxˣ⁻ᶜ-++ˣ⁻             (!∷ᵖ kk′~) k″k‴~ u≥       u<′       u<″ = cong suc (≥⇒lengthˣ⁻+idxˣ⁻ᶜ≡idxˣ⁻ᶜ-++ˣ⁻ kk′~ k″k‴~ u≥ u<′ u<″)
+≥⇒lengthˣ⁻+idxˣ⁻ᶜ≡idxˣ⁻ᶜ-++ˣ⁻             (?∷ᶜ kk′~) k″k‴~ u≥       u<′       u<″ = cong suc (≥⇒lengthˣ⁻+idxˣ⁻ᶜ≡idxˣ⁻ᶜ-++ˣ⁻ kk′~ k″k‴~ u≥ u<′ u<″)
+≥⇒lengthˣ⁻+idxˣ⁻ᶜ≡idxˣ⁻ᶜ-++ˣ⁻ {u = suc u} (!∷ᶜ kk′~) k″k‴~ (s≤s u≥) (s≤s u<′) u<″ = cong suc (≥⇒lengthˣ⁻+idxˣ⁻ᶜ≡idxˣ⁻ᶜ-++ˣ⁻ kk′~ k″k‴~ u≥ u<′ u<″)
+
+idxˣ⁻ᵖ<lengthˣ⁻ : (kk′~ : k ⍮ k′ ~ˣ⁻) →
+                  (x< : x ℕ.< k′) →
+                  idxˣ⁻ᵖ kk′~ x< ℕ.< lengthˣ⁻ kk′~
+idxˣ⁻ᵖ<lengthˣ⁻             (?∷ᶜ kk′~) x<       = s≤s (idxˣ⁻ᵖ<lengthˣ⁻ kk′~ x<)
+idxˣ⁻ᵖ<lengthˣ⁻             (!∷ᶜ kk′~) x<       = s≤s (idxˣ⁻ᵖ<lengthˣ⁻ kk′~ x<)
+idxˣ⁻ᵖ<lengthˣ⁻             (?∷ᵖ kk′~) x<       = s≤s (idxˣ⁻ᵖ<lengthˣ⁻ kk′~ x<)
+idxˣ⁻ᵖ<lengthˣ⁻ {x = zero}  (!∷ᵖ kk′~) (s≤s x<) = s≤s z≤n
+idxˣ⁻ᵖ<lengthˣ⁻ {x = suc u} (!∷ᵖ kk′~) (s≤s x<) = s≤s (idxˣ⁻ᵖ<lengthˣ⁻ kk′~ x<)
+
+<⇒idxˣ⁻ᵖ≡idxˣ⁻ᵖ-++ˣ⁻ : (kk′~ : k ⍮ k′ ~ˣ⁻) (k″k‴~ : k″ ⍮ k‴ ~ˣ⁻) (x< : DP.x ℕ.< k′) (x<′ : DP.x ℕ.< k′ + k‴) →
+                       idxˣ⁻ᵖ kk′~ x< ≡ idxˣ⁻ᵖ (kk′~ ++ˣ⁻ k″k‴~) x<′
+<⇒idxˣ⁻ᵖ≡idxˣ⁻ᵖ-++ˣ⁻             (!∷ᶜ kk′~) k″k‴~ x<        x<′       = cong suc (<⇒idxˣ⁻ᵖ≡idxˣ⁻ᵖ-++ˣ⁻ kk′~ k″k‴~ x< x<′)
+<⇒idxˣ⁻ᵖ≡idxˣ⁻ᵖ-++ˣ⁻             (?∷ᶜ kk′~) k″k‴~ x<        x<′       = cong suc (<⇒idxˣ⁻ᵖ≡idxˣ⁻ᵖ-++ˣ⁻ kk′~ k″k‴~ x< x<′)
+<⇒idxˣ⁻ᵖ≡idxˣ⁻ᵖ-++ˣ⁻             (?∷ᵖ kk′~) k″k‴~ x<        x<′       = cong suc (<⇒idxˣ⁻ᵖ≡idxˣ⁻ᵖ-++ˣ⁻ kk′~ k″k‴~ x< x<′)
+<⇒idxˣ⁻ᵖ≡idxˣ⁻ᵖ-++ˣ⁻ {x = zero}  (!∷ᵖ kk′~) k″k‴~ (s≤s x<)  (s≤s x<′) = refl
+<⇒idxˣ⁻ᵖ≡idxˣ⁻ᵖ-++ˣ⁻ {x = suc _} (!∷ᵖ kk′~) k″k‴~ (s≤s x<)  (s≤s x<′) = cong suc (<⇒idxˣ⁻ᵖ≡idxˣ⁻ᵖ-++ˣ⁻ kk′~ k″k‴~ x< x<′)
+
+idxˣ⁻ᵖ-<-irrelevant : (kk′~ : k ⍮ k′ ~ˣ⁻) (x< : x ℕ.< k′) (x<′ : x ℕ.< k′) →
+                      idxˣ⁻ᵖ kk′~ x< ≡ idxˣ⁻ᵖ kk′~ x<′
+idxˣ⁻ᵖ-<-irrelevant             (?∷ᶜ kk′~) x<        x<′      = cong suc (idxˣ⁻ᵖ-<-irrelevant kk′~ x< x<′)
+idxˣ⁻ᵖ-<-irrelevant             (!∷ᶜ kk′~) x<        x<′      = cong suc (idxˣ⁻ᵖ-<-irrelevant kk′~ x< x<′)
+idxˣ⁻ᵖ-<-irrelevant             (?∷ᵖ kk′~) x<        x<′      = cong suc (idxˣ⁻ᵖ-<-irrelevant kk′~ x< x<′)
+idxˣ⁻ᵖ-<-irrelevant {x = zero}  (!∷ᵖ kk′~) (s≤s x<) (s≤s x<′) = refl
+idxˣ⁻ᵖ-<-irrelevant {x = suc u} (!∷ᵖ kk′~) (s≤s x<) (s≤s x<′) = cong suc (idxˣ⁻ᵖ-<-irrelevant kk′~ x< x<′)
+
+≥⇒lengthˣ⁻+idxˣ⁻ᵖ≡idxˣ⁻ᵖ-++ˣ⁻ : (kk′~ : k ⍮ k′ ~ˣ⁻) (k″k‴~ : k″ ⍮ k‴ ~ˣ⁻) →
+                                x ℕ.≥ k′ →
+                                (x<′ : x ℕ.< k′ + k‴) (x<″ : x ∸ k′ ℕ.< k‴) →
+                                lengthˣ⁻ kk′~ + idxˣ⁻ᵖ k″k‴~ x<″ ≡ idxˣ⁻ᵖ (kk′~ ++ˣ⁻ k″k‴~) x<′
+≥⇒lengthˣ⁻+idxˣ⁻ᵖ≡idxˣ⁻ᵖ-++ˣ⁻             []         k″k‴~ x≥       x<′       x<″ = idxˣ⁻ᵖ-<-irrelevant k″k‴~ x<″ x<′
+≥⇒lengthˣ⁻+idxˣ⁻ᵖ≡idxˣ⁻ᵖ-++ˣ⁻             (?∷ᶜ kk′~) k″k‴~ x≥       x<′       x<″ = cong suc (≥⇒lengthˣ⁻+idxˣ⁻ᵖ≡idxˣ⁻ᵖ-++ˣ⁻ kk′~ k″k‴~ x≥ x<′ x<″)
+≥⇒lengthˣ⁻+idxˣ⁻ᵖ≡idxˣ⁻ᵖ-++ˣ⁻             (!∷ᶜ kk′~) k″k‴~ x≥       x<′       x<″ = cong suc (≥⇒lengthˣ⁻+idxˣ⁻ᵖ≡idxˣ⁻ᵖ-++ˣ⁻ kk′~ k″k‴~ x≥ x<′ x<″)
+≥⇒lengthˣ⁻+idxˣ⁻ᵖ≡idxˣ⁻ᵖ-++ˣ⁻             (?∷ᵖ kk′~) k″k‴~ x≥       x<′       x<″ = cong suc (≥⇒lengthˣ⁻+idxˣ⁻ᵖ≡idxˣ⁻ᵖ-++ˣ⁻ kk′~ k″k‴~ x≥ x<′ x<″)
+≥⇒lengthˣ⁻+idxˣ⁻ᵖ≡idxˣ⁻ᵖ-++ˣ⁻ {x = suc u} (!∷ᵖ kk′~) k″k‴~ (s≤s x≥) (s≤s x<′) x<″ = cong suc (≥⇒lengthˣ⁻+idxˣ⁻ᵖ≡idxˣ⁻ᵖ-++ˣ⁻ kk′~ k″k‴~ x≥ x<′ x<″)
 
 ~ᴹ⇒++ˣ⁻~ᴹ : (kk′~ : k ⍮ k′ ~ˣ⁻) (k″k‴~ : k″ ⍮ k‴ ~ˣ⁻) →
             kk′~ ⊢ DP.L ~ᴹ L →
@@ -418,11 +474,11 @@ idxˣ⁻ᵖ⇒idxˣ⁻ᵖ-++ˣ⁻ {x = suc _} (!∷ᵖ kk′~) k″k‴~ (s≤s 
     rewrite sym (extractˣ⁻ᶜ-++ˣ⁻ kk′~ {k″k‴~}) = `box ~L′
 ~ᴹ⇒++ˣ⁻~ᴹ kk′~ k″k‴~ (`let-box ~L `in ~M) = `let-box (~ᴹ⇒++ˣ⁻~ᴹ kk′~ k″k‴~ ~L) `in (~ᴹ⇒++ˣ⁻~ᴹ (!∷ᶜ kk′~) k″k‴~ ~M)
 ~ᴹ⇒++ˣ⁻~ᴹ kk′~ k″k‴~ (`#¹ u<)
-  rewrite idxˣ⁻ᶜ⇒idxˣ⁻ᶜ-++ˣ⁻ kk′~ k″k‴~ u< (ℕ.≤-trans u< (ℕ.m≤m+n _ _)) = `#¹ (ℕ.≤-trans u< (ℕ.m≤m+n _ _))
+  rewrite <⇒idxˣ⁻ᶜ≡idxˣ⁻ᶜ-++ˣ⁻ kk′~ k″k‴~ u< (ℕ.≤-trans u< (ℕ.m≤m+n _ _)) = `#¹ (ℕ.≤-trans u< (ℕ.m≤m+n _ _))
 ~ᴹ⇒++ˣ⁻~ᴹ kk′~ k″k‴~ (`λ⦂ S~ ∙ ~L) = `λ⦂ S~ ∙ ~ᴹ⇒++ˣ⁻~ᴹ (!∷ᵖ kk′~) k″k‴~ ~L
 ~ᴹ⇒++ˣ⁻~ᴹ kk′~ k″k‴~ (~L `$ ~M) = ~ᴹ⇒++ˣ⁻~ᴹ kk′~ k″k‴~ ~L `$ ~ᴹ⇒++ˣ⁻~ᴹ kk′~ k″k‴~ ~M
 ~ᴹ⇒++ˣ⁻~ᴹ kk′~ k″k‴~ (`#⁰ x<)
-  rewrite idxˣ⁻ᵖ⇒idxˣ⁻ᵖ-++ˣ⁻ kk′~ k″k‴~ x< (ℕ.≤-trans x< (ℕ.m≤m+n _ _)) = `#⁰ (ℕ.≤-trans x< (ℕ.m≤m+n _ _))
+  rewrite <⇒idxˣ⁻ᵖ≡idxˣ⁻ᵖ-++ˣ⁻ kk′~ k″k‴~ x< (ℕ.≤-trans x< (ℕ.m≤m+n _ _)) = `#⁰ (ℕ.≤-trans x< (ℕ.m≤m+n _ _))
 ~ᴹ⇒++ˣ⁻~ᴹ kk′~ k″k‴~ (`unlift-`lift ~L)
   with ~L′ ← ~ᴹ⇒++ˣ⁻~ᴹ (extractˣ⁻ᶜ kk′~) (extractˣ⁻ᶜ k″k‴~) ~L
     rewrite sym (extractˣ⁻ᶜ-++ˣ⁻ kk′~ {k″k‴~}) = `unlift-`lift ~L′
@@ -445,8 +501,8 @@ extractˣ⁻ᶜ⁻¹-~ᴹ kk′~ k″k‴~ (`#¹ u<)
 extractˣ⁻ᶜ⁻¹-~ᴹ kk′~ k″k‴~ (`λ⦂ ~S ∙ ~L) = `λ⦂ ~S ∙ extractˣ⁻ᶜ⁻¹-~ᴹ (!∷ᵖ kk′~) k″k‴~ ~L
 extractˣ⁻ᶜ⁻¹-~ᴹ kk′~ k″k‴~ (~L `$ ~M) = extractˣ⁻ᶜ⁻¹-~ᴹ kk′~ k″k‴~ ~L `$ extractˣ⁻ᶜ⁻¹-~ᴹ kk′~ k″k‴~ ~M
 extractˣ⁻ᶜ⁻¹-~ᴹ {k′ = k′} kk′~ k″k‴~ (`#⁰_ {x = x} x<)
-  rewrite sym (idxˣ⁻ᵖ⇒idxˣ⁻ᵖ-++ˣ⁻ kk′~ (extractˣ⁻ᶜ k″k‴~) (subst (x ℕ.<_) (ℕ.+-identityʳ k′) x<) x<)
-        | idxˣ⁻ᵖ⇒idxˣ⁻ᵖ-++ˣ⁻ kk′~ k″k‴~ (subst (x ℕ.<_) (ℕ.+-identityʳ k′) x<) (ℕ.≤-trans (subst (x ℕ.<_) (ℕ.+-identityʳ k′) x<) (ℕ.m≤m+n _ _)) = `#⁰ (ℕ.≤-trans (subst (x ℕ.<_) (ℕ.+-identityʳ k′) x<) (ℕ.m≤m+n _ _))
+  rewrite sym (<⇒idxˣ⁻ᵖ≡idxˣ⁻ᵖ-++ˣ⁻ kk′~ (extractˣ⁻ᶜ k″k‴~) (subst (x ℕ.<_) (ℕ.+-identityʳ k′) x<) x<)
+        | <⇒idxˣ⁻ᵖ≡idxˣ⁻ᵖ-++ˣ⁻ kk′~ k″k‴~ (subst (x ℕ.<_) (ℕ.+-identityʳ k′) x<) (ℕ.≤-trans (subst (x ℕ.<_) (ℕ.+-identityʳ k′) x<) (ℕ.m≤m+n _ _)) = `#⁰ (ℕ.≤-trans (subst (x ℕ.<_) (ℕ.+-identityʳ k′) x<) (ℕ.m≤m+n _ _))
 extractˣ⁻ᶜ⁻¹-~ᴹ kk′~ k″k‴~ (`unlift-`lift ~L)
   rewrite extractˣ⁻ᶜ-++ˣ⁻ kk′~ {extractˣ⁻ᶜ k″k‴~}
     with ~L′ ← extractˣ⁻ᶜ⁻¹-~ᴹ (extractˣ⁻ᶜ kk′~) (extractˣ⁻ᶜ k″k‴~) ~L
@@ -470,8 +526,8 @@ extractˣ⁻ᶜ⁻¹-~ᴹ-depth~ᴹ kk′~ k″k‴~ (`#¹ u<)
 extractˣ⁻ᶜ⁻¹-~ᴹ-depth~ᴹ kk′~ k″k‴~ (`λ⦂ ~S ∙ ~L) = cong suc (extractˣ⁻ᶜ⁻¹-~ᴹ-depth~ᴹ (!∷ᵖ kk′~) k″k‴~ ~L)
 extractˣ⁻ᶜ⁻¹-~ᴹ-depth~ᴹ kk′~ k″k‴~ (~L `$ ~M) = cong suc (cong₂ ℕ._⊔_ (extractˣ⁻ᶜ⁻¹-~ᴹ-depth~ᴹ kk′~ k″k‴~ ~L) (extractˣ⁻ᶜ⁻¹-~ᴹ-depth~ᴹ kk′~ k″k‴~ ~M))
 extractˣ⁻ᶜ⁻¹-~ᴹ-depth~ᴹ {k′ = k′} kk′~ k″k‴~ (`#⁰_ {x = x} x<)
-  rewrite sym (idxˣ⁻ᵖ⇒idxˣ⁻ᵖ-++ˣ⁻ kk′~ (extractˣ⁻ᶜ k″k‴~) (subst (x ℕ.<_) (ℕ.+-identityʳ k′) x<) x<)
-        | idxˣ⁻ᵖ⇒idxˣ⁻ᵖ-++ˣ⁻ kk′~ k″k‴~ (subst (x ℕ.<_) (ℕ.+-identityʳ k′) x<) (ℕ.≤-trans (subst (x ℕ.<_) (ℕ.+-identityʳ k′) x<) (ℕ.m≤m+n _ _)) = refl
+  rewrite sym (<⇒idxˣ⁻ᵖ≡idxˣ⁻ᵖ-++ˣ⁻ kk′~ (extractˣ⁻ᶜ k″k‴~) (subst (x ℕ.<_) (ℕ.+-identityʳ k′) x<) x<)
+        | <⇒idxˣ⁻ᵖ≡idxˣ⁻ᵖ-++ˣ⁻ kk′~ k″k‴~ (subst (x ℕ.<_) (ℕ.+-identityʳ k′) x<) (ℕ.≤-trans (subst (x ℕ.<_) (ℕ.+-identityʳ k′) x<) (ℕ.m≤m+n _ _)) = refl
 extractˣ⁻ᶜ⁻¹-~ᴹ-depth~ᴹ kk′~ k″k‴~ (`unlift-`lift ~L)
   rewrite extractˣ⁻ᶜ-++ˣ⁻ kk′~ {extractˣ⁻ᶜ k″k‴~}
     with ~L′ ← extractˣ⁻ᶜ⁻¹-~ᴹ (extractˣ⁻ᶜ kk′~) (extractˣ⁻ᶜ k″k‴~) ~L
@@ -731,83 +787,196 @@ Value~ᴹ-normalize ~L VDPL = Value~ᴹ-normalize-helper ~L VDPL (ℕ.<-wellFoun
                ∃₂ (λ S′ L′ → L ⟶* `λ⦂ᵖ S′ ∘ L′ × !∷ᵖ kk′~ ⊢ DP.L ~ᴹ L′ × DP.S ~ᵀ S′)
 `λ⦂-∙-~ᴹ-inv ~L = `λ⦂-∙-~ᴹ-inv-helper ~L (ℕ.<-wellFounded _)
 
-adgweperu : ∀ {u} →
-            (kk′~ : k ⍮ k′ ~ˣ⁻) {k″k‴~ : k″ ⍮ k‴ ~ˣ⁻} →
-            (u< : u ℕ.< k + k″) →
-            wkidx[ 1 ↑ lengthˣ⁻ kk′~ ] (idxˣ⁻ᶜ (kk′~ ++ˣ⁻ k″k‴~) u<) ≡ idxˣ⁻ᶜ (kk′~ ++ˣ⁻ ?∷ᵖ k″k‴~) u<
-adgweperu = {!!}
+wkidx[↑]-idxˣ⁻ᶜ : ∀ {u} →
+                  (kk′~ : k ⍮ k′ ~ˣ⁻) (0k₀~ : 0 ⍮ k₀ ~ˣ⁻) {k″k‴~ : k″ ⍮ k‴ ~ˣ⁻} →
+                  (u< : u ℕ.< k + k″) →
+                  wkidx[ lengthˣ⁻ 0k₀~ ↑ lengthˣ⁻ kk′~ ] (idxˣ⁻ᶜ (kk′~ ++ˣ⁻ k″k‴~) u<) ≡ idxˣ⁻ᶜ (kk′~ ++ˣ⁻ 0k₀~ ++ˣ⁻ k″k‴~) u<
+wkidx[↑]-idxˣ⁻ᶜ             []         0k₀~ {k″k‴~} u<                                             = ≥⇒lengthˣ⁻+idxˣ⁻ᶜ≡idxˣ⁻ᶜ-++ˣ⁻ 0k₀~ k″k‴~ z≤n u< u<
+wkidx[↑]-idxˣ⁻ᶜ             (?∷ᵖ kk′~) 0k₀~ {k″k‴~} u<
+  rewrite wkidx[↑suc]suc≡sucwkidx[↑] (lengthˣ⁻ 0k₀~) (lengthˣ⁻ kk′~) (idxˣ⁻ᶜ (kk′~ ++ˣ⁻ k″k‴~) u<) = cong suc (wkidx[↑]-idxˣ⁻ᶜ kk′~ 0k₀~ u<)
+wkidx[↑]-idxˣ⁻ᶜ             (!∷ᵖ kk′~) 0k₀~ {k″k‴~} u<
+  rewrite wkidx[↑suc]suc≡sucwkidx[↑] (lengthˣ⁻ 0k₀~) (lengthˣ⁻ kk′~) (idxˣ⁻ᶜ (kk′~ ++ˣ⁻ k″k‴~) u<) = cong suc (wkidx[↑]-idxˣ⁻ᶜ kk′~ 0k₀~ u<)
+wkidx[↑]-idxˣ⁻ᶜ             (?∷ᶜ kk′~) 0k₀~ {k″k‴~} u<
+  rewrite wkidx[↑suc]suc≡sucwkidx[↑] (lengthˣ⁻ 0k₀~) (lengthˣ⁻ kk′~) (idxˣ⁻ᶜ (kk′~ ++ˣ⁻ k″k‴~) u<) = cong suc (wkidx[↑]-idxˣ⁻ᶜ kk′~ 0k₀~ u<)
+wkidx[↑]-idxˣ⁻ᶜ {u = zero}  (!∷ᶜ kk′~) 0k₀~         (s≤s u<)                                       = refl
+wkidx[↑]-idxˣ⁻ᶜ {u = suc u} (!∷ᶜ kk′~) 0k₀~ {k″k‴~} (s≤s u<)
+  rewrite wkidx[↑suc]suc≡sucwkidx[↑] (lengthˣ⁻ 0k₀~) (lengthˣ⁻ kk′~) (idxˣ⁻ᶜ (kk′~ ++ˣ⁻ k″k‴~) u<) = cong suc (wkidx[↑]-idxˣ⁻ᶜ kk′~ 0k₀~ u<)
 
-fqwgusfds : (kk′~ : k ⍮ k′ ~ˣ⁻) {k″k‴~ : k″ ⍮ k‴ ~ˣ⁻} →
-            (x< : x ℕ.< k′ + k‴) →
-            wkidx[ 1 ↑ lengthˣ⁻ kk′~ ] (idxˣ⁻ᵖ (kk′~ ++ˣ⁻ k″k‴~) x<) ≡ idxˣ⁻ᵖ (kk′~ ++ˣ⁻ ?∷ᵖ k″k‴~) x<
-fqwgusfds = {!!}
+wkidx[↑]-idxˣ⁻ᵖ : (kk′~ : k ⍮ k′ ~ˣ⁻) (k₀0~ : k₀ ⍮ 0 ~ˣ⁻) {k″k‴~ : k″ ⍮ k‴ ~ˣ⁻} →
+                  (x< : x ℕ.< k′ + k‴) →
+                  wkidx[ lengthˣ⁻ k₀0~ ↑ lengthˣ⁻ kk′~ ] (idxˣ⁻ᵖ (kk′~ ++ˣ⁻ k″k‴~) x<) ≡ idxˣ⁻ᵖ (kk′~ ++ˣ⁻ k₀0~ ++ˣ⁻ k″k‴~) x<
+wkidx[↑]-idxˣ⁻ᵖ             []         k₀0~ {k″k‴~} x<                                             = ≥⇒lengthˣ⁻+idxˣ⁻ᵖ≡idxˣ⁻ᵖ-++ˣ⁻ k₀0~ k″k‴~ z≤n x< x<
+wkidx[↑]-idxˣ⁻ᵖ             (?∷ᶜ kk′~) k₀0~ {k″k‴~} x<
+  rewrite wkidx[↑suc]suc≡sucwkidx[↑] (lengthˣ⁻ k₀0~) (lengthˣ⁻ kk′~) (idxˣ⁻ᵖ (kk′~ ++ˣ⁻ k″k‴~) x<) = cong suc (wkidx[↑]-idxˣ⁻ᵖ kk′~ k₀0~ x<)
+wkidx[↑]-idxˣ⁻ᵖ             (!∷ᶜ kk′~) k₀0~ {k″k‴~} x<
+  rewrite wkidx[↑suc]suc≡sucwkidx[↑] (lengthˣ⁻ k₀0~) (lengthˣ⁻ kk′~) (idxˣ⁻ᵖ (kk′~ ++ˣ⁻ k″k‴~) x<) = cong suc (wkidx[↑]-idxˣ⁻ᵖ kk′~ k₀0~ x<)
+wkidx[↑]-idxˣ⁻ᵖ             (?∷ᵖ kk′~) k₀0~ {k″k‴~} x<
+  rewrite wkidx[↑suc]suc≡sucwkidx[↑] (lengthˣ⁻ k₀0~) (lengthˣ⁻ kk′~) (idxˣ⁻ᵖ (kk′~ ++ˣ⁻ k″k‴~) x<) = cong suc (wkidx[↑]-idxˣ⁻ᵖ kk′~ k₀0~ x<)
+wkidx[↑]-idxˣ⁻ᵖ {x = zero}  (!∷ᵖ kk′~) k₀0~         (s≤s x<)                                       = refl
+wkidx[↑]-idxˣ⁻ᵖ {x = suc x} (!∷ᵖ kk′~) k₀0~ {k″k‴~} (s≤s x<)
+  rewrite wkidx[↑suc]suc≡sucwkidx[↑] (lengthˣ⁻ k₀0~) (lengthˣ⁻ kk′~) (idxˣ⁻ᵖ (kk′~ ++ˣ⁻ k″k‴~) x<) = cong suc (wkidx[↑]-idxˣ⁻ᵖ kk′~ k₀0~ x<)
 
-adsf : (kk′~ : k ⍮ k′ ~ˣ⁻) {k″k‴~ : k″ ⍮ k‴ ~ˣ⁻} →
-       (x< : x ℕ.< k′ + k‴) →
-       wkidx[ 1 ↑ lengthˣ⁻ kk′~ ] (idxˣ⁻ᵖ (kk′~ ++ˣ⁻ k″k‴~) x<) ≡ idxˣ⁻ᵖ (kk′~ ++ˣ⁻ !∷ᶜ k″k‴~) x<
-adsf = {!!}
-
-wk[↑¹]-respects-~ᴹ : (kk′~ : k ⍮ k′ ~ˣ⁻) {k″k‴~ : k″ ⍮ k‴ ~ˣ⁻} →
-                     kk′~ ++ˣ⁻ k″k‴~ ⊢ DP.L ~ᴹ L →
-                     kk′~ ++ˣ⁻ !∷ᶜ k″k‴~ ⊢ DP.wk[ 1 ↑¹ k ] DP.L ~ᴹ wk[ 1 ↑ lengthˣ⁻ kk′~ ] L
-wk[↑¹]-respects-~ᴹ kk′~ `unit = `unit
-wk[↑¹]-respects-~ᴹ kk′~ (`box ~L) = `box {!!}
-wk[↑¹]-respects-~ᴹ kk′~ (`let-box ~L `in ~M) = `let-box wk[↑¹]-respects-~ᴹ kk′~ ~L `in wk[↑¹]-respects-~ᴹ (!∷ᶜ kk′~) ~M
-wk[↑¹]-respects-~ᴹ kk′~ {k″k‴~} (`#¹ u<) = {!!}
-wk[↑¹]-respects-~ᴹ {k = k} {k′ = k′} kk′~ (`λ⦂ ~S ∙ ~L)
-  with ~L′ ← wk[↑¹]-respects-~ᴹ (!∷ᵖ kk′~) ~L
+wk[↑¹]~ᴹwk[↑]ᶜ : (kk′~ : k ⍮ k′ ~ˣ⁻) {k″k‴~ : k″ ⍮ k‴ ~ˣ⁻} →
+                 kk′~ ++ˣ⁻ k″k‴~ ⊢ DP.L ~ᴹ L →
+                 kk′~ ++ˣ⁻ !∷ᶜ k″k‴~ ⊢ DP.wk[ 1 ↑¹ k ] DP.L ~ᴹ wk[ 1 ↑ lengthˣ⁻ kk′~ ] L
+wk[↑¹]~ᴹwk[↑]ᶜ kk′~ `unit = `unit
+wk[↑¹]~ᴹwk[↑]ᶜ kk′~ {k″k‴~} (`box ~L)
+  rewrite extractˣ⁻ᶜ-++ˣ⁻ kk′~ {k″k‴~ = k″k‴~}
+    with ~L′ ← wk[↑¹]~ᴹwk[↑]ᶜ (extractˣ⁻ᶜ kk′~) {k″k‴~ = extractˣ⁻ᶜ k″k‴~} ~L
+      rewrite sym (extractˣ⁻ᶜ-++ˣ⁻ kk′~ {k″k‴~ = !∷ᶜ k″k‴~})
+            | extractˣ⁻ᶜ-lengthˣ⁻ kk′~ = `box ~L′
+wk[↑¹]~ᴹwk[↑]ᶜ kk′~ (`let-box ~L `in ~M) = `let-box wk[↑¹]~ᴹwk[↑]ᶜ kk′~ ~L `in wk[↑¹]~ᴹwk[↑]ᶜ (!∷ᶜ kk′~) ~M
+wk[↑¹]~ᴹwk[↑]ᶜ {k} kk′~ {k″k‴~} (`#¹_ {u = u} u<)
+  with u ℕ.≥? k
+...  | no  u≱k
+    with u<k ← ℕ.≰⇒> u≱k
+      rewrite sym (<⇒idxˣ⁻ᶜ≡idxˣ⁻ᶜ-++ˣ⁻ kk′~ k″k‴~ u<k u<)
+            | dec-no (_ ℕ.≤? _) (ℕ.<⇒≱ (idxˣ⁻ᶜ<lengthˣ⁻ kk′~ u<k))
+            | <⇒idxˣ⁻ᶜ≡idxˣ⁻ᶜ-++ˣ⁻ kk′~ (!∷ᶜ k″k‴~) u<k (ℕ.<-transˡ u<k (ℕ.m≤m+n _ _)) = `#¹ ℕ.<-transˡ u<k (ℕ.m≤m+n _ _)
+...  | yes u≥k
+    with u∸k< ← subst (u ∸ k ℕ.<_) (ℕ.m+n∸m≡n k _) (ℕ.∸-monoˡ-< u< u≥k)
+      rewrite sym (≥⇒lengthˣ⁻+idxˣ⁻ᶜ≡idxˣ⁻ᶜ-++ˣ⁻ kk′~ k″k‴~ u≥k u< u∸k<)
+            | proj₂ (dec-yes (_ ℕ.≤? _) (ℕ.m≤m+n (lengthˣ⁻ kk′~) (idxˣ⁻ᶜ k″k‴~ u∸k<)))
+            | dec-no (_ ℕ.≟ _) (ℕ.m+1+n≢m (lengthˣ⁻ kk′~) {idxˣ⁻ᶜ k″k‴~ u∸k<})
+            | sym (ℕ.+-suc (lengthˣ⁻ kk′~) (idxˣ⁻ᶜ k″k‴~ u∸k<)) = {!!}
+wk[↑¹]~ᴹwk[↑]ᶜ {k} {k′} kk′~ (`λ⦂ ~S ∙ ~L)
+  with ~L′ ← wk[↑¹]~ᴹwk[↑]ᶜ (!∷ᵖ kk′~) ~L
     rewrite ℕ.+-suc k k′ = `λ⦂ ~S ∙ ~L′
-wk[↑¹]-respects-~ᴹ kk′~ (~L `$ ~M) = wk[↑¹]-respects-~ᴹ kk′~ ~L `$ wk[↑¹]-respects-~ᴹ kk′~ ~M
-wk[↑¹]-respects-~ᴹ kk′~ {k″k‴~} (`#⁰ x<)
-  rewrite adsf kk′~ {k″k‴~} x< = `#⁰ x<
-wk[↑¹]-respects-~ᴹ kk′~ (`unlift-`lift ~L) = `unlift-`lift {!!}
+wk[↑¹]~ᴹwk[↑]ᶜ kk′~ (~L `$ ~M) = wk[↑¹]~ᴹwk[↑]ᶜ kk′~ ~L `$ wk[↑¹]~ᴹwk[↑]ᶜ kk′~ ~M
+wk[↑¹]~ᴹwk[↑]ᶜ kk′~ {k″k‴~} (`#⁰ x<)
+  rewrite wkidx[↑]-idxˣ⁻ᵖ kk′~ (!∷ᶜ []) {k″k‴~} x< = `#⁰ x<
+wk[↑¹]~ᴹwk[↑]ᶜ kk′~ {k″k‴~} (`unlift-`lift ~L)
+  rewrite extractˣ⁻ᶜ-++ˣ⁻ kk′~ {k″k‴~ = k″k‴~}
+    with ~L′ ← wk[↑¹]~ᴹwk[↑]ᶜ (extractˣ⁻ᶜ kk′~) {k″k‴~ = extractˣ⁻ᶜ k″k‴~} ~L
+      rewrite sym (extractˣ⁻ᶜ-++ˣ⁻ kk′~ {k″k‴~ = !∷ᶜ k″k‴~})
+            | extractˣ⁻ᶜ-lengthˣ⁻ kk′~ = `unlift-`lift ~L′
 
-wk[↑⁰]-respects-~ᴹ : (kk′~ : k ⍮ k′ ~ˣ⁻) {k″k‴~ : k″ ⍮ k‴ ~ˣ⁻} →
-                     kk′~ ++ˣ⁻ k″k‴~ ⊢ DP.L ~ᴹ L →
-                     kk′~ ++ˣ⁻ !∷ᵖ k″k‴~ ⊢ DP.wk[ 1 ↑⁰ k′ ] DP.L ~ᴹ wk[ 1 ↑ lengthˣ⁻ kk′~ ] L
-wk[↑⁰]-respects-~ᴹ kk′~ `unit = `unit
-wk[↑⁰]-respects-~ᴹ kk′~ (`box ~L) = `box {!!}
-wk[↑⁰]-respects-~ᴹ kk′~ (`let-box ~L `in ~M) = `let-box wk[↑⁰]-respects-~ᴹ kk′~ ~L `in wk[↑⁰]-respects-~ᴹ (!∷ᶜ kk′~) ~M
-wk[↑⁰]-respects-~ᴹ kk′~ {k″k‴~} (`#¹ u<) = {!!}
-wk[↑⁰]-respects-~ᴹ {k = k} {k′ = k′} kk′~ (`λ⦂ ~S ∙ ~L)
-  with ~L′ ← wk[↑⁰]-respects-~ᴹ (!∷ᵖ kk′~) ~L
-    rewrite ℕ.+-suc k k′ = `λ⦂ ~S ∙ ~L′
-wk[↑⁰]-respects-~ᴹ kk′~ (~L `$ ~M) = wk[↑⁰]-respects-~ᴹ kk′~ ~L `$ wk[↑⁰]-respects-~ᴹ kk′~ ~M
-wk[↑⁰]-respects-~ᴹ kk′~ {k″k‴~} (`#⁰ x<) = {!!}
-wk[↑⁰]-respects-~ᴹ kk′~ (`unlift-`lift ~L) = `unlift-`lift {!!}
+~ᴹ∧≥⇒wk[↑⁰]≡ : {kk′~ : k ⍮ k′ ~ˣ⁻} →
+               kk′~ ⊢ DP.L ~ᴹ L →
+               x ℕ.≥ k′ →
+               DP.wk[ 1 ↑⁰ x ] DP.L ≡ DP.L
+~ᴹ∧≥⇒wk[↑⁰]≡ `unit x≥ = refl
+~ᴹ∧≥⇒wk[↑⁰]≡ (`box ~M) x≥ = refl
+~ᴹ∧≥⇒wk[↑⁰]≡ (`let-box ~M `in ~N) x≥ = cong₂ DP.`let-box_`in_ (~ᴹ∧≥⇒wk[↑⁰]≡ ~M x≥) (~ᴹ∧≥⇒wk[↑⁰]≡ ~N x≥)
+~ᴹ∧≥⇒wk[↑⁰]≡ (`#¹ u<) x≥ = refl
+~ᴹ∧≥⇒wk[↑⁰]≡ (`λ⦂ ~S ∙ ~M) x≥ = cong (DP.`λ⦂ _ ∙_) (~ᴹ∧≥⇒wk[↑⁰]≡ ~M (s≤s x≥))
+~ᴹ∧≥⇒wk[↑⁰]≡ (~M `$ ~N) x≥ = cong₂ DP._`$_ (~ᴹ∧≥⇒wk[↑⁰]≡ ~M x≥) (~ᴹ∧≥⇒wk[↑⁰]≡ ~N x≥)
+~ᴹ∧≥⇒wk[↑⁰]≡ (`#⁰ y<) x≥
+  rewrite dec-no (_ ℕ.≤? _) (ℕ.<⇒≱ (ℕ.<-transˡ y< x≥)) = refl
+~ᴹ∧≥⇒wk[↑⁰]≡ (`unlift-`lift ~M) x≥ = ~ᴹ∧≥⇒wk[↑⁰]≡ ~M z≤n 
 
 ~ᴹwk[↑]ᵖ : (kk′~ : k ⍮ k′ ~ˣ⁻) {k″k‴~ : k″ ⍮ k‴ ~ˣ⁻} →
            kk′~ ++ˣ⁻ k″k‴~ ⊢ DP.L ~ᴹ L →
            kk′~ ++ˣ⁻ ?∷ᵖ k″k‴~ ⊢ DP.L ~ᴹ wk[ 1 ↑ lengthˣ⁻ kk′~ ] L
 ~ᴹwk[↑]ᵖ kk′~ `unit = `unit
-~ᴹwk[↑]ᵖ kk′~ (`box ~L) = `box {!!}
+~ᴹwk[↑]ᵖ kk′~ {k″k‴~} (`box ~L)
+  rewrite extractˣ⁻ᶜ-++ˣ⁻ kk′~ {k″k‴~ = k″k‴~}
+    with ~L′ ← ~ᴹwk[↑]ᵖ (extractˣ⁻ᶜ kk′~) {k″k‴~ = extractˣ⁻ᶜ k″k‴~} ~L
+      rewrite sym (extractˣ⁻ᶜ-++ˣ⁻ kk′~ {k″k‴~ = ?∷ᵖ k″k‴~})
+            | extractˣ⁻ᶜ-lengthˣ⁻ kk′~ = `box ~L′
 ~ᴹwk[↑]ᵖ kk′~ (`let-box ~L `in ~M) = `let-box ~ᴹwk[↑]ᵖ kk′~ ~L `in ~ᴹwk[↑]ᵖ (!∷ᶜ kk′~) ~M
 ~ᴹwk[↑]ᵖ kk′~ {k″k‴~} (`#¹ u<)
-  rewrite adgweperu kk′~ {k″k‴~} u< = `#¹ u<
+  rewrite wkidx[↑]-idxˣ⁻ᶜ kk′~ (?∷ᵖ []) {k″k‴~} u< = `#¹ u<
 ~ᴹwk[↑]ᵖ {k = k} {k′ = k′} kk′~ (`λ⦂ ~S ∙ ~L)
   with ~L′ ← ~ᴹwk[↑]ᵖ (!∷ᵖ kk′~) ~L
     rewrite ℕ.+-suc k k′ = `λ⦂ ~S ∙ ~L′
 ~ᴹwk[↑]ᵖ kk′~ (~L `$ ~M) = ~ᴹwk[↑]ᵖ kk′~ ~L `$ ~ᴹwk[↑]ᵖ kk′~ ~M
 ~ᴹwk[↑]ᵖ kk′~ {k″k‴~} (`#⁰ x<)
-  rewrite fqwgusfds kk′~ {k″k‴~} x< = `#⁰ x<
-~ᴹwk[↑]ᵖ kk′~ (`unlift-`lift ~L) = `unlift-`lift {!!}
+  rewrite wkidx[↑]-idxˣ⁻ᵖ kk′~ (?∷ᵖ []) {k″k‴~} x< = `#⁰ x<
+~ᴹwk[↑]ᵖ kk′~ {k″k‴~} (`unlift-`lift ~L)
+  rewrite extractˣ⁻ᶜ-++ˣ⁻ kk′~ {k″k‴~ = k″k‴~}
+    with ~L′ ← ~ᴹwk[↑]ᵖ (extractˣ⁻ᶜ kk′~) {k″k‴~ = extractˣ⁻ᶜ k″k‴~} ~L
+      rewrite sym (extractˣ⁻ᶜ-++ˣ⁻ kk′~ {k″k‴~ = ?∷ᵖ k″k‴~})
+            | extractˣ⁻ᶜ-lengthˣ⁻ kk′~ = `unlift-`lift ~L′
 
-[/¹]-respects-~ᴹ : (kk′~ : k ⍮ k′ ~ˣ⁻) {k″k‴~ : k″ ⍮ k‴ ~ˣ⁻} →
-                   extractˣ⁻ᶜ (kk′~ ++ˣ⁻ k″k‴~) ⊢ DP.L ~ᴹ L →
-                   kk′~ ++ˣ⁻ !∷ᶜ k″k‴~ ⊢ DP.M ~ᴹ M →
-                   kk′~ ++ˣ⁻ k″k‴~ ⊢ DP.[ DP.L /¹ k ] DP.M ~ᴹ [ `lift L /[ cMode ] lengthˣ⁻ kk′~ ] M
-[/¹]-respects-~ᴹ kk′~ ~L `unit = `unit
-[/¹]-respects-~ᴹ kk′~ ~L (`box ~M)
-  rewrite extractˣ⁻ᶜ-++ˣ⁻ kk′~ {k″k‴~ = !∷ᵖ k″k‴~} = `box {![/¹]-respects-~ᴹ (extractˣ⁻ᶜ kk′~) ? ?!}
-[/¹]-respects-~ᴹ kk′~ ~L (`let-box ~M `in ~N) = `let-box [/¹]-respects-~ᴹ kk′~ ~L ~M `in [/¹]-respects-~ᴹ (!∷ᶜ kk′~) (wk[↑¹]-respects-~ᴹ [] ~L) ~N
-[/¹]-respects-~ᴹ kk′~ ~L (`#¹ u<)
-  rewrite proj₂ (dec-yes (_ ≤?ₘ² _) p≤c) = {!!}
-[/¹]-respects-~ᴹ {k = k} {k′ = k′} kk′~ ~L (`λ⦂ ~S ∙ ~M)
-  with ⊢M′ ← [/¹]-respects-~ᴹ (!∷ᵖ kk′~) (~ᴹwk[↑]ᵖ [] ~L) ~M
-    rewrite ℕ.+-suc k k′ = `λ⦂ ~S ∙ ⊢M′
-[/¹]-respects-~ᴹ kk′~ ~L (~M `$ ~N) = [/¹]-respects-~ᴹ kk′~ ~L ~M `$ [/¹]-respects-~ᴹ kk′~ ~L ~N
-[/¹]-respects-~ᴹ kk′~ ~L (`#⁰ x<) = {!!}
-[/¹]-respects-~ᴹ kk′~ ~L (`unlift-`lift ~M) = `unlift-`lift {!subst (_⊢ _ ~ᴹ _) (sym (extractˣ⁻ᶜ-++ˣ⁻ kk′~))!}
+wk[↑⁰]~ᴹwk[↑]ᵖ : (kk′~ : k ⍮ k′ ~ˣ⁻) {k″k‴~ : k″ ⍮ k‴ ~ˣ⁻} →
+                 kk′~ ++ˣ⁻ k″k‴~ ⊢ DP.L ~ᴹ L →
+                 kk′~ ++ˣ⁻ !∷ᵖ k″k‴~ ⊢ DP.wk[ 1 ↑⁰ k′ ] DP.L ~ᴹ wk[ 1 ↑ lengthˣ⁻ kk′~ ] L
+wk[↑⁰]~ᴹwk[↑]ᵖ kk′~ `unit = `unit
+wk[↑⁰]~ᴹwk[↑]ᵖ kk′~ {k″k‴~} (`box ~L)
+  rewrite extractˣ⁻ᶜ-++ˣ⁻ kk′~ {k″k‴~ = k″k‴~}
+    with ~L′ ← ~ᴹwk[↑]ᵖ (extractˣ⁻ᶜ kk′~) {k″k‴~ = extractˣ⁻ᶜ k″k‴~} ~L
+      rewrite sym (extractˣ⁻ᶜ-++ˣ⁻ kk′~ {k″k‴~ = !∷ᵖ k″k‴~})
+            | extractˣ⁻ᶜ-lengthˣ⁻ kk′~ = `box ~L′
+wk[↑⁰]~ᴹwk[↑]ᵖ kk′~ (`let-box ~L `in ~M) = `let-box wk[↑⁰]~ᴹwk[↑]ᵖ kk′~ ~L `in wk[↑⁰]~ᴹwk[↑]ᵖ (!∷ᶜ kk′~) ~M
+wk[↑⁰]~ᴹwk[↑]ᵖ kk′~ {k″k‴~} (`#¹ u<)
+  rewrite wkidx[↑]-idxˣ⁻ᶜ kk′~ (!∷ᵖ []) {k″k‴~} u< = `#¹ u<
+wk[↑⁰]~ᴹwk[↑]ᵖ {k = k} {k′ = k′} kk′~ (`λ⦂ ~S ∙ ~L)
+  with ~L′ ← wk[↑⁰]~ᴹwk[↑]ᵖ (!∷ᵖ kk′~) ~L
+    rewrite ℕ.+-suc k k′ = `λ⦂ ~S ∙ ~L′
+wk[↑⁰]~ᴹwk[↑]ᵖ kk′~ (~L `$ ~M) = wk[↑⁰]~ᴹwk[↑]ᵖ kk′~ ~L `$ wk[↑⁰]~ᴹwk[↑]ᵖ kk′~ ~M
+wk[↑⁰]~ᴹwk[↑]ᵖ kk′~ {k″k‴~} (`#⁰ x<) = {!!}
+wk[↑⁰]~ᴹwk[↑]ᵖ {k′ = k′} kk′~ {k″k‴~} (`unlift-`lift ~L)
+  rewrite extractˣ⁻ᶜ-++ˣ⁻ kk′~ {k″k‴~ = k″k‴~}
+    with ~L′ ← ~ᴹwk[↑]ᵖ (extractˣ⁻ᶜ kk′~) {k″k‴~ = extractˣ⁻ᶜ k″k‴~} ~L
+      rewrite sym (extractˣ⁻ᶜ-++ˣ⁻ kk′~ {k″k‴~ = !∷ᵖ k″k‴~})
+            | extractˣ⁻ᶜ-lengthˣ⁻ kk′~
+            | ~ᴹ∧≥⇒wk[↑⁰]≡ ~L (z≤n {k′}) = `unlift-`lift ~L′
+
+[/¹]~ᴹ[/]ᶜ : (kk′~ : k ⍮ k′ ~ˣ⁻) {k″k‴~ : k″ ⍮ k‴ ~ˣ⁻} →
+             extractˣ⁻ᶜ (kk′~ ++ˣ⁻ k″k‴~) ⊢ DP.L ~ᴹ L →
+             kk′~ ++ˣ⁻ !∷ᶜ k″k‴~ ⊢ DP.M ~ᴹ M →
+             kk′~ ++ˣ⁻ k″k‴~ ⊢ DP.[ DP.L /¹ k ] DP.M ~ᴹ [ `lift L /[ cMode ] lengthˣ⁻ kk′~ ] M
+[/¹]~ᴹ[/]ᶜ kk′~ ~L `unit = `unit
+[/¹]~ᴹ[/]ᶜ kk′~ {k″k‴~} ~L (`box ~M)
+  rewrite sym (extractˣ⁻ᶜ-idempotent (kk′~ ++ˣ⁻ k″k‴~))
+        | extractˣ⁻ᶜ-++ˣ⁻ kk′~ {k″k‴~ = k″k‴~}
+        | extractˣ⁻ᶜ-++ˣ⁻ kk′~ {k″k‴~ = !∷ᶜ k″k‴~}
+    with ~M′ ← [/¹]~ᴹ[/]ᶜ (extractˣ⁻ᶜ kk′~) ~L ~M
+      rewrite sym (extractˣ⁻ᶜ-++ˣ⁻ kk′~ {k″k‴~ = k″k‴~})
+            | extractˣ⁻ᶜ-lengthˣ⁻ kk′~ = `box ~M′
+[/¹]~ᴹ[/]ᶜ kk′~ ~L (`let-box ~M `in ~N) = `let-box [/¹]~ᴹ[/]ᶜ kk′~ ~L ~M `in [/¹]~ᴹ[/]ᶜ (!∷ᶜ kk′~) (wk[↑¹]~ᴹwk[↑]ᶜ [] ~L) ~N
+[/¹]~ᴹ[/]ᶜ {k} {_} {k″} kk′~ {k″k‴~} ~L (`#¹_ {u = u} u<)
+  with u ℕ.≥? k
+...  | no  u≱k
+    with u<k ← ℕ.≰⇒> u≱k
+      rewrite sym (<⇒idxˣ⁻ᶜ≡idxˣ⁻ᶜ-++ˣ⁻ kk′~ (!∷ᶜ k″k‴~) u<k u<)
+            | dec-no (_ ℕ.≤? _) (ℕ.<⇒≱ (idxˣ⁻ᶜ<lengthˣ⁻ kk′~ u<k))
+            | <⇒idxˣ⁻ᶜ≡idxˣ⁻ᶜ-++ˣ⁻ kk′~ k″k‴~ u<k (ℕ.<-transˡ u<k (ℕ.m≤m+n _ _)) = `#¹ (ℕ.<-transˡ u<k (ℕ.m≤m+n _ _))
+...  | yes u≥k
+    with u∸k< ← subst (u ∸ k ℕ.<_) (ℕ.m+n∸m≡n k _) (ℕ.∸-monoˡ-< u< u≥k)
+      rewrite sym (≥⇒lengthˣ⁻+idxˣ⁻ᶜ≡idxˣ⁻ᶜ-++ˣ⁻ kk′~ (!∷ᶜ k″k‴~) u≥k u< u∸k<)
+            | proj₂ (dec-yes (_ ℕ.≤? _) (ℕ.m≤m+n (lengthˣ⁻ kk′~) (idxˣ⁻ᶜ (!∷ᶜ k″k‴~) u∸k<)))
+        with u ℕ.≟ k
+...        | no  u≢k
+          with u>k ← ℕ.≤∧≢⇒< u≥k (≢-sym u≢k)
+             | s≤s u∸k≤ ← u∸k<
+            with suc u′ ← u
+              rewrite ℕ.+-∸-assoc 1 (ℕ.≤-pred u>k)
+                    | dec-no (_ ℕ.≟ _) (ℕ.m+1+n≢m (lengthˣ⁻ kk′~) {idxˣ⁻ᶜ k″k‴~ u∸k≤})
+                    | ℕ.+-suc (lengthˣ⁻ kk′~) (idxˣ⁻ᶜ k″k‴~ u∸k≤)
+                    | ℕ.+-suc k k″
+                    | ≥⇒lengthˣ⁻+idxˣ⁻ᶜ≡idxˣ⁻ᶜ-++ˣ⁻ kk′~ k″k‴~ (ℕ.≤-pred u>k) (ℕ.≤-pred u<) u∸k≤ = `#¹ (ℕ.≤-pred u<)
+...        | yes u≡k
+          with s≤s _ ← u∸k<
+            rewrite u≡k
+                  | ℕ.n∸n≡0 k
+                  | proj₂ (dec-yes (_ ℕ.≟ _) (ℕ.+-identityʳ (lengthˣ⁻ kk′~))) = `unlift-`lift ~L
+[/¹]~ᴹ[/]ᶜ {k} {k′} kk′~ ~L (`λ⦂ ~S ∙ ~M)
+  with ~M′ ← [/¹]~ᴹ[/]ᶜ (!∷ᵖ kk′~) (~ᴹwk[↑]ᵖ [] ~L) ~M
+    rewrite ℕ.+-suc k k′ = `λ⦂ ~S ∙ ~M′
+[/¹]~ᴹ[/]ᶜ kk′~ ~L (~M `$ ~N) = [/¹]~ᴹ[/]ᶜ kk′~ ~L ~M `$ [/¹]~ᴹ[/]ᶜ kk′~ ~L ~N
+[/¹]~ᴹ[/]ᶜ {_} {k′} {_} {k‴} kk′~ {k″k‴~} ~L (`#⁰_ {x = x} x<)
+  with x ℕ.≥? k′
+...  | no  x≱k′
+    with x<k′ ← ℕ.≰⇒> x≱k′
+      rewrite sym (<⇒idxˣ⁻ᵖ≡idxˣ⁻ᵖ-++ˣ⁻ kk′~ (!∷ᶜ k″k‴~) x<k′ x<)
+            | dec-no (_ ℕ.≥? _) (ℕ.<⇒≱ (idxˣ⁻ᵖ<lengthˣ⁻ kk′~ x<k′))
+            | <⇒idxˣ⁻ᵖ≡idxˣ⁻ᵖ-++ˣ⁻ kk′~ k″k‴~ x<k′ x< = `#⁰ x<
+...  | yes x≥k′
+    with x∸k′< ← subst (x ∸ k′ ℕ.<_) (ℕ.m+n∸m≡n k′ _) (ℕ.∸-monoˡ-< x< x≥k′)
+      rewrite sym (≥⇒lengthˣ⁻+idxˣ⁻ᵖ≡idxˣ⁻ᵖ-++ˣ⁻ kk′~ (!∷ᶜ k″k‴~) x≥k′ x< x∸k′<)
+            | proj₂ (dec-yes (_ ℕ.≤? _) (ℕ.m≤m+n (lengthˣ⁻ kk′~) (idxˣ⁻ᵖ (!∷ᶜ k″k‴~) x∸k′<)))
+            | dec-no (_ ℕ.≟ _) (ℕ.m+1+n≢m (lengthˣ⁻ kk′~) {idxˣ⁻ᵖ k″k‴~ x∸k′<})
+            | ℕ.+-suc (lengthˣ⁻ kk′~) (idxˣ⁻ᵖ k″k‴~ x∸k′<)
+            | ≥⇒lengthˣ⁻+idxˣ⁻ᵖ≡idxˣ⁻ᵖ-++ˣ⁻ kk′~ k″k‴~ x≥k′ x< x∸k′< = `#⁰ x<
+[/¹]~ᴹ[/]ᶜ kk′~ {k″k‴~} ~L (`unlift-`lift ~M)
+  rewrite sym (extractˣ⁻ᶜ-idempotent (kk′~ ++ˣ⁻ k″k‴~))
+        | extractˣ⁻ᶜ-++ˣ⁻ kk′~ {k″k‴~ = k″k‴~}
+        | extractˣ⁻ᶜ-++ˣ⁻ kk′~ {k″k‴~ = !∷ᶜ k″k‴~}
+    with ~M′ ← [/¹]~ᴹ[/]ᶜ (extractˣ⁻ᶜ kk′~) ~L ~M
+      rewrite sym (extractˣ⁻ᶜ-++ˣ⁻ kk′~ {k″k‴~ = k″k‴~})
+            | extractˣ⁻ᶜ-lengthˣ⁻ kk′~ = `unlift-`lift ~M′
 
 ~ᴹ∧≥⇒[/⁰]≡ : ∀ DPL →
              {kk′~ : k ⍮ k′ ~ˣ⁻} →
@@ -828,27 +997,100 @@ wk[↑⁰]-respects-~ᴹ kk′~ (`unlift-`lift ~L) = `unlift-`lift {!!}
          ∀ L →
          kk′~ ++ˣ⁻ ?∷ᵖ k″k‴~ ⊢ DP.M ~ᴹ M →
          kk′~ ++ˣ⁻ k″k‴~ ⊢ DP.M ~ᴹ [ L /[ pMode ] lengthˣ⁻ kk′~ ] M
-~ᴹ[/]ᵖ kk′~ L ~M = {!!}
+~ᴹ[/]ᵖ kk′~         _ `unit = `unit
+~ᴹ[/]ᵖ kk′~ {k″k‴~} _ (`box ~M)
+  rewrite extractˣ⁻ᶜ-++ˣ⁻ kk′~ {k″k‴~ = ?∷ᵖ k″k‴~}
+    with ~M′ ← ~ᴹ[/]ᵖ (extractˣ⁻ᶜ kk′~) (`unlift `unit) ~M
+      rewrite sym (extractˣ⁻ᶜ-++ˣ⁻ kk′~ {k″k‴~ = k″k‴~})
+            | extractˣ⁻ᶜ-lengthˣ⁻ kk′~ = `box ~M′
+~ᴹ[/]ᵖ kk′~         _ (`let-box ~M `in ~N) = `let-box ~ᴹ[/]ᵖ kk′~ _ ~M `in ~ᴹ[/]ᵖ (!∷ᶜ kk′~) _ ~N
+~ᴹ[/]ᵖ {k} kk′~ {k″k‴~} _ (`#¹_ {u = u} u<)
+  with u ℕ.≥? k
+...  | no  u≱k
+    rewrite sym (<⇒idxˣ⁻ᶜ≡idxˣ⁻ᶜ-++ˣ⁻ kk′~ (?∷ᵖ k″k‴~) (ℕ.≰⇒> u≱k) u<)
+          | dec-no (_ ℕ.≥? _) (ℕ.<⇒≱ (idxˣ⁻ᶜ<lengthˣ⁻ kk′~ (ℕ.≰⇒> u≱k)))
+          | <⇒idxˣ⁻ᶜ≡idxˣ⁻ᶜ-++ˣ⁻ kk′~ k″k‴~ (ℕ.≰⇒> u≱k) u< = `#¹ u<
+...  | yes u≥k
+    with u∸k< ← subst (u ∸ k ℕ.<_) (ℕ.m+n∸m≡n k _) (ℕ.∸-monoˡ-< u< u≥k)
+      rewrite sym (≥⇒lengthˣ⁻+idxˣ⁻ᶜ≡idxˣ⁻ᶜ-++ˣ⁻ kk′~ (?∷ᵖ k″k‴~) u≥k u< u∸k<)
+            | proj₂ (dec-yes (_ ℕ.≤? _) (ℕ.m≤m+n (lengthˣ⁻ kk′~) (idxˣ⁻ᶜ (?∷ᵖ k″k‴~) u∸k<)))
+            | dec-no (_ ℕ.≟ _) (ℕ.m+1+n≢m (lengthˣ⁻ kk′~) {idxˣ⁻ᶜ k″k‴~ u∸k<})
+            | ℕ.+-suc (lengthˣ⁻ kk′~) (idxˣ⁻ᶜ k″k‴~ u∸k<)
+            | ≥⇒lengthˣ⁻+idxˣ⁻ᶜ≡idxˣ⁻ᶜ-++ˣ⁻ kk′~ k″k‴~ u≥k u< u∸k< = `#¹ u<
+~ᴹ[/]ᵖ kk′~         _ (`λ⦂ ~S ∙ ~M) = `λ⦂ ~S ∙ (~ᴹ[/]ᵖ (!∷ᵖ kk′~) _ ~M)
+~ᴹ[/]ᵖ kk′~         _ (~M `$ ~N) = ~ᴹ[/]ᵖ kk′~ _ ~M `$ ~ᴹ[/]ᵖ kk′~ _ ~N
+~ᴹ[/]ᵖ {_} {k′} kk′~ {k″k‴~} _ (`#⁰_ {x = x} x<)
+  with x ℕ.≥? k′
+...  | no  x≱k′
+    with x<k′ ← ℕ.≰⇒> x≱k′
+      rewrite sym (<⇒idxˣ⁻ᵖ≡idxˣ⁻ᵖ-++ˣ⁻ kk′~ (?∷ᵖ k″k‴~) x<k′ x<)
+            | dec-no (_ ℕ.≥? _) (ℕ.<⇒≱ (idxˣ⁻ᵖ<lengthˣ⁻ kk′~ x<k′))
+            | <⇒idxˣ⁻ᵖ≡idxˣ⁻ᵖ-++ˣ⁻ kk′~ k″k‴~ x<k′ x< = `#⁰ x<
+...  | yes x≥k′
+    with x∸k′< ← subst (x ∸ k′ ℕ.<_) (ℕ.m+n∸m≡n k′ _) (ℕ.∸-monoˡ-< x< x≥k′)
+      rewrite sym (≥⇒lengthˣ⁻+idxˣ⁻ᵖ≡idxˣ⁻ᵖ-++ˣ⁻ kk′~ (?∷ᵖ k″k‴~) x≥k′ x< x∸k′<)
+            | proj₂ (dec-yes (_ ℕ.≤? _) (ℕ.m≤m+n (lengthˣ⁻ kk′~) (idxˣ⁻ᵖ (?∷ᵖ k″k‴~) x∸k′<)))
+            | dec-no (_ ℕ.≟ _) (ℕ.m+1+n≢m (lengthˣ⁻ kk′~) {idxˣ⁻ᵖ k″k‴~ x∸k′<})
+            | ℕ.+-suc (lengthˣ⁻ kk′~) (idxˣ⁻ᵖ k″k‴~ x∸k′<)
+            | ≥⇒lengthˣ⁻+idxˣ⁻ᵖ≡idxˣ⁻ᵖ-++ˣ⁻ kk′~ k″k‴~ x≥k′ x< x∸k′< = `#⁰ x<
+~ᴹ[/]ᵖ kk′~ {k″k‴~} _ (`unlift-`lift ~M)
+  rewrite extractˣ⁻ᶜ-++ˣ⁻ kk′~ {k″k‴~ = ?∷ᵖ k″k‴~}
+    with ~M′ ← ~ᴹ[/]ᵖ (extractˣ⁻ᶜ kk′~) (`unlift `unit) ~M
+      rewrite sym (extractˣ⁻ᶜ-++ˣ⁻ kk′~ {k″k‴~ = k″k‴~})
+            | extractˣ⁻ᶜ-lengthˣ⁻ kk′~ = `unlift-`lift ~M′
 
-[/⁰]-respects-~ᴹ : (kk′~ : k ⍮ k′ ~ˣ⁻) {k″k‴~ : k″ ⍮ k‴ ~ˣ⁻} →
-                   kk′~ ++ˣ⁻ k″k‴~ ⊢ DP.L ~ᴹ L →
-                   kk′~ ++ˣ⁻ !∷ᵖ k″k‴~ ⊢ DP.M ~ᴹ M →
-                   kk′~ ++ˣ⁻ k″k‴~ ⊢ DP.[ DP.L /⁰ k′ ] DP.M ~ᴹ [ L /[ pMode ] lengthˣ⁻ kk′~ ] M
-[/⁰]-respects-~ᴹ kk′~ ~L `unit = `unit
-[/⁰]-respects-~ᴹ kk′~ {k″k‴~} ~L (`box ~M)
+[/⁰]~ᴹ[/]ᵖ : (kk′~ : k ⍮ k′ ~ˣ⁻) {k″k‴~ : k″ ⍮ k‴ ~ˣ⁻} →
+             kk′~ ++ˣ⁻ k″k‴~ ⊢ DP.L ~ᴹ L →
+             kk′~ ++ˣ⁻ !∷ᵖ k″k‴~ ⊢ DP.M ~ᴹ M →
+             kk′~ ++ˣ⁻ k″k‴~ ⊢ DP.[ DP.L /⁰ k′ ] DP.M ~ᴹ [ L /[ pMode ] lengthˣ⁻ kk′~ ] M
+[/⁰]~ᴹ[/]ᵖ kk′~ ~L `unit = `unit
+[/⁰]~ᴹ[/]ᵖ kk′~ {k″k‴~} ~L (`box ~M)
   rewrite extractˣ⁻ᶜ-++ˣ⁻ kk′~ {k″k‴~ = !∷ᵖ k″k‴~}
     with ~M′ ← ~ᴹ[/]ᵖ (extractˣ⁻ᶜ kk′~) (`unlift `unit) ~M
       rewrite sym (extractˣ⁻ᶜ-++ˣ⁻ kk′~ {k″k‴~ = k″k‴~})
             | extractˣ⁻ᶜ-lengthˣ⁻ kk′~ = `box ~M′
-[/⁰]-respects-~ᴹ kk′~ ~L (`let-box ~M `in ~N) = `let-box [/⁰]-respects-~ᴹ kk′~ ~L ~M `in [/⁰]-respects-~ᴹ (!∷ᶜ kk′~) (wk[↑¹]-respects-~ᴹ [] ~L) ~N
-[/⁰]-respects-~ᴹ kk′~ ~L (`#¹ u<) = {!!}
-[/⁰]-respects-~ᴹ {k = k} {k′ = k′} kk′~ ~L (`λ⦂ ~S ∙ ~M)
-  with ⊢M′ ← [/⁰]-respects-~ᴹ (!∷ᵖ kk′~) (wk[↑⁰]-respects-~ᴹ [] ~L) ~M
-    rewrite ℕ.+-suc k k′ = `λ⦂ ~S ∙ ⊢M′
-[/⁰]-respects-~ᴹ kk′~ ~L (~M `$ ~N) = [/⁰]-respects-~ᴹ kk′~ ~L ~M `$ [/⁰]-respects-~ᴹ kk′~ ~L ~N
-[/⁰]-respects-~ᴹ kk′~ ~L (`#⁰ x<) = {!!}
-[/⁰]-respects-~ᴹ {k′ = k′} {_} {_} {DPL} kk′~ {k″k‴~} ~L (`unlift-`lift ~M)
-  rewrite ~ᴹ∧≥⇒[/⁰]≡ {x = k′} DPL ~M z≤n
+[/⁰]~ᴹ[/]ᵖ kk′~ ~L (`let-box ~M `in ~N) = `let-box [/⁰]~ᴹ[/]ᵖ kk′~ ~L ~M `in [/⁰]~ᴹ[/]ᵖ (!∷ᶜ kk′~) (wk[↑¹]~ᴹwk[↑]ᶜ [] ~L) ~N
+[/⁰]~ᴹ[/]ᵖ {k} {_} {_} {_} {_} {L} kk′~ {k″k‴~} ~L (`#¹_ {u = u} u<)
+  with u ℕ.≥? k
+...  | no  u≱k
+    rewrite sym (<⇒idxˣ⁻ᶜ≡idxˣ⁻ᶜ-++ˣ⁻ kk′~ (!∷ᵖ k″k‴~) (ℕ.≰⇒> u≱k) u<)
+          | <⇒idxˣ⁻ᶜ≡idxˣ⁻ᶜ-++ˣ⁻ kk′~ (?∷ᵖ k″k‴~) (ℕ.≰⇒> u≱k) u< = ~ᴹ[/]ᵖ kk′~ L (`#¹ u<)
+...  | yes u≥k
+    with u∸k< ← subst (u ∸ k ℕ.<_) (ℕ.m+n∸m≡n k _) (ℕ.∸-monoˡ-< u< u≥k)
+      rewrite sym (≥⇒lengthˣ⁻+idxˣ⁻ᶜ≡idxˣ⁻ᶜ-++ˣ⁻ kk′~ (!∷ᵖ k″k‴~) u≥k u< u∸k<)
+            | ≥⇒lengthˣ⁻+idxˣ⁻ᶜ≡idxˣ⁻ᶜ-++ˣ⁻ kk′~ (?∷ᵖ k″k‴~) u≥k u< u∸k< = ~ᴹ[/]ᵖ kk′~ L (`#¹ u<) 
+[/⁰]~ᴹ[/]ᵖ {k} {k′} kk′~ ~L (`λ⦂ ~S ∙ ~M)
+  with ~M′ ← [/⁰]~ᴹ[/]ᵖ (!∷ᵖ kk′~) (wk[↑⁰]~ᴹwk[↑]ᵖ [] ~L) ~M
+    rewrite ℕ.+-suc k k′ = `λ⦂ ~S ∙ ~M′
+[/⁰]~ᴹ[/]ᵖ kk′~ ~L (~M `$ ~N) = [/⁰]~ᴹ[/]ᵖ kk′~ ~L ~M `$ [/⁰]~ᴹ[/]ᵖ kk′~ ~L ~N
+[/⁰]~ᴹ[/]ᵖ {_} {k′} {_} {k‴} kk′~ {k″k‴~} ~L (`#⁰_ {x = x} x<)
+  with x ℕ.≥? k′
+...  | no  x≱k′
+    with x<k′ ← ℕ.≰⇒> x≱k′
+      rewrite sym (<⇒idxˣ⁻ᵖ≡idxˣ⁻ᵖ-++ˣ⁻ kk′~ (!∷ᵖ k″k‴~) x<k′ x<)
+            | dec-no (_ ℕ.≥? _) (ℕ.<⇒≱ (idxˣ⁻ᵖ<lengthˣ⁻ kk′~ x<k′))
+            | <⇒idxˣ⁻ᵖ≡idxˣ⁻ᵖ-++ˣ⁻ kk′~ k″k‴~ x<k′ (ℕ.<-transˡ x<k′ (ℕ.m≤m+n _ _)) = `#⁰ ℕ.<-transˡ x<k′ (ℕ.m≤m+n _ _)
+...  | yes x≥k′
+    with x∸k′< ← subst (x ∸ k′ ℕ.<_) (ℕ.m+n∸m≡n k′ _) (ℕ.∸-monoˡ-< x< x≥k′)
+      rewrite sym (≥⇒lengthˣ⁻+idxˣ⁻ᵖ≡idxˣ⁻ᵖ-++ˣ⁻ kk′~ (!∷ᵖ k″k‴~) x≥k′ x< x∸k′<)
+            | proj₂ (dec-yes (_ ℕ.≤? _) (ℕ.m≤m+n (lengthˣ⁻ kk′~) (idxˣ⁻ᵖ (!∷ᵖ k″k‴~) x∸k′<)))
+        with x ℕ.≟ k′
+...        | no  x≢k′
+          with x>k′ ← ℕ.≤∧≢⇒< x≥k′ (≢-sym x≢k′)
+             | s≤s x∸k′≤ ← x∸k′<
+            with suc x′ ← x
+              rewrite ℕ.+-∸-assoc 1 (ℕ.≤-pred x>k′)
+                    | dec-no (_ ℕ.≟ _) (ℕ.m+1+n≢m (lengthˣ⁻ kk′~) {idxˣ⁻ᵖ k″k‴~ x∸k′≤})
+                    | ℕ.+-suc (lengthˣ⁻ kk′~) (idxˣ⁻ᵖ k″k‴~ x∸k′≤)
+                    | ℕ.+-suc k′ k‴
+                    | ≥⇒lengthˣ⁻+idxˣ⁻ᵖ≡idxˣ⁻ᵖ-++ˣ⁻ kk′~ k″k‴~ (ℕ.≤-pred x>k′) (ℕ.≤-pred x<) x∸k′≤ = `#⁰ (ℕ.≤-pred x<)
+...        | yes x≡k′
+          with s≤s _ ← x∸k′<
+            rewrite x≡k′
+                  | ℕ.n∸n≡0 k′
+                  | proj₂ (dec-yes (_ ℕ.≟ _) (ℕ.+-identityʳ (lengthˣ⁻ kk′~))) = ~L
+[/⁰]~ᴹ[/]ᵖ {_} {k′} {_} {_} {DPL} kk′~ {k″k‴~} ~L (`unlift-`lift ~M)
+  rewrite ~ᴹ∧≥⇒[/⁰]≡ DPL ~M (z≤n {k′})
         | extractˣ⁻ᶜ-++ˣ⁻ kk′~ {k″k‴~ = !∷ᵖ k″k‴~}
     with ~M′ ← ~ᴹ[/]ᵖ (extractˣ⁻ᶜ kk′~) (`unlift `unit) ~M
       rewrite sym (extractˣ⁻ᶜ-++ˣ⁻ kk′~ {k″k‴~ = k″k‴~})
@@ -865,7 +1107,7 @@ wk[↑⁰]-respects-~ᴹ kk′~ (`unlift-`lift ~L) = `unlift-`lift {!!}
 ~ᴹ-simulation-helper DP.β-`□                 (`let-box ~L `in ~M) (acc r)
   with _ , ⟶*`boxL′ , WL′ , ~L ← `box-~ᴹ-inv ~L = -, ξ-of-⟶* (`let-return_`in _) ξ-`let-return_`in- ⟶*`boxL′
                                                                                     ◅◅ β-`↓ (`lift WL′) ◅ ε
-                                                                               , [/¹]-respects-~ᴹ [] ~L ~M
+                                                                               , [/¹]~ᴹ[/]ᶜ [] ~L ~M
 ~ᴹ-simulation-helper DP.ξ- DPL⟶ `$?          (~L `$ ~M)           (acc r)
   with _ , ⟶*L′ , ~L′ ← ~ᴹ-simulation-helper DPL⟶ ~L (r _ (s≤s (ℕ.m≤m⊔n _ _))) = -, ξ-of-⟶* (_`$ _) ξ-_`$? ⟶*L′
                                                                                , ~L′ `$ ~M
@@ -879,7 +1121,7 @@ wk[↑⁰]-respects-~ᴹ kk′~ (`unlift-`lift ~L) = `unlift-`lift {!!}
      | _ , ⟶*M′ , VM′ , ~M′ ← Value~ᴹ-normalize ~M VDPM                        = -, ξ-of-⟶* (_`$ _) ξ-_`$? ⟶*`λ⦂ᵖS′∘L′
                                                                                    ◅◅ ξ-of-⟶* (_ `$_) ξ-! `λ⦂ᵖ _ ∘ _ `$_ ⟶*M′
                                                                                    ◅◅ β-`⊸ VM′ ◅ ε
-                                                                               , [/⁰]-respects-~ᴹ [] ~M′ ~L′
+                                                                               , [/⁰]~ᴹ[/]ᵖ [] ~M′ ~L′
 ~ᴹ-simulation-helper DPL⟶                    (`unlift-`lift ~L)   (acc r)
   with _ , ⟶*L′[≤] , VL′ , ~L′ , L′≤ ← ~ᴹ-normalize[≤] ~L
     with _ , ⟶*L″ , ~L″ ← ~ᴹ-simulation-helper DPL⟶ ~L′ (r _ (s≤s L′≤))        = -, ξ-of-⟶* `unlift ξ-`unlift (ξ-of-↝*-⟶* _⟶[ cMode ≤]_ `lift ξ-`lift ⟶*L′[≤])
@@ -899,10 +1141,10 @@ wk[↑⁰]-respects-~ᴹ kk′~ (`unlift-`lift ~L) = `unlift-`lift {!!}
 ~ᴹ⁻¹-simulation (ξ-`return (ξ-`lift L⟶[≤])) (`box ~L)                 = -, ε , `box (⟶[≤]-preserves-~ᴹ ~L L⟶[≤])
 ~ᴹ⁻¹-simulation ξ-`let-return L⟶ `in-       (`let-box ~L `in ~M)
   with _ , DPL⟶* , ~L′ ← ~ᴹ⁻¹-simulation L⟶ ~L                        = -, DP.ξ-of-⟶* (DP.`let-box_`in _) DP.ξ-`let-box_`in- DPL⟶* , `let-box ~L′ `in ~M
-~ᴹ⁻¹-simulation (β-`↓ (`lift WL))           (`let-box `box ~L `in ~M) = -, DP.β-`□ ◅ ε , [/¹]-respects-~ᴹ [] ~L ~M
+~ᴹ⁻¹-simulation (β-`↓ (`lift WL))           (`let-box `box ~L `in ~M) = -, DP.β-`□ ◅ ε , [/¹]~ᴹ[/]ᶜ [] ~L ~M
 ~ᴹ⁻¹-simulation ξ- L⟶ `$?                   (~L `$ ~M)
   with _ , DPL⟶* , ~L′ ← ~ᴹ⁻¹-simulation L⟶ ~L                        = -, DP.ξ-of-⟶* (DP._`$ _) DP.ξ-_`$? DPL⟶* , ~L′ `$ ~M
 ~ᴹ⁻¹-simulation (ξ-! VL′ `$ M⟶)             (~L `$ ~M)
   with _ , DPM⟶* , ~M′ ← ~ᴹ⁻¹-simulation M⟶ ~M                        = -, DP.ξ-of-⟶* (_ DP.`$_) (DP.ξ-! []⊢~ᴹ⁻¹-respects-Value ~L VL′ `$_) DPM⟶* , ~L `$ ~M′
-~ᴹ⁻¹-simulation (β-`⊸ VM)                   ((`λ⦂ ~S ∙ ~L) `$ ~M)     = -, DP.β-`→ ([]⊢~ᴹ⁻¹-respects-Value ~M VM) ◅ ε , [/⁰]-respects-~ᴹ [] ~M ~L
+~ᴹ⁻¹-simulation (β-`⊸ VM)                   ((`λ⦂ ~S ∙ ~L) `$ ~M)     = -, DP.β-`→ ([]⊢~ᴹ⁻¹-respects-Value ~M VM) ◅ ε , [/⁰]~ᴹ[/]ᵖ [] ~M ~L
 
