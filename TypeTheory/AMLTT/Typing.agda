@@ -1,20 +1,66 @@
 {-# OPTIONS --without-K --safe #-}
 open import TypeTheory.AMLTT.ModeSpec
 
-module TypeTheory.AMLTT.Typing {ℓ₁ ℓ₂} (ℳ : `ModeSpec ℓ₁ ℓ₂) where
+module TypeTheory.AMLTT.Typing {ℓ₁ ℓ₂} (ℳ : ModeSpec ℓ₁ ℓ₂) where
 
+open import Data.Bool as Bool using (Bool; true; false)
+open import Data.List using (List; []; _∷_)
 open import Data.Product
 open import Relation.Binary.PropositionalEquality
 
--- How should we deal with
--- (l , true , `Nat) ∷ (l , true , `Fin # 0) ∷ (l , true , `Fin # 1) ∷ [] ⊢[ l ] (# 0 , # 1) : `Fin (# 2) × `Fin (# 2)
--- ?
--- Instead of true/false, let's use unused/used/disabled, and both unused/used are useable in type checking/equality.
+open ModeSpec ℳ
+
+import TypeTheory.AMLTT.Syntax as S
+import TypeTheory.AMLTT.ContextOperation as CO
+open S ℳ
+open CO ℳ
+open Variable
+
+-- Typing rules
+--
 
 -- Should lower mode terms be ignored in equality?
 -- No, but they should use a different equality (as we have weak normal form/canonical term in simply typed setting)
 
 -- Substitution should preserve the mode
--- Γ ⊢[ m ] M ⦂ S and
--- Δ ⊢[ m ] σ ⦂ Γ then
--- Δ ⊢[ m ] M [ σ ] ⦂ S [ σ ]
+-- Γ ⊢ M ⦂ S ⋆ m and
+-- Δ ⊢ σ ⦂ Γ ∥ m then
+-- Δ ⊢ M [ σ ] ⦂ S [ σ ] ∥ m
+
+infix  4 _¿_⊢_⦂_⋆_
+infix  4 _⊢ᵗ_⦂_⋆_
+infix  4 _⊢ᵀ_⦂_⋆_
+infix  4 _¿_⊢_≈[_≤]_⦂_⋆_
+infix  4 _⊢ᵗ_≈[_≤]_⦂_⋆_
+infix  4 _⊢ᵀ_≈[_≤]_⦂_⋆_
+infix  4 _¿_⊢s_⦂_⋆_
+infix  4 _⊢sᵗ_⦂_⋆_
+infix  4 _⊢sᵀ_⦂_⋆_
+infix  4 _¿_⊢s_≈[_≤]_⦂_⋆_
+infix  4 _⊢sᵗ_≈[_≤]_⦂_⋆_
+infix  4 _⊢sᵀ_≈[_≤]_⦂_⋆_
+
+data _¿_⊢_⦂_⋆_ : Bool → `Context → `Term → `Type → `Mode → Set (ℓ₁ ⊔ ℓ₂)
+data _¿_⊢_≈[_≤]_⦂_⋆_ : Bool → `Context → `Term → `Mode → `Term → `Type → `Mode → Set (ℓ₁ ⊔ ℓ₂)
+data _¿_⊢s_⦂_⋆_ : Bool → `Context → `Subst → `Context → `Mode → Set (ℓ₁ ⊔ ℓ₂)
+data _¿_⊢s_≈[_≤]_⦂_⋆_ : Bool → `Context → `Subst → `Mode → `Subst → `Context → `Mode → Set (ℓ₁ ⊔ ℓ₂)
+
+_⊢ᵗ_⦂_⋆_ = true ¿_⊢_⦂_⋆_
+_⊢ᵀ_⦂_⋆_ = false ¿_⊢_⦂_⋆_
+
+_⊢ᵗ_≈[_≤]_⦂_⋆_ = true ¿_⊢_≈[_≤]_⦂_⋆_
+_⊢ᵀ_≈[_≤]_⦂_⋆_ = false ¿_⊢_≈[_≤]_⦂_⋆_
+
+_⊢sᵗ_⦂_⋆_ = true ¿_⊢s_⦂_⋆_
+_⊢sᵀ_⦂_⋆_ = false ¿_⊢s_⦂_⋆_
+
+_⊢sᵗ_≈[_≤]_⦂_⋆_ = true ¿_⊢s_≈[_≤]_⦂_⋆_
+_⊢sᵀ_≈[_≤]_⦂_⋆_ = false ¿_⊢s_≈[_≤]_⦂_⋆_
+
+data _¿_⊢_⦂_⋆_ where
+
+data _¿_⊢_≈[_≤]_⦂_⋆_ where
+
+data _¿_⊢s_⦂_⋆_ where
+
+data _¿_⊢s_≈[_≤]_⦂_⋆_ where

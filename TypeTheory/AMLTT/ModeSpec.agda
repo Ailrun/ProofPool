@@ -1,7 +1,7 @@
 {-# OPTIONS --without-K --safe #-}
 module TypeTheory.AMLTT.ModeSpec where
 
-open import Agda.Primitive
+open import Agda.Primitive public
 open import Data.Bool as Bool using (Bool)
 open import Data.Product using (_×_; proj₁)
 open import Relation.Binary
@@ -10,21 +10,21 @@ open import Relation.Binary.PropositionalEquality using (_≡_; _≢_)
 open import Relation.Nullary
 open import Relation.Nullary.Decidable using (_×-dec_; ¬?)
 
-data `ModeSpecSt : Set where
-  ``Wk ``Co : `ModeSpecSt
+data ModeSpecSt : Set where
+  Wkₘ Coₘ : ModeSpecSt
 
-data `ModeSpecOp : Set where
-  ``⊤ ``Π ``↑ ``↓ : `ModeSpecOp
+data ModeSpecOp : Set where
+  Natₘ Πₘ ↑ₘ ↓ₘ : ModeSpecOp
 
-record `ModeSpec ℓ₁ ℓ₂ : Set (lsuc (ℓ₁ ⊔ ℓ₂)) where
+record ModeSpec ℓ₁ ℓ₂ : Set (lsuc (ℓ₁ ⊔ ℓ₂)) where
   field
     `Mode : Set ℓ₁
     _≤ₘ_ : Rel `Mode ℓ₂
     isPreorderₘ : IsPreorder _≡_ _≤ₘ_
     _≟ₘ_ : Decidable (_≡_ {A = `Mode})
     _≤?ₘ_ : Decidable _≤ₘ_
-    stₘ : `Mode → `ModeSpecSt → Bool
-    opₘ : `Mode → `ModeSpecOp → Bool
+    stₘ : `Mode → ModeSpecSt → Bool
+    opₘ : `Mode → ModeSpecOp → Bool
     isWellStructuredₘ : ∀ m₁ m₂ s → m₁ ≤ₘ m₂ → Bool.T (stₘ m₁ s) → Bool.T (stₘ m₂ s)
 
   preorderₘ : Preorder ℓ₁ ℓ₁ ℓ₂
