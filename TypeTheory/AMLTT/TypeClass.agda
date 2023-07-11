@@ -4,7 +4,7 @@ module TypeTheory.AMLTT.TypeClass where
 open import Agda.Primitive
 
 record HasSubst {ℓ ℓ′} (A : Set ℓ) (B : Set ℓ′) : Set (ℓ ⊔ ℓ′) where
-  infixl 4.5 _`⟦_⟧
+  infixl  4 _`⟦_⟧
   field
     _`⟦_⟧ : A → B → A
 

@@ -5,6 +5,7 @@ module TypeTheory.AMLTT.Typing {ℓ₁ ℓ₂} (ℳ : ModeSpec ℓ₁ ℓ₂) wh
 
 open import Data.Bool as Bool using (Bool; true; false)
 open import Data.List using (List; []; _∷_)
+open import Data.Nat as ℕ using (ℕ; zero; suc)
 open import Data.Product
 open import Relation.Binary.PropositionalEquality
 
@@ -58,6 +59,33 @@ _⊢sᵗ_≈[_≤]_⦂_⋆_ = true ¿_⊢s_≈[_≤]_⦂_⋆_
 _⊢sᵀ_≈[_≤]_⦂_⋆_ = false ¿_⊢s_≈[_≤]_⦂_⋆_
 
 data _¿_⊢_⦂_⋆_ where
+  -- (Cumulative) Universe
+  --
+  `Univ  : (Bool.T b → Γ ∁) →
+           ------------------------------------
+           b ¿ Γ ⊢ `Univ i ⦂ `Univ (suc i) ⋆ m
+
+  `cumul : b ¿ Γ ⊢ T ⦂ `Univ i ⋆ m →
+           ------------------------------
+           b ¿ Γ ⊢ T ⦂ `Univ (suc i) ⋆ m
+
+  -- Upshift
+  --
+  `↑[_⇗_]_      : l <ₘ m →
+                  Bool.T (opₘ m ↑ₘ) →
+                  b ¿ Γ ⊢ T ⦂ `Univ i ⋆ l →
+                  ------------------------------------------
+                  b ¿ Γ ⊢ `↑[ l ⇗ m ] T ⦂ `Univ (suc i) ⋆ m
+
+  -- `lift[_⇗_]_   : (l h : `Mode)             (s : `Term) → `Term
+  -- `unlift[_⇗_]_ : (l h : `Mode)             (s : `Term) → `Term
+
+  -- Conversion
+  --
+  `conv : b ¿ Γ ⊢ t ⦂ T ⋆ m →
+          Γ ⊢ᵀ T ≈[ m ≤] S ⦂ `Univ i ⋆ m →
+          ---------------------------------
+          b ¿ Γ ⊢ t ⦂ S ⋆ m
 
 data _¿_⊢_≈[_≤]_⦂_⋆_ where
 
