@@ -279,8 +279,7 @@ data _¿_⊢_≈[_≤]_⦂_⋆_ where
 data _¿_s⊢_⦂_⋆_ where
   `id   : b ¿ Γ s⊢ `id ⦂ Γ ⋆ m
   -- `wk   :                              `Subst
-  -- _`,⁺_ : (σ : `Subst)   (s : `Term) → `Subst
-  -- _`,⁻_ : (σ : `Subst)   (s : `Term) → `Subst
+  -- _`,_  : (σ : `Subst)   (s : `Term) → `Subst
   -- _`,Ø  : (σ : `Subst)               → `Subst
   -- _`∘_  : (σ τ : `Subst)             → `Subst
 
