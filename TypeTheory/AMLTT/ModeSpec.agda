@@ -10,6 +10,7 @@ open import Relation.Binary.PropositionalEquality using (_≡_; _≢_)
 open import Relation.Nullary
 open import Relation.Nullary.Decidable using (_×-dec_; ¬?)
 
+-- Might add universe cumulativity? How about predicativity?
 data ModeSpecSt : Set where
   Wkₘ Coₘ : ModeSpecSt
 

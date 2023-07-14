@@ -11,7 +11,7 @@ open import Data.Unit using (⊤)
 
 open ModeSpec ℳ
 
-open import TypeTheory.AMLTT.TypeClass
+open import TypeTheory.AMLTT.TypeClass public
 
 ------------------------------------------------------------
 -- Term, i.e. Type and Simultaneous Substitution
@@ -117,17 +117,20 @@ data `Useability : Set where
 ------------------------------------------------------------
 -- Typing Context
 --
-infix   6 _/_⋆_
+infixl  5 _`∙_
+infix   6 `⟨_⋆_/_⟩
 
 record `ContextEntry : Set ℓ₁ where
-  constructor _/_⋆_
+  constructor `⟨_⋆_/_⟩
   field
     type : `Type
-    useability : `Useability
     mode : `Mode
+    useability : `Useability
 
 `Context : Set ℓ₁
 `Context = List `ContextEntry
+
+pattern _`∙_ as a = a ∷ as
 
 module Variable where
   variable
@@ -297,6 +300,9 @@ s `⟦|Ø⟧ = s `⟦ `id `,Ø ⟧
 --   Γ , S `⟦ σ ⟧ ⊢ `h σ ⦂ Δ ⸴ S
 `h : `Subst → `Subst
 `h σ = (σ `∘ `wk) `, `# 0
+
+`rec-suc-subst : `Subst
+`rec-suc-subst = (`wk `∘ `wk) `, `suc (`# 1)
 
 -- Non-dependent function space
 

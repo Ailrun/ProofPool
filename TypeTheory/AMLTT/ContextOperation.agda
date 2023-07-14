@@ -4,8 +4,9 @@ open import TypeTheory.AMLTT.ModeSpec
 module TypeTheory.AMLTT.ContextOperation {ℓ₁ ℓ₂} (ℳ : ModeSpec ℓ₁ ℓ₂) where
 
 open import Data.Bool as Bool using (Bool; true; false)
-open import Data.List using (List; []; _∷_)
+open import Data.List using (List; [])
 open import Data.Nat as ℕ using (ℕ; zero; suc)
+open import Data.Product using (_×_)
 open import Relation.Binary.PropositionalEquality
 
 open ModeSpec ℳ
@@ -21,134 +22,151 @@ open Variable
 
 -- Context Splitting
 --
-infix   4 _≅_e⋈_
-infix   4 _≅_⋈_
+infix   4 _⋆_≅_a⋈ᵗ_
+infix   4 _⋆_≅_a⋈ᵀ_
+infix   4 _¿_⋆_≅_a⋈_
+infix   4 _¿_≅_e⋈_
+infix   4 _¿_≅_⋈_
+infix   4 _≅_⋈ᵗ_
+infix   4 _≅_⋈ᵀ_
 
-data _⋆_≅_a⋈_ : `Useability → `Mode → `Useability → `Useability → Set (ℓ₁ ⊔ ℓ₂) where
+data _⋆_≅_a⋈ᵗ_ : `Useability → `Mode → `Useability → `Useability → Set (ℓ₁ ⊔ ℓ₂) where
   `⁺`⁺ : Bool.T (stₘ m Coₘ) →
          ---------------------
-         `⁺ ⋆ m ≅ `⁺ a⋈ `⁺
+         `⁺ ⋆ m ≅ `⁺ a⋈ᵗ `⁺
 
-  `⁺`⁻ : ------------------
-         `⁺ ⋆ m ≅ `⁺ a⋈ `⁻
+  `⁺`⁻ : -------------------
+         `⁺ ⋆ m ≅ `⁺ a⋈ᵗ `⁻
 
-  `⁻`⁺ : ------------------
-         `⁺ ⋆ m ≅ `⁻ a⋈ `⁺
+  `⁻`⁺ : -------------------
+         `⁺ ⋆ m ≅ `⁻ a⋈ᵗ `⁺
 
-  `⁻`⁻ : ------------------
-         `⁻ ⋆ m ≅ `⁻ a⋈ `⁻
+  `⁻`⁻ : -------------------
+         `⁻ ⋆ m ≅ `⁻ a⋈ᵗ `⁻
 
-  `Ø`Ø : ------------------
-         `Ø ⋆ m ≅ `Ø a⋈ `Ø
+  `Ø`Ø : -------------------
+         `Ø ⋆ m ≅ `Ø a⋈ᵗ `Ø
 
-data _≅_e⋈_ : `ContextEntry → `ContextEntry → `ContextEntry → Set (ℓ₁ ⊔ ℓ₂) where
-  `e : S ≡ S₀ →
-       S ≡ S₁ →
-       a ⋆ m ≅ a₀ a⋈ a₁ →
-       ---------------------------------------
-       S / a ⋆ m ≅ S₀ / a₀ ⋆ m e⋈ S₁ / a₁ ⋆ m
+data _⋆_≅_a⋈ᵀ_ : `Useability → `Mode → `Useability → `Useability → Set (ℓ₁ ⊔ ℓ₂) where
+  `Co : ----------------
+        a ⋆ m ≅ a a⋈ᵀ a
 
-data _≅_⋈_ : `Context → `Context → `Context → Set (ℓ₁ ⊔ ℓ₂) where
-  []  : -------------
-        [] ≅ [] ⋈ []
+_¿_⋆_≅_a⋈_ : Bool → `Useability → `Mode → `Useability → `Useability → Set (ℓ₁ ⊔ ℓ₂)
+_¿_⋆_≅_a⋈_ true  = _⋆_≅_a⋈ᵗ_
+_¿_⋆_≅_a⋈_ false = _⋆_≅_a⋈ᵀ_
 
-  _∷_ : e ≅ e₀ e⋈ e₁ →
-        Γ ≅ Γ₀ ⋈ Γ₁ →
-        --------------------------------------------------
-        e ∷ Γ ≅ e₀ ∷ Γ₀ ⋈ e₁ ∷ Γ₁
+data _¿_≅_e⋈_ : Bool → `ContextEntry → `ContextEntry → `ContextEntry → Set (ℓ₁ ⊔ ℓ₂) where
+  `⟨_⋆_⟩ : S ≡ S₀ × S ≡ S₁ →
+           b ¿ a ⋆ m ≅ a₀ a⋈ a₁ →
+           ----------------------------------------------------------
+           b ¿ `⟨ S ⋆ m / a ⟩ ≅ `⟨ S₀ ⋆ m / a₀ ⟩ e⋈ `⟨ S₁ ⋆ m / a₁ ⟩
+
+data _¿_≅_⋈_ : Bool → `Context → `Context → `Context → Set (ℓ₁ ⊔ ℓ₂) where
+  []  : -----------------
+        b ¿ [] ≅ [] ⋈ []
+
+  _∷_ : b ¿ e ≅ e₀ e⋈ e₁ →
+        b ¿ Γ ≅ Γ₀ ⋈ Γ₁ →
+        ---------------------------------
+        b ¿ Γ `∙ e ≅ Γ₀ `∙ e₀ ⋈ Γ₁ `∙ e₁
+
+_≅_⋈ᵗ_ = true ¿_≅_⋈_
+_≅_⋈ᵀ_ = false ¿_≅_⋈_
 
 -- Full Context Weakening
 --
-infix   4 _∁
+infix   4 _¿_⋆_a∁
+infix   4 _⋆_a∁ᵗ
+infix   4 _⋆_a∁ᵀ
+infix   4 _¿_∁
+infix   4 _∁ᵗ
+infix   4 _∁ᵀ
 
-data _⋆_a∁ : `Useability → `Mode → Set (ℓ₁ ⊔ ℓ₂) where
-  `⁺  : Bool.T (stₘ m Wkₘ) →
-        ---------------------
-        `⁺ ⋆ m a∁
+data _¿_⋆_a∁ : Bool → `Useability → `Mode → Set (ℓ₁ ⊔ ℓ₂) where
+  `⁺  : (Bool.T b → Bool.T (stₘ m Wkₘ)) →
+        ----------------------------------
+        b ¿ `⁺ ⋆ m a∁
 
-  `⁻  : ----------
-        `⁻ ⋆ m a∁
+  `⁻  : --------------
+        b ¿ `⁻ ⋆ m a∁
 
-  `Ø  : ----------
-        `Ø ⋆ m a∁
+  `Ø  : --------------
+        b ¿ `Ø ⋆ m a∁
 
-data _∁ : `Context → Set (ℓ₁ ⊔ ℓ₂) where
-  []  : -----
-        [] ∁
+data _¿_∁ : Bool → `Context → Set (ℓ₁ ⊔ ℓ₂) where
+  []  : ---------
+        b ¿ [] ∁
 
-  _∷_ : a ⋆ m a∁ →
-        Γ ∁ →
-        ----------------
-        S / a ⋆ m ∷ Γ ∁
+  _∷_ : b ¿ a ⋆ m a∁ →
+        b ¿ Γ ∁ →
+        --------------------------
+        b ¿ Γ `∙ `⟨ S ⋆ m / a ⟩ ∁
+
+_⋆_a∁ᵗ = true ¿_⋆_a∁
+_⋆_a∁ᵀ = false ¿_⋆_a∁
+_∁ᵗ = true ¿_∁
+_∁ᵀ = false ¿_∁
 
 -- Context Weakening Modulo Mode
 --
-infix   4 _e∥[_≤]≅_
-infix   4 _∥[_≤]≅_
+infix   4 _¿_e∥[_≤]≅_
+infix   4 _¿_∥[_≤]≅_
+infix   4 _∥[_≤]ᵗ≅_
+infix   4 _∥[_≤]ᵀ≅_
 
-data _⋆_a∥[_≤]≅_ : `Useability → `Mode → `Mode → `Useability → Set (ℓ₁ ⊔ ℓ₂) where
-  `⁺`⁺ : n ≤ₘ m →
-         --------------------
-         `⁺ ⋆ m a∥[ n ≤]≅ `⁺
+data _¿_⋆_a∥[_≤]≅_ : Bool → `Useability → `Mode → `Mode → `Useability → Set (ℓ₁ ⊔ ℓ₂) where
+  refl : n ≤ₘ m →
+         ----------------------
+         b ¿ a ⋆ m a∥[ n ≤]≅ a
 
-  `⁺`Ø : n ≰ₘ m →
-         Bool.T (stₘ m Wkₘ) →
-         ---------------------
-         `⁺ ⋆ m a∥[ n ≤]≅ `Ø
+  `Ø   : n ≰ₘ m →
+         b ¿ a ⋆ m a∁ →
+         -----------------------
+         b ¿ a ⋆ m a∥[ n ≤]≅ `Ø
 
-  `⁻`⁻ : n ≤ₘ m →
-         --------------------
-         `⁻ ⋆ m a∥[ n ≤]≅ `⁻
+data _¿_e∥[_≤]≅_ : Bool → `ContextEntry → `Mode → `ContextEntry → Set (ℓ₁ ⊔ ℓ₂) where
+  `⟨_⋆_⟩ : S ≡ S′ →
+           b ¿ a ⋆ m a∥[ n ≤]≅ a′ →
+           ----------------------------------------------
+           b ¿ `⟨ S ⋆ m / a ⟩ e∥[ n ≤]≅ `⟨ S′ ⋆ m / a′ ⟩
 
-  `⁻`Ø : n ≰ₘ m →
-         --------------------
-         `⁻ ⋆ m a∥[ n ≤]≅ `Ø
+data _¿_∥[_≤]≅_ : Bool → `Context → `Mode → `Context → Set (ℓ₁ ⊔ ℓ₂) where
+  []  : -------------------
+        b ¿ [] ∥[ n ≤]≅ []
 
-  `Ø`Ø : --------------------
-         `Ø ⋆ m a∥[ n ≤]≅ `Ø
+  _∷_ : b ¿ e e∥[ n ≤]≅ e′ →
+        b ¿ Γ ∥[ n ≤]≅ Γ′ →
+        -----------------------------
+        b ¿ Γ `∙ e ∥[ n ≤]≅ Γ′ `∙ e′
 
-data _e∥[_≤]≅_ : `ContextEntry → `Mode → `ContextEntry → Set (ℓ₁ ⊔ ℓ₂) where
-  `e : S ≡ S′ →
-       a ⋆ m a∥[ n ≤]≅ a′ →
-       --------------------------------
-       S / a ⋆ m e∥[ n ≤]≅ S′ / a′ ⋆ m
-
-data _∥[_≤]≅_ : `Context → `Mode → `Context → Set (ℓ₁ ⊔ ℓ₂) where
-  []  : ---------------
-        [] ∥[ n ≤]≅ []
-
-  _∷_ : e e∥[ n ≤]≅ e′ →
-        Γ ∥[ n ≤]≅ Γ′ →
-        -----------------------
-        e ∷ Γ ∥[ n ≤]≅ e′ ∷ Γ′
+_∥[_≤]ᵗ≅_ = true ¿_∥[_≤]≅_
+_∥[_≤]ᵀ≅_ = false ¿_∥[_≤]≅_
 
 -- Context Membership
 --
+infix   4 _¿_is-useable
+infix   4 _¿_⦂_⋆_∈_
 infix   4 _⦂ᵗ_⋆_∈_
 infix   4 _⦂ᵀ_⋆_∈_
-infix   4 _¿_⦂_⋆_∈_
 
-data _⦂ᵗ_⋆_∈_ : ℕ → `Type → `Mode → `Context → Set (ℓ₁ ⊔ ℓ₂) where
+data _¿_is-useable : Bool → `Useability → Set (ℓ₁ ⊔ ℓ₂) where
+  `⁺ : ------------------
+       b ¿ `⁺ is-useable
+
+  `⁻ : ----------------------
+       false ¿ `⁻ is-useable
+
+data _¿_⦂_⋆_∈_ : Bool → ℕ → `Type → `Mode → `Context → Set (ℓ₁ ⊔ ℓ₂) where
   here  : S ≡ S′ →
-          Γ ∁ →
-          -----------------------------------
-          0 ⦂ᵗ S ⋆ m ∈ S′ / `⁺ ⋆ m ∷ Γ
+          b ¿ a is-useable →
+          b ¿ Γ ∁ →
+          -------------------------------------
+          b ¿ 0 ⦂ S ⋆ m ∈ Γ `∙ `⟨ S′ ⋆ m / a ⟩
 
-  there : a ⋆ n a∁ →
-          x ⦂ᵗ S ⋆ m ∈ Γ →
-          --------------------------------
-          suc x ⦂ᵗ S ⋆ m ∈ S′ / a ⋆ n ∷ Γ
+  there : b ¿ a ⋆ n a∁ →
+          b ¿ x ⦂ S ⋆ m ∈ Γ →
+          -----------------------------------------
+          b ¿ suc x ⦂ S ⋆ m ∈ Γ `∙ `⟨ S′ ⋆ n / a ⟩
 
-data _⦂ᵀ_⋆_∈_ : ℕ → `Type → `Mode → `Context → Set (ℓ₁ ⊔ ℓ₂) where
-  here  : S ≡ S′ →
-          a ≢ `Ø →
-          -----------------------------------
-          0 ⦂ᵀ S ⋆ m ∈ S′ / a ⋆ m ∷ Γ
-
-  there : x ⦂ᵀ S ⋆ m ∈ Γ →
-          --------------------------------
-          suc x ⦂ᵀ S ⋆ m ∈ S′ / a ⋆ n ∷ Γ
-
-_¿_⦂_⋆_∈_ : Bool → ℕ → `Type → `Mode → `Context → Set (ℓ₁ ⊔ ℓ₂)
-_¿_⦂_⋆_∈_ true  = _⦂ᵗ_⋆_∈_
-_¿_⦂_⋆_∈_ false = _⦂ᵀ_⋆_∈_
+_⦂ᵗ_⋆_∈_ = true ¿_⦂_⋆_∈_
+_⦂ᵀ_⋆_∈_ = true ¿_⦂_⋆_∈_
