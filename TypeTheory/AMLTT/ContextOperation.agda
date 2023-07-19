@@ -78,6 +78,9 @@ _≅_⋈ᵀ_ = false ¿_≅_⋈_
 infix   4 _¿_⋆_a∁
 infix   4 _⋆_a∁ᵗ
 infix   4 _⋆_a∁ᵀ
+infix   4 _¿_e∁
+infix   4 _e∁ᵗ
+infix   4 _e∁ᵀ
 infix   4 _¿_∁
 infix   4 _∁ᵗ
 infix   4 _∁ᵀ
@@ -93,17 +96,22 @@ data _¿_⋆_a∁ : Bool → `Useability → `Mode → Set (ℓ₁ ⊔ ℓ₂) w
   `Ø  : --------------
         b ¿ `Ø ⋆ m a∁
 
+_¿_e∁ : Bool → `ContextEntry → Set (ℓ₁ ⊔ ℓ₂)
+b ¿ `⟨ S ⋆ m / a ⟩ e∁ = b ¿ a ⋆ m a∁
+
 data _¿_∁ : Bool → `Context → Set (ℓ₁ ⊔ ℓ₂) where
   []  : ---------
         b ¿ [] ∁
 
-  _∷_ : b ¿ a ⋆ m a∁ →
+  _∷_ : b ¿ e e∁ →
         b ¿ Γ ∁ →
-        --------------------------
-        b ¿ Γ `∙ `⟨ S ⋆ m / a ⟩ ∁
+        ---------------
+        b ¿ Γ `∙ e ∁
 
 _⋆_a∁ᵗ = true ¿_⋆_a∁
 _⋆_a∁ᵀ = false ¿_⋆_a∁
+_e∁ᵗ = true ¿_e∁
+_e∁ᵀ = false ¿_e∁
 _∁ᵗ = true ¿_∁
 _∁ᵀ = false ¿_∁
 

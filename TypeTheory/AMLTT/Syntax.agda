@@ -22,14 +22,14 @@ infixr 24 `lift[_⇗_]_
 infixr 24 `unlift[_⇗_]_
 infixr 24 `↓[_⇘_]_
 infixr 24 `return[_⇘_]_
-infixr 22 `let-return[_⇘_]_then_
+infixr 22 `let-return[_⇘_]_then_of_
 infixr 24 `suc
 infixr 24 `rec
 infixr 22 `Π_⊸_
 infixr 22 _`⊸_
-infixr 22 `Π[_⇘_]_⊸_
+infixr 22 `Π[_⇘_]_⊸_of_
 infixr 22 `λ_⊸_
-infixr 22 `λ[_⇘_]_⊸_
+infixr 22 `λ[_⇘_]_⊸_of_
 infixl 23 _`$_
 infixl 23 _`$[_⇘_]_
 infixl 25 `#_
@@ -51,31 +51,31 @@ data `Term where
   --
   -- "`↑[ l ⇗ h ] T" shifts "T" at mode "l" up to mode "h".
   --
-  `↑[_⇗_]_      : (l h : `Mode) (S : `Type)             → `Type
-  `lift[_⇗_]_   : (l h : `Mode)             (s : `Term) → `Term
-  `unlift[_⇗_]_ : (l h : `Mode)             (s : `Term) → `Term
+  `↑[_⇗_]_      : (l h : `Mode) (S : `Type) → `Type
+  `lift[_⇗_]_   : (l h : `Mode) (s : `Term) → `Term
+  `unlift[_⇗_]_ : (l h : `Mode) (s : `Term) → `Term
 
   -- Downshift
   --
   -- "`↓[ h ⇘ l ] T" shifts "T" at mode "h" down to mode "l".
   --
-  `↓[_⇘_]_               : (h l : `Mode) (S : `Type)               → `Type
-  `return[_⇘_]_          : (h l : `Mode)             (s : `Term)   → `Term
-  `let-return[_⇘_]_then_ : (h l : `Mode)             (s t : `Term) → `Term
+  `↓[_⇘_]_                  : (h l : `Mode) (S : `Type)               → `Type
+  `return[_⇘_]_             : (h l : `Mode) (s : `Term)               → `Term
+  `let-return[_⇘_]_then_of_ : (h l : `Mode) (s t : `Term) (T : `Type) → `Term
 
   -- Natural number
   --
   `Nat  :                               `Type
   `zero :                               `Term
-  `suc  :             (s : `Term)     → `Term
+  `suc  : (s : `Term)                 → `Term
   `rec  : (S : `Type) (t u v : `Term) → `Term
 
   -- Lambda-calculus
   --
-  `Π_⊸_ : (S T : `Type)               → `Type
-  `λ_⊸_ : (S : `Type)   (t : `Term)   → `Term
-  _`$_  :               (s t : `Term) → `Term
-  `#_   :               (x : ℕ)       → `Term
+  `Π_⊸_ : (S T : `Type)                   → `Type
+  `λ_⊸_ : (S : `Type) (t : `Term)         → `Term
+  _`$_  : (s t : `Term)                   → `Term
+  `#_   :                         (x : ℕ) → `Term
 
   -- Explicit substitution
   --
@@ -214,7 +214,7 @@ data `Norm where
 data `Neut where
   `unlift[_⇗_]_ : (l h : `Mode) (Rs : `Neut s) → `Neut (`unlift[ l ⇗ h ] s)
 
-  `let-return[_⇘_]_then_ : (h l : `Mode) (Rs : `Neut s) (Nt : `Norm t) → `Neut (`let-return[ h ⇘ l ] s then t)
+  `let-return[_⇘_]_then_of_ : (h l : `Mode) (Rs : `Neut s) (Nt : `Norm t) (Nt : `Norm T) → `Neut (`let-return[ h ⇘ l ] s then t of T)
 
   `rec : (NS : `Norm S) (Rt : `Neut t) (Nu : `Norm u) (Nv : `Norm v) → `Neut (`rec S t u v)
 
@@ -222,35 +222,35 @@ data `Neut where
   `#_  : (x : ℕ)                       → `Neut (`# x)
 
 ¬lift : `Term → Set
-¬lift (`Univ i)                       = ⊤
-¬lift (`↑[ l ⇗ h ] S)                 = ⊤
-¬lift (`lift[ l ⇗ h ] s)              = ⊥
-¬lift (`unlift[ l ⇗ h ] s)            = ⊤
-¬lift (`↓[ h ⇘ l ] S)                 = ⊤
-¬lift (`return[ h ⇘ l ] s)            = ⊤
-¬lift (`let-return[ h ⇘ l ] s then t) = ⊤
-¬lift `Nat                            = ⊤
-¬lift `zero                           = ⊤
-¬lift (`suc s)                        = ⊤
-¬lift (`rec S t u v)                  = ⊤
-¬lift (`Π S ⊸ T)                      = ⊤
-¬lift (`λ S ⊸ t)                      = ⊤
-¬lift (s `$ t)                        = ⊤
-¬lift (`# x)                          = ⊤
-¬lift (`sub s σ)                      = ⊤
+¬lift (`Univ i)                            = ⊤
+¬lift (`↑[ l ⇗ h ] S)                      = ⊤
+¬lift (`lift[ l ⇗ h ] s)                   = ⊥
+¬lift (`unlift[ l ⇗ h ] s)                 = ⊤
+¬lift (`↓[ h ⇘ l ] S)                      = ⊤
+¬lift (`return[ h ⇘ l ] s)                 = ⊤
+¬lift (`let-return[ h ⇘ l ] s then t of T) = ⊤
+¬lift `Nat                                 = ⊤
+¬lift `zero                                = ⊤
+¬lift (`suc s)                             = ⊤
+¬lift (`rec S t u v)                       = ⊤
+¬lift (`Π S ⊸ T)                           = ⊤
+¬lift (`λ S ⊸ t)                           = ⊤
+¬lift (s `$ t)                             = ⊤
+¬lift (`# x)                               = ⊤
+¬lift (`sub s σ)                           = ⊤
 
 data `Canon⋆ m where
   `Univ : (i : ℕ) → `Canon⋆ m (`Univ i)
 
-  `↑[_⇗_]_       : (l h : `Mode)                          (CS : `Canon⋆ m S)                                       → `Canon⋆ m (`↑[ l ⇗ h ] S)
-  `lift[_⇗_]_    : (l h : `Mode)                                             (Cs : `Canon⋆ m s)                    → `Canon⋆ m (`lift[ l ⇗ h ] s)
-  `unlift[≰_⇗_]_ : {l : `Mode} (m≰l : m ≰ₘ l) (h : `Mode)                    (Cs : `Canon⋆ m s)                    → `Canon⋆ m (`unlift[ l ⇗ h ] s)
-  `unlift[≤_⇗_]_ : {l : `Mode} (m≤l : m ≤ₘ l) (h : `Mode)                    (Ns : `Norm s)     {¬lifts : ¬lift s} → `Canon⋆ m (`unlift[ l ⇗ h ] s)
+  `↑[_⇗_]_       : (l h : `Mode)                          (CS : `Canon⋆ m S)                    → `Canon⋆ m (`↑[ l ⇗ h ] S)
+  `lift[_⇗_]_    : (l h : `Mode)                          (Cs : `Canon⋆ m s)                    → `Canon⋆ m (`lift[ l ⇗ h ] s)
+  `unlift[≰_⇗_]_ : {l : `Mode} (m≰l : m ≰ₘ l) (h : `Mode) (Cs : `Canon⋆ m s)                    → `Canon⋆ m (`unlift[ l ⇗ h ] s)
+  `unlift[≤_⇗_]_ : {l : `Mode} (m≤l : m ≤ₘ l) (h : `Mode) (Ns : `Norm s)     {¬lifts : ¬lift s} → `Canon⋆ m (`unlift[ l ⇗ h ] s)
 
-  `↓[_⇘_]_               : (h l : `Mode)                          (CS : `Canon⋆ m S)                                       → `Canon⋆ m (`↓[ h ⇘ l ] S)
-  `return[_⇘≰_]_         : (h : `Mode) {l : `Mode} (m≰l : m ≰ₘ l)                    (Cs : `Canon⋆ m s)                    → `Canon⋆ m (`return[ h ⇘ l ] s)
-  `return[_⇘≤_]_         : (h : `Mode) {l : `Mode} (m≤l : m ≤ₘ l)                    (Ns : `Norm s)                        → `Canon⋆ m (`return[ h ⇘ l ] s)
-  `let-return[_⇘_]_then_ : (h l : `Mode)                                             (Cs : `Canon⋆ m s) (Ct : `Canon⋆ m t) → `Canon⋆ m (`let-return[ h ⇘ l ] s then t)
+  `↓[_⇘_]_                  : (h l : `Mode)                          (CS : `Canon⋆ m S)                                       → `Canon⋆ m (`↓[ h ⇘ l ] S)
+  `return[_⇘≰_]_            : (h : `Mode) {l : `Mode} (m≰l : m ≰ₘ l) (Cs : `Canon⋆ m s)                                       → `Canon⋆ m (`return[ h ⇘ l ] s)
+  `return[_⇘≤_]_            : (h : `Mode) {l : `Mode} (m≤l : m ≤ₘ l) (Ns : `Norm s)                                           → `Canon⋆ m (`return[ h ⇘ l ] s)
+  `let-return[_⇘_]_then_of_ : (h l : `Mode)                          (Cs : `Canon⋆ m s) (Ct : `Canon⋆ m t) (CT : `Canon⋆ m T) → `Canon⋆ m (`let-return[ h ⇘ l ] s then t of T)
 
   `Nat  :                                                                               `Canon⋆ m `Nat
   `zero :                                                                               `Canon⋆ m `zero
@@ -289,8 +289,8 @@ s `⟦|Ø⟧ = s `⟦ `id `,Ø ⟧
 --   Γ ⊢ σ ⦂ Δ ⸴ A
 -- to
 --   Γ ⊢ `p σ ⦂ Δ
-`p : `Subst → `Subst
-`p = `wk `∘_
+`pr : `Subst → `Subst
+`pr = `wk `∘_
 
 -- Hoisting of substitution
 --
@@ -298,8 +298,8 @@ s `⟦|Ø⟧ = s `⟦ `id `,Ø ⟧
 --   Γ ⊢ σ ⦂ Δ
 -- to
 --   Γ , S `⟦ σ ⟧ ⊢ `h σ ⦂ Δ ⸴ S
-`h : `Subst → `Subst
-`h σ = (σ `∘ `wk) `, `# 0
+`ho : `Subst → `Subst
+`ho σ = (σ `∘ `wk) `, `# 0
 
 `rec-suc-subst : `Subst
 `rec-suc-subst = (`wk `∘ `wk) `, `suc (`# 1)
@@ -310,11 +310,11 @@ _`⊸_ : (S T : `Type) → `Type
 S `⊸ T = `Π S ⊸ T `⟦ `wk ⟧
 
 -- Cross-mode function space
-`Π[_⇘_]_⊸_ : (h l : `Mode) (S T : `Type) → `Type
-`Π[ h ⇘ l ] S ⊸ T = `Π `↓[ h ⇘ l ] S ⊸ `let-return[ h ⇘ l ] `# 0 then T `⟦ `h `wk ⟧
+`Π[_⇘_]_⊸_of_ : (h l : `Mode) (S T : `Type) (i : ℕ) → `Type
+`Π[ h ⇘ l ] S ⊸ T of i = `Π `↓[ h ⇘ l ] S ⊸ `let-return[ h ⇘ l ] `# 0 then T `⟦ `ho `wk ⟧ of `Univ i
 
-`λ[_⇘_]_⊸_ : (h l : `Mode) (S : `Type) (t : `Term) → `Term
-`λ[ h ⇘ l ] S ⊸ t = `λ `↓[ h ⇘ l ] S ⊸ `let-return[ h ⇘ l ] `# 0 then t `⟦ `h `wk ⟧
+`λ[_⇘_]_⊸_of_ : (h l : `Mode) (S : `Type) (t : `Term) (T : `Type) → `Term
+`λ[ h ⇘ l ] S ⊸ t of T = `λ `↓[ h ⇘ l ] S ⊸ `let-return[ h ⇘ l ] `# 0 then t `⟦ `ho `wk ⟧ of T
 
 _`$[_⇘_]_ : (s : `Term) (h l : `Mode) (t : `Term) → `Term
 s `$[ h ⇘ l ] t = s `$ `return[ h ⇘ l ] t

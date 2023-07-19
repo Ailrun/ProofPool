@@ -152,34 +152,28 @@ data _¿_⊢_⦂_⋆_ where
 
   -- Downshift
   --
-  _&_⊢`↓[_⇘_]_             : ⊢ Γ ⋆ m →
-                             b ¿ Γ ∥[ h ≤]≅ Γ′ →
-                             m <ₘ h →
-                             Bool.T (opₘ m ↑ₘ) →
-                             b ¿ Γ′ ⊢ S ⦂ `Univ i ⋆ h →
-                             ------------------------------------
-                             b ¿ Γ ⊢ `↓[ h ⇘ m ] S ⦂ `Univ i ⋆ m
+  _&_⊢`↓[_⇘_]_                : ⊢ Γ ⋆ m →
+                                b ¿ Γ ∥[ h ≤]≅ Γ′ →
+                                m <ₘ h →
+                                Bool.T (opₘ m ↑ₘ) →
+                                b ¿ Γ′ ⊢ S ⦂ `Univ i ⋆ h →
+                                ------------------------------------
+                                b ¿ Γ ⊢ `↓[ h ⇘ m ] S ⦂ `Univ i ⋆ m
 
-  _&_⊢`return[_⇘_]_        : ⊢ Γ ⋆ m →
-                             b ¿ Γ ∥[ h ≤]≅ Γ′ →
-                             m <ₘ h →
-                             Bool.T (opₘ m ↑ₘ) →
-                             b ¿ Γ′ ⊢ s ⦂ S ⋆ h →
-                             -----------------------------------------------
-                             b ¿ Γ ⊢ `return[ m ⇘ h ] s ⦂ `↓[ h ⇘ m ] S ⋆ m
+  _&_⊢`return[_⇘_]_           : ⊢ Γ ⋆ m →
+                                b ¿ Γ ∥[ h ≤]≅ Γ′ →
+                                m <ₘ h →
+                                Bool.T (opₘ m ↑ₘ) →
+                                b ¿ Γ′ ⊢ s ⦂ S ⋆ h →
+                                -----------------------------------------------
+                                b ¿ Γ ⊢ `return[ m ⇘ h ] s ⦂ `↓[ h ⇘ m ] S ⋆ m
 
-  _⊢`let-return[-⇘-]_then_ : b ¿ Γ ≅ Γ₀ ⋈ Γ₁ →
-                             b ¿ Γ₀ ⊢ s ⦂ `↓[ h ⇘ m ] T ⋆ m →
-                             b ¿ Γ₁ `∙ `⟨ T ⋆ h / `⁺ ⟩ ⊢ t ⦂ S ⋆ m →
-                             --------------------------------------------------------------------------
-                             b ¿ Γ ⊢ `let-return[ m ⇘ h ] s then t ⦂ `let-return[ m ⇘ h ] s then S ⋆ m
-                             -- we want some way to get a "canonical" type for this one...
-                             -- maybe by extending the definition of substitution?
-                             -- or maybe by providing an equational rule like
-                             --   `let-return[ m ⇘ h ] s then `Univ i ≈ `Univ i
-                             -- I guess we need in general some kind of commuting conversion
-                             --
-                             -- that is anyway very similar to extending substitution though...
+  _⊢`let-return[-⇘-]_then_of_ : b ¿ Γ ≅ Γ₀ ⋈ Γ₁ →
+                                b ¿ Γ₀ ⊢ s ⦂ `↓[ h ⇘ m ] S ⋆ m →
+                                b ¿ Γ₁ `∙ `⟨ S ⋆ h / `⁺ ⟩ ⊢ t ⦂ T `⟦| `return[ h ⇘ m ] `# 0 ⟧ ⋆ m →
+                                Γ₁ `∙ `⟨ `↓[ h ⇘ m ] S ⋆ m / `⁺ ⟩ ⊢ᵀ T ⦂ `Univ i ⋆ m →
+                                --------------------------------------------------------------
+                                b ¿ Γ ⊢ `let-return[ m ⇘ h ] s then t of T ⦂ T `⟦| s ⟧ ⋆ m
 
   -- Natural number
   --
@@ -277,11 +271,44 @@ data _¿_⊢_≈[_≤]_⦂_⋆_ where
            b ¿ Γ ⊢ t ≈[ n ≤] t″ ⦂ T ⋆ m
 
 data _¿_s⊢_⦂_⋆_ where
-  `id   : b ¿ Γ s⊢ `id ⦂ Γ ⋆ m
-  -- `wk   :                              `Subst
-  -- _`,_  : (σ : `Subst)   (s : `Term) → `Subst
-  -- _`,Ø  : (σ : `Subst)               → `Subst
-  -- _`∘_  : (σ τ : `Subst)             → `Subst
+  -- Substitution Constructors
+  --
+  `id            : ⊢ Γ ⋆ m →
+                   ---------------------
+                   b ¿ Γ s⊢ `id ⦂ Γ ⋆ m
+
+  `wk            : ⊢ Γ `∙ e ⋆ m →
+                   b ¿ e e∁ →
+                   --------------------------
+                   b ¿ Γ `∙ e s⊢ `wk ⦂ Γ ⋆ m
+
+  _&_⊢_`,_⦂_⊢_/_ : b ¿ Γ ≅ Γ₀ ⋈ Γ₁ →
+                   b ¿ Γ₁ ∥[ h ≤]≅ Γ′₁ →
+                   b ¿ Γ₀ s⊢ σ ⦂ Δ ⋆ m →
+                   b ¿ Γ′₁ ⊢ t ⦂ T `⟦ σ ⟧ ⋆ h →
+                   Δ ∥[ h ≤]ᵀ≅ Δ′ →
+                   Δ′ ⊢ᵀ T ⦂ `Univ i ⋆ h →
+                   false ¿ a is-useable →
+                   ------------------------------------------
+                   b ¿ Γ s⊢ σ `, t ⦂ Δ `∙ `⟨ T ⋆ h / a ⟩ ⋆ m
+
+  _`,Ø⦂_⊢_       : b ¿ Γ s⊢ σ ⦂ Δ ⋆ m →
+                   Δ ∥[ h ≤]ᵀ≅ Δ′ →
+                   Δ′ ⊢ᵀ T ⦂ `Univ i ⋆ h →
+                   ------------------------------------------
+                   b ¿ Γ s⊢ σ `,Ø ⦂ Δ `∙ `⟨ T ⋆ h / `Ø ⟩ ⋆ m
+
+  _`∘_           : b ¿ Δ s⊢ σ ⦂ Ψ ⋆ m →
+                   b ¿ Γ s⊢ τ ⦂ Δ ⋆ m →
+                   ------------------------
+                   b ¿ Γ s⊢ σ `∘ τ ⦂ Ψ ⋆ m
+
+  -- Conversion
+  --
+  `conv          : b ¿ Γ s⊢ σ ⦂ Δ ⋆ m →
+                   ⊢ Δ ≈[ n ≤] Δ′ ⋆ m →
+                   ---------------------
+                   b ¿ Γ s⊢ σ ⦂ Δ′ ⋆ m
 
 data _¿_s⊢_≈[_≤]_⦂_⋆_ where
   -- Conversion
