@@ -35,7 +35,6 @@ infixl 23 _`$[_⇘_]_
 infixl 25 `#_
 
 infixr  4 _`⟦|_⟧
-infixr  4 _`⟦|Ø⟧
 
 data `Term : Set ℓ₁
 data `Subst : Set ℓ₁
@@ -83,14 +82,12 @@ data `Term where
   `sub : (s : `Term) (σ : `Subst) → `Term
 
 infixl  4 _`,_
-infixl  4 _`,Ø
 infixl  3 _`∘_
 
 data `Subst where
   `id  :                              `Subst
   `wk  :                              `Subst
   _`,_ : (σ : `Subst)   (s : `Term) → `Subst
-  _`,Ø : (σ : `Subst)               → `Subst
   _`∘_ : (σ τ : `Subst)             → `Subst
 
 ------------------------------------------------------------
