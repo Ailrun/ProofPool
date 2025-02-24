@@ -331,12 +331,37 @@ instance
   [_]_ ⦃ AppSubSub ⦄ σ `·       = `·
   [_]_ ⦃ AppSubSub ⦄ σ (τ `, M) = [ σ ] τ `, [ σ ] M
 
-wk[]-idWk⇒id : ∀ (δ : Γ ⊢Wk: Δ) →
-               -------------------
-                wk[ δ ] ^id ≡ δ
-wk[]-idWk⇒id `·       = refl
-wk[]-idWk⇒id (`wk δ)  = cong `wk (wk[]-idWk⇒id δ)
-wk[]-idWk⇒id (`ext δ) = cong `ext (wk[]-idWk⇒id δ)
+record CtxCompose (F : Ctx → Ctx → Set) : Set where
+  infixl 45 _`∘_
+  field
+    _`∘_ : F Γ Δ → F Δ Ψ → F Γ Ψ
+
+open CtxCompose ⦃...⦄
+instance
+  CtxComposeCtx≤ : CtxCompose _Ctx≤_
+  _`∘_ ⦃ CtxComposeCtx≤ ⦄ = ctx≤[_]_ ⦃ AppCtx≤Ctx≤ ⦄
+
+  CtxComposeWk : CtxCompose _⊢Wk:_
+  _`∘_ ⦃ CtxComposeWk ⦄ = wk[_]_ ⦃ AppWkWk ⦄
+
+  CtxComposeSub : CtxCompose _⊢Sub:_
+  _`∘_ ⦃ CtxComposeSub ⦄ = [_]_ ⦃ AppSubSub ⦄
+
+record CtxComposeIdentity
+  (F : Ctx → Ctx → Set)
+  ⦃ CtxIdF : CtxId F ⦄
+  ⦃ CtxComposeF : CtxCompose F ⦄ : Set where
+  field
+    `∘-identityʳ : ∀ (x : F Γ Δ) →
+                   ----------------
+                    x `∘ ^id ≡ x
+
+open CtxComposeIdentity ⦃...⦄
+instance
+  CtxComposeIdentityWk : CtxComposeIdentity _⊢Wk:_
+  `∘-identityʳ ⦃ CtxComposeIdentityWk ⦄ `·       = refl
+  `∘-identityʳ ⦃ CtxComposeIdentityWk ⦄ (`wk δ)  = cong `wk (`∘-identityʳ δ)
+  `∘-identityʳ ⦃ CtxComposeIdentityWk ⦄ (`ext δ) = cong `ext (`∘-identityʳ δ)
 
 []-idWk⇒id : ∀ (σ : Γ ⊢Sub: Δ) →
              --------------------
@@ -346,15 +371,15 @@ wk[]-idWk⇒id (`ext δ) = cong `ext (wk[]-idWk⇒id δ)
 
 record AppIdWk⇒Id F ⦃ AppWkF : AppWk F ⦄ : Set where
   field
-    wk[idWk]⇒id : ∀ (x : F Γ) →
-                  -----------------
-                   wk[ ^id ] x ≡ x
+    wk[id]⇒id : ∀ (x : F Γ) →
+                -----------------
+                 wk[ ^id ] x ≡ x
 
 record AppWkCompose F ⦃ AppWkF : AppWk F ⦄ : Set where
   field
     wk[]-compose : ∀ (δ : Γ ⊢Wk: Δ) (ε : Δ ⊢Wk: Ψ) (x : F Ψ) →
                    --------------------------------------------
-                    wk[ δ ] wk[ ε ] x ≡ wk[ wk[ δ ] ε ] x
+                    wk[ δ ] wk[ ε ] x ≡ wk[ δ `∘ ε ] x
 
 record AppSubWkCompose F ⦃ AppWkF : AppWk F ⦄ ⦃ AppSubF : AppSub F ⦄ ⦃ AppWkFOutput : AppWk (AppSubOutput ⦃ AppSubF ⦄) ⦄ : Set where
   field
@@ -388,26 +413,26 @@ open AppSubCompose ⦃...⦄
 open CompatibleSubWk ⦃...⦄
 instance
   AppIdWk⇒IdWk : AppIdWk⇒Id (_⊢Wk: Δ)
-  wk[idWk]⇒id ⦃ AppIdWk⇒IdWk ⦄ {Γ = `·}      `·       = refl
-  wk[idWk]⇒id ⦃ AppIdWk⇒IdWk ⦄ {Γ = Γ' `, A} `·       = refl
-  wk[idWk]⇒id ⦃ AppIdWk⇒IdWk ⦄ {Γ = Γ' `, A} (`wk δ)  = cong `wk (wk[idWk]⇒id δ)
-  wk[idWk]⇒id ⦃ AppIdWk⇒IdWk ⦄ {Γ = Γ' `, A} (`ext δ) = cong `ext (wk[idWk]⇒id δ)
+  wk[id]⇒id ⦃ AppIdWk⇒IdWk ⦄ {Γ = `·}      `·       = refl
+  wk[id]⇒id ⦃ AppIdWk⇒IdWk ⦄ {Γ = Γ' `, A} `·       = refl
+  wk[id]⇒id ⦃ AppIdWk⇒IdWk ⦄ {Γ = Γ' `, A} (`wk δ)  = cong `wk (wk[id]⇒id δ)
+  wk[id]⇒id ⦃ AppIdWk⇒IdWk ⦄ {Γ = Γ' `, A} (`ext δ) = cong `ext (wk[id]⇒id δ)
 
   AppIdWk⇒IdVar : AppIdWk⇒Id (_Include A)
-  wk[idWk]⇒id ⦃ AppIdWk⇒IdVar ⦄ here      = refl
-  wk[idWk]⇒id ⦃ AppIdWk⇒IdVar ⦄ (there x) = cong there (wk[idWk]⇒id x)
+  wk[id]⇒id ⦃ AppIdWk⇒IdVar ⦄ here      = refl
+  wk[id]⇒id ⦃ AppIdWk⇒IdVar ⦄ (there x) = cong there (wk[id]⇒id x)
 
   AppIdWk⇒IdTm : AppIdWk⇒Id (_⊢Tm: A)
-  wk[idWk]⇒id ⦃ AppIdWk⇒IdTm ⦄ (`! x)   = cong `!_ (wk[idWk]⇒id x)
-  wk[idWk]⇒id ⦃ AppIdWk⇒IdTm ⦄ `zero    = refl
-  wk[idWk]⇒id ⦃ AppIdWk⇒IdTm ⦄ `suc     = refl
-  wk[idWk]⇒id ⦃ AppIdWk⇒IdTm ⦄ `rec     = refl
-  wk[idWk]⇒id ⦃ AppIdWk⇒IdTm ⦄ (`λ M)   = cong `λ_ (wk[idWk]⇒id M)
-  wk[idWk]⇒id ⦃ AppIdWk⇒IdTm ⦄ (M `$ N) = cong₂ _`$_ (wk[idWk]⇒id M) (wk[idWk]⇒id N)
+  wk[id]⇒id ⦃ AppIdWk⇒IdTm ⦄ (`! x)   = cong `!_ (wk[id]⇒id x)
+  wk[id]⇒id ⦃ AppIdWk⇒IdTm ⦄ `zero    = refl
+  wk[id]⇒id ⦃ AppIdWk⇒IdTm ⦄ `suc     = refl
+  wk[id]⇒id ⦃ AppIdWk⇒IdTm ⦄ `rec     = refl
+  wk[id]⇒id ⦃ AppIdWk⇒IdTm ⦄ (`λ M)   = cong `λ_ (wk[id]⇒id M)
+  wk[id]⇒id ⦃ AppIdWk⇒IdTm ⦄ (M `$ N) = cong₂ _`$_ (wk[id]⇒id M) (wk[id]⇒id N)
 
   AppIdWk⇒IdSub : AppIdWk⇒Id (_⊢Sub: Δ)
-  wk[idWk]⇒id ⦃ AppIdWk⇒IdSub ⦄ `· = refl
-  wk[idWk]⇒id ⦃ AppIdWk⇒IdSub ⦄ (σ `, M) = cong₂ _`,_ (wk[idWk]⇒id σ) (wk[idWk]⇒id M)
+  wk[id]⇒id ⦃ AppIdWk⇒IdSub ⦄ `· = refl
+  wk[id]⇒id ⦃ AppIdWk⇒IdSub ⦄ (σ `, M) = cong₂ _`,_ (wk[id]⇒id σ) (wk[id]⇒id M)
 
   AppWkComposeWk : AppWkCompose (_⊢Wk: Ψ')
   wk[]-compose ⦃ AppWkComposeWk ⦄ `·       `·       `·       = refl
@@ -454,8 +479,8 @@ instance
   wk[]-[]-compose ⦃ AppSubWkComposeTm ⦄ δ σ (`λ M)   = cong `λ_
     (begin wk[ ^ext δ ] [ ^ext σ ] M                ≡⟨ wk[]-[]-compose (^ext δ) (^ext σ) M ⟩
            [ wk[ ^ext δ ] wk1 σ `, `! here ] M      ≡⟨ cong (λ x → [ x `, _ ] M) (wk[]-compose (^ext δ) (`wk ^id) σ) ⟩
-           [ wk[ wk[ `wk δ ] ^id ] σ `, `! here ] M ≡⟨ cong (λ x → [ x `, _ ] M) (cong (wk[_] σ) (wk[]-idWk⇒id (`wk δ))) ⟩
-           [ wk[ `wk δ ] σ `, `! here ] M           ≡˘⟨ cong (λ x → [ x `, _ ] M) (cong (wk[_] σ) (wk[idWk]⇒id (`wk δ))) ⟩
+           [ wk[ wk[ `wk δ ] ^id ] σ `, `! here ] M ≡⟨ cong (λ x → [ x `, _ ] M) (cong (wk[_] σ) (`∘-identityʳ (`wk δ))) ⟩
+           [ wk[ `wk δ ] σ `, `! here ] M           ≡˘⟨ cong (λ x → [ x `, _ ] M) (cong (wk[_] σ) (wk[id]⇒id (`wk δ))) ⟩
            [ wk[ wk[ ^id ] `wk δ ] σ `, `! here ] M ≡˘⟨ cong (λ x → [ x `, _ ] M) (wk[]-compose (`wk ^id) δ σ) ⟩
            [ ^ext (wk[ δ ] σ) ] M                   ∎)
     where
@@ -499,7 +524,7 @@ instance
   compatible-Sub-Wk ⦃ CompatibleSubWkVar ⦄ (`wk δ) x          =
     begin [ wk1 (fromWk δ) ] x           ≡˘⟨ wk[]-[]-compose (`wk ^id) (fromWk δ) x ⟩
           wk1 [ fromWk δ ] x             ≡⟨ cong wk1_ (compatible-Sub-Wk δ x) ⟩
-          `! there (wk[ ^id ] wk[ δ ] x) ≡⟨ cong `!_ (cong there (wk[idWk]⇒id (wk[ δ ] x))) ⟩
+          `! there (wk[ ^id ] wk[ δ ] x) ≡⟨ cong `!_ (cong there (wk[id]⇒id (wk[ δ ] x))) ⟩
           `! there (wk[ δ ] x)           ∎
     where
       open ≡-Reasoning
@@ -507,7 +532,7 @@ instance
   compatible-Sub-Wk ⦃ CompatibleSubWkVar ⦄ (`ext δ) (there x) =
     begin [ wk1 (fromWk δ) ] x           ≡˘⟨ wk[]-[]-compose (`wk ^id) (fromWk δ) x ⟩
           wk1 [ fromWk δ ] x             ≡⟨ cong wk1_ (compatible-Sub-Wk δ x) ⟩
-          `! there (wk[ ^id ] wk[ δ ] x) ≡⟨ cong `!_ (cong there (wk[idWk]⇒id (wk[ δ ] x))) ⟩
+          `! there (wk[ ^id ] wk[ δ ] x) ≡⟨ cong `!_ (cong there (wk[id]⇒id (wk[ δ ] x))) ⟩
           `! there (wk[ δ ] x)           ∎
     where
       open ≡-Reasoning
@@ -543,37 +568,35 @@ instance
       open ≡-Reasoning
   []-compose ⦃ AppSubComposeTm ⦄ σ τ (M `$ N) = cong₂ _`$_ ([]-compose σ τ M) ([]-compose σ τ N)
 
+  CtxComposeIdentitySub : CtxComposeIdentity _⊢Sub:_
+  `∘-identityʳ ⦃ CtxComposeIdentitySub ⦄ `·       = refl
+  `∘-identityʳ ⦃ CtxComposeIdentitySub ⦄ (σ `, M) = cong (_`, _)
+    (begin [ σ `, M ] wk1 idSub         ≡⟨ []-wk[]-compose (σ `, M) (`wk ^id) idSub ⟩
+           [ [ σ `, M ] `wk ^id ] idSub ≡⟨ cong ([_] idSub) ([]-idWk⇒id σ) ⟩
+           [ σ ] idSub                  ≡⟨ `∘-identityʳ σ ⟩
+           σ ∎)
+    where
+      open ≡-Reasoning
+
 idSub≡fromWk-idWk : ∀ {Γ} →
                     -----------------------------
                      idSub {Γ = Γ} ≡ fromWk idWk
 idSub≡fromWk-idWk {`·}     = refl
 idSub≡fromWk-idWk {Γ `, A} = cong (_`, `! here) (cong wk1_ idSub≡fromWk-idWk)
 
-[idSub]⇒id : ∀ {F}
-               ⦃ AppWkF : AppWk F ⦄
-               ⦃ AppSubF : AppSub F ⦄
-               ⦃ AppIdWk⇒IdF : AppIdWk⇒Id F ⦄
-               ⦃ CompatibleSubWkF : CompatibleSubWk F ⦄
-               (x : F Γ) →
-             -------------------------------------------
-              [ ^id ] x ≡ AppSubOutputMap x
-[idSub]⇒id x =
+[id]⇒id : ∀ {F}
+            ⦃ AppWkF : AppWk F ⦄
+            ⦃ AppSubF : AppSub F ⦄
+            ⦃ AppIdWk⇒IdF : AppIdWk⇒Id F ⦄
+            ⦃ CompatibleSubWkF : CompatibleSubWk F ⦄
+            (x : F Γ) →
+          -------------------------------------------
+           [ ^id ] x ≡ AppSubOutputMap x
+[id]⇒id x =
   begin [ ^id ] x                     ≡⟨ cong ([_] x) idSub≡fromWk-idWk ⟩
         [ fromWk ^id ] x              ≡⟨ compatible-Sub-Wk idWk x ⟩
-        AppSubOutputMap (wk[ ^id ] x) ≡⟨ cong AppSubOutputMap (wk[idWk]⇒id x) ⟩
+        AppSubOutputMap (wk[ ^id ] x) ≡⟨ cong AppSubOutputMap (wk[id]⇒id x) ⟩
         AppSubOutputMap x             ∎
-  where
-    open ≡-Reasoning
-
-[]-idSub⇒id : ∀ (σ : Γ ⊢Sub: Δ) →
-              --------------------
-               [ σ ] idSub ≡ σ
-[]-idSub⇒id `·       = refl
-[]-idSub⇒id (σ `, M) = cong (_`, _)
-  (begin [ σ `, M ] wk1 idSub         ≡⟨ []-wk[]-compose (σ `, M) (`wk ^id) idSub ⟩
-         [ [ σ `, M ] `wk ^id ] idSub ≡⟨ cong ([_] idSub) ([]-idWk⇒id σ) ⟩
-         [ σ ] idSub                  ≡⟨ []-idSub⇒id σ ⟩
-         σ ∎)
   where
     open ≡-Reasoning
 
@@ -581,7 +604,7 @@ ctx≤[]-fromCtx≤-commute : ∀ (Γ''≤Γ' : Γ'' Ctx≤ Γ')
                             (Γ'≤Γ : Γ' Ctx≤ Γ) →
                           -----------------------------------------------------------------
                            fromCtx≤ (ctx≤[ Γ''≤Γ' ] Γ'≤Γ) ≡ ctx≤[ Γ''≤Γ' ] (fromCtx≤ Γ'≤Γ)
-ctx≤[]-fromCtx≤-commute `id          Γ'≤Γ = sym (wk[idWk]⇒id (fromCtx≤ Γ'≤Γ))
+ctx≤[]-fromCtx≤-commute `id          Γ'≤Γ = sym (wk[id]⇒id (fromCtx≤ Γ'≤Γ))
 ctx≤[]-fromCtx≤-commute (`wk Γ''≤Γ') Γ'≤Γ = cong `wk (ctx≤[]-fromCtx≤-commute Γ''≤Γ' Γ'≤Γ)
 
 ctx≤[]-compose : ∀ {F}
@@ -595,7 +618,7 @@ ctx≤[]-compose : ∀ {F}
 ctx≤[]-compose Γ''≤Γ' Γ'≤Γ x =
   begin ctx≤[ Γ''≤Γ' ] ctx≤[ Γ'≤Γ ] x        ≡⟨ wk[]-compose (fromCtx≤ Γ''≤Γ') (fromCtx≤ Γ'≤Γ) x ⟩
         wk[ ctx≤[ Γ''≤Γ' ] fromCtx≤ Γ'≤Γ ] x ≡˘⟨ cong (wk[_] x) (ctx≤[]-fromCtx≤-commute Γ''≤Γ' Γ'≤Γ) ⟩
-        ctx≤[ ctx≤[ Γ''≤Γ' ] Γ'≤Γ ] x        ∎
+        ctx≤[ Γ''≤Γ' `∘ Γ'≤Γ ] x             ∎
   where
     open ≡-Reasoning
 
@@ -685,14 +708,14 @@ Equiv-Sub : ∀ {M M'} σ →
             -----------------------------
              Δ ⊢ [ σ ] M ≋ [ σ ] M' `: A
 Equiv-Sub {M = (`λ M) `$ N} {M' = _}  σ `β-`→                =
-  begin (`λ [ ^ext σ ] M) `$ [ σ ] N          ≈⟨ `β-`→ ⟩
-        [ [ σ ] N 1] [ ^ext σ ] M             ≡⟨ []-compose (^id `, [ σ ] N) (^ext σ) M ⟩
-        [ [ [ σ ] N 1] wk1 σ `, [ σ ] N ] M   ≡⟨ cong (λ x → [ x `, [ σ ] N ] M) ([]-wk[]-compose (^id `, [ σ ] N) (`wk ^id) σ) ⟩
-        [ [ [ idSub ] idWk ] σ `, [ σ ] N ] M ≡⟨ cong (λ x → [ [ x ] σ `, [ σ ] N ] M) ([]-idWk⇒id idSub) ⟩
-        [ [ idSub ] σ `, [ σ ] N ] M          ≡⟨ cong (λ x → [ x `, [ σ ] N ] M) ([idSub]⇒id σ) ⟩
-        [ σ `, [ σ ] N ] M                    ≡˘⟨ cong (λ x → [ x `, [ σ ] N ] M) ([]-idSub⇒id σ) ⟩
-        [ [ σ ] idSub `, [ σ ] N ] M          ≡˘⟨ []-compose σ (^id `, N) M ⟩
-        [ σ ] [ ^id `, N ] M                  ∎
+  begin (`λ [ ^ext σ ] M) `$ [ σ ] N         ≈⟨ `β-`→ ⟩
+        [ [ σ ] N 1] [ ^ext σ ] M            ≡⟨ []-compose (^id `, [ σ ] N) (^ext σ) M ⟩
+        [ [ [ σ ] N 1] wk1 σ `, [ σ ] N ] M  ≡⟨ cong (λ x → [ x `, [ σ ] N ] M) ([]-wk[]-compose (^id `, [ σ ] N) (`wk ^id) σ) ⟩
+        [ ([ ^id ] idWk) `∘ σ `, [ σ ] N ] M ≡⟨ cong (λ x → [ [ x ] σ `, [ σ ] N ] M) ([]-idWk⇒id idSub) ⟩
+        [ ^id `∘ σ `, [ σ ] N ] M            ≡⟨ cong (λ x → [ x `, [ σ ] N ] M) ([id]⇒id σ) ⟩
+        [ σ `, [ σ ] N ] M                   ≡˘⟨ cong (λ x → [ x `, [ σ ] N ] M) (`∘-identityʳ σ) ⟩
+        [ σ `∘ ^id `, [ σ ] N ] M            ≡˘⟨ []-compose σ (^id `, N) M ⟩
+        [ σ ] [ ^id `, N ] M                 ∎
   where
     open Equiv-Reasoning _ _
 Equiv-Sub                             σ `β-`N₀               = `β-`N₀
@@ -844,8 +867,8 @@ instance
 
   InterpretVar : Interpret (A ∈ Γ)
   InterpretUniv ⦃ InterpretVar {A} {Γ} ⦄ = ⟦ Γ ⟧ → ⟦ A ⟧
-  ⟦_⟧ ⦃ InterpretVar ⦄ here      (ρ , a) = a
-  ⟦_⟧ ⦃ InterpretVar ⦄ (there x) (ρ , a) = ⟦ x ⟧ ρ
+  ⟦_⟧ ⦃ InterpretVar ⦄ here      ρ = proj₂ ρ
+  ⟦_⟧ ⦃ InterpretVar ⦄ (there x) ρ = ⟦ x ⟧ (proj₁ ρ)
 
   interleaved mutual
     ReflectTy : Reflect Ty (λ A → Ne* A → ⟦ A ⟧)
@@ -854,33 +877,33 @@ instance
     ↑[_] ⦃ ReflectTy ⦄ `N       u*   = `⇑ u*
     ↑[_] ⦃ ReflectTy ⦄ (A `→ B) u* a = ↑[ B ] (u* Ne*$ ↓[ A ] a)
 
-    ↓[_] ⦃ ReifyTy ⦄ `N       v = ↓Nat v
+    ↓[_] ⦃ ReifyTy ⦄ `N       v   = ↓Nat v
     ↓[_] ⦃ ReifyTy ⦄ (A `→ B) v Γ = `λ (↓[ B ] (v (↑[ A ] (Ne*! Γ A))) (Γ `, A))
 
   ReflectCtx : Reflect Ctx ⟦_⟧
-  ↑[_] ⦃ ReflectCtx ⦄ `· = tt
+  ↑[_] ⦃ ReflectCtx ⦄ `·       = tt
   ↑[_] ⦃ ReflectCtx ⦄ (Γ `, A) = ↑[ Γ ] , (↑[ A ] (Ne*! Γ A))
 
 ⟦rec⟧ : ∀ A → ⟦ A `→ (`N `→ A `→ A) `→ `N `→ A ⟧
 ⟦rec⟧ A z s `zero    = z
 ⟦rec⟧ A z s (`suc n) = s n (⟦rec⟧ A z s n)
-⟦rec⟧ A z s (`⇑ u*)   = ↑[ A ] (Ne*rec (↓[ A ] z) (↓[ `N `→ A `→ A ] s) u*)
+⟦rec⟧ A z s (`⇑ u*)  = ↑[ A ] (Ne*rec (↓[ A ] z) (↓[ `N `→ A `→ A ] s) u*)
 
 instance
   InterpretTm : Interpret (Γ ⊢Tm: A)
   InterpretUniv ⦃ InterpretTm {Γ} {A} ⦄ = ⟦ Γ ⟧ → ⟦ A ⟧
-  ⟦_⟧ ⦃ InterpretTm ⦄ (`! x)   ρ       = ⟦ x ⟧ ρ
-  ⟦_⟧ ⦃ InterpretTm ⦄ `zero    ρ       = `zero
-  ⟦_⟧ ⦃ InterpretTm ⦄ `suc     ρ n     = `suc n
-  ⟦_⟧ ⦃ InterpretTm ⦄ `rec     ρ z s n = ⟦rec⟧ _ z s n
-  ⟦_⟧ ⦃ InterpretTm ⦄ (`λ M)   ρ a     = ⟦ M ⟧ (ρ , a)
-  ⟦_⟧ ⦃ InterpretTm ⦄ (M `$ N) ρ       = ⟦ M ⟧ ρ (⟦ N ⟧ ρ)
+  ⟦_⟧ ⦃ InterpretTm ⦄ (`! x)   ρ   = ⟦ x ⟧ ρ
+  ⟦_⟧ ⦃ InterpretTm ⦄ `zero    ρ   = `zero
+  ⟦_⟧ ⦃ InterpretTm ⦄ `suc     ρ   = `suc
+  ⟦_⟧ ⦃ InterpretTm ⦄ `rec     ρ   = ⟦rec⟧ _
+  ⟦_⟧ ⦃ InterpretTm ⦄ (`λ M)   ρ a = ⟦ M ⟧ (ρ , a)
+  ⟦_⟧ ⦃ InterpretTm ⦄ (M `$ N) ρ   = ⟦ M ⟧ ρ (⟦ N ⟧ ρ)
 
   InterpretWk : Interpret (Γ ⊢Wk: Δ)
   InterpretUniv ⦃ InterpretWk {Γ} {Δ} ⦄ = ⟦ Γ ⟧ → ⟦ Δ ⟧
-  ⟦_⟧ ⦃ InterpretWk ⦄ `·       ρ       = tt
-  ⟦_⟧ ⦃ InterpretWk ⦄ (`wk δ)  (ρ , a) = ⟦ δ ⟧ ρ
-  ⟦_⟧ ⦃ InterpretWk ⦄ (`ext δ) (ρ , a) = ⟦ δ ⟧ ρ , a
+  ⟦_⟧ ⦃ InterpretWk ⦄ `·       ρ = tt
+  ⟦_⟧ ⦃ InterpretWk ⦄ (`wk δ)  ρ = ⟦ δ ⟧ (proj₁ ρ)
+  ⟦_⟧ ⦃ InterpretWk ⦄ (`ext δ) ρ = ⟦ δ ⟧ (proj₁ ρ) , proj₂ ρ
 
   InterpretSub : Interpret (Γ ⊢Sub: Δ)
   InterpretUniv ⦃ InterpretSub {Γ} {Δ} ⦄ = ⟦ Γ ⟧ → ⟦ Δ ⟧
@@ -928,7 +951,7 @@ module Completeness (fun-ext : ∀ {a b} → Extensionality a b) where
     meaning-preserving-Sub-Var : ∀ (σ : Γ ⊢Sub: Δ)
                                    (x : A ∈ Δ)
                                    (ρ : ⟦ Γ ⟧) →
-                                 ----------------------------------------------
+                                 ---------------------------------
                                   ⟦ [ σ ] x ⟧ ρ ≡ ⟦ x ⟧ (⟦ σ ⟧ ρ)
     meaning-preserving-Sub-Var (σ `, M) here      ρ = refl
     meaning-preserving-Sub-Var (σ `, M) (there x) ρ = meaning-preserving-Sub-Var σ x ρ
@@ -985,21 +1008,18 @@ module Completeness (fun-ext : ∀ {a b} → Extensionality a b) where
       open ≡-Reasoning
   completeness-helper `β-`N₀                  = refl
   completeness-helper `β-`N₁                  = refl
-  completeness-helper {M' = M'} `η-`→         = fun-ext λ ρ → fun-ext λ a → cong (_$ a)
+  completeness-helper {M' = M'} `η-`→         = fun-ext λ ρ → fun-ext λ a → cong-app
     (begin ⟦ wk1 M' ⟧ (ρ , a)  ≡⟨ meaning-preserving-Wk (`wk ^id) M' (ρ , a) ⟩
            ⟦ M' ⟧ (⟦ idWk ⟧ ρ) ≡⟨ cong ⟦ M' ⟧ (⟦idWk⟧-id ρ) ⟩
-           ⟦ M' ⟧ ρ            ∎)
+           ⟦ M' ⟧ ρ            ∎) a
     where
       open ≡-Reasoning
   completeness-helper `ξ-`!                   = refl
   completeness-helper `ξ-`zero                = refl
   completeness-helper `ξ-`suc                 = refl
   completeness-helper `ξ-`rec                 = refl
-  completeness-helper (`ξ-`λ M≋M')
-    rewrite completeness-helper M≋M'          = refl
-  completeness-helper (`ξ- M≋M' `$ N≋N')
-    rewrite completeness-helper M≋M'
-          | completeness-helper N≋N'          = refl
+  completeness-helper (`ξ-`λ M≋M')            = cong curry (completeness-helper M≋M')
+  completeness-helper (`ξ- M≋M' `$ N≋N')      = cong₂ (λ x y ρ → x ρ (y ρ)) (completeness-helper M≋M') (completeness-helper N≋N')
   completeness-helper (`sym M'≋M)             = sym (completeness-helper M'≋M)
   completeness-helper (`trans M≋M' M'≋M'')    = trans (completeness-helper M≋M') (completeness-helper M'≋M'')
 
@@ -1007,8 +1027,7 @@ module Completeness (fun-ext : ∀ {a b} → Extensionality a b) where
                   Γ ⊢ M ≋ M' `: A →
                  -------------------
                   nbe M ≡ nbe M'
-  completeness M≋M'
-    rewrite completeness-helper M≋M' = refl
+  completeness M≋M' = cong (λ x → (↓[ _ ] (x _)) $ _) (completeness-helper M≋M')
 
 module Soundness where
   module GluingModel where
@@ -1033,61 +1052,62 @@ module Soundness where
 
     gluingSub : ∀ Γ Δ → Γ ⊢Sub: Δ → ⟦ Δ ⟧ → Set
     syntax gluingSub Γ Δ σ ρ = Γ ⊢s σ `: Δ ® ρ
-    Γ ⊢s `·     `: `·     ® tt      = ⊤
-    Γ ⊢s σ `, M `: Δ `, A ® (ρ , a) = Γ ⊢s σ `: Δ ® ρ × Γ ⊢ M `: A ® a
+    Γ ⊢s `·     `: `·     ® ρ = ⊤
+    Γ ⊢s σ `, M `: Δ `, A ® ρ = Γ ⊢s σ `: Δ ® proj₁ ρ × Γ ⊢ M `: A ® proj₂ ρ
 
   open GluingModel
 
   module KripkeProperty where
+    kripkeGluingTm⊥ : ∀ {M u*} (Γ'≤Γ : Γ' Ctx≤ Γ) →
+                       Γ ⊢ M `: A ®⊥ u* →
+                      --------------------------------
+                       Γ' ⊢ ctx≤[ Γ'≤Γ ] M `: A ®⊥ u*
+    kripkeGluingTm⊥ {M = M} Γ'≤Γ ⊥M Γ''≤Γ'
+      with u , eq , equivA ← ⊥M (ctx≤[ Γ''≤Γ' ] Γ'≤Γ)
+        rewrite ctx≤[]-compose Γ''≤Γ' Γ'≤Γ M = u , eq , equivA
+
     kripkeGluingNat : ∀ {M n} (Γ'≤Γ : Γ' Ctx≤ Γ) →
                        Γ ⊢ M ®Nat n →
                       ----------------------------
                        Γ' ⊢ ctx≤[ Γ'≤Γ ] M ®Nat n
-    kripkeGluingNat         {n = `zero}  Γ'≤Γ equiv                             = Equiv-Ctx≤ Γ'≤Γ equiv
-    kripkeGluingNat         {n = `suc n} Γ'≤Γ (M' , equiv , natM')              = ctx≤[ Γ'≤Γ ] M' , Equiv-Ctx≤ Γ'≤Γ equiv , kripkeGluingNat Γ'≤Γ natM'
-    kripkeGluingNat {M = M} {n = `⇑ x}   Γ'≤Γ ⊥M                   {Γ''} Γ''≤Γ'
-      with u , eq , equiv ← ⊥M (ctx≤[ Γ''≤Γ' ] Γ'≤Γ)                            = u , eq ,
-        (begin ctx≤[ Γ''≤Γ' ] ctx≤[ Γ'≤Γ ] M ≡⟨ ctx≤[]-compose Γ''≤Γ' Γ'≤Γ M ⟩
-               ctx≤[ ctx≤[ Γ''≤Γ' ] Γ'≤Γ ] M ≈⟨ equiv ⟩
-               embed u                       ∎)
-      where
-        open Equiv-Reasoning _ _
+    kripkeGluingNat {n = `zero}  Γ'≤Γ equiv                = Equiv-Ctx≤ Γ'≤Γ equiv
+    kripkeGluingNat {n = `suc n} Γ'≤Γ (M' , equiv , natM') = ctx≤[ Γ'≤Γ ] M' , Equiv-Ctx≤ Γ'≤Γ equiv , kripkeGluingNat Γ'≤Γ natM'
+    kripkeGluingNat {n = `⇑ x}                             = kripkeGluingTm⊥
 
     kripkeGluingTm : ∀ {M a} (Γ'≤Γ : Γ' Ctx≤ Γ) →
                       Γ ⊢ M `: A ® a →
                      -------------------------------
                       Γ' ⊢ ctx≤[ Γ'≤Γ ] M `: A ® a
-    kripkeGluingTm {A = `N}                                     = kripkeGluingNat
-    kripkeGluingTm {A = A `→ B} {M = M} Γ'≤Γ gM {Γ''} Γ''≤Γ' gN
-      rewrite ctx≤[]-compose Γ''≤Γ' Γ'≤Γ M                      = gM (ctx≤[ Γ''≤Γ' ] Γ'≤Γ) gN
-
-    kripkeGluingTm⊥ : ∀ {M u} (Γ'≤Γ : Γ' Ctx≤ Γ) →
-                       Γ ⊢ M `: A ®⊥ u →
-                      -------------------------------
-                       Γ' ⊢ ctx≤[ Γ'≤Γ ] M `: A ®⊥ u
-    kripkeGluingTm⊥ {M = M} Γ'≤Γ ⊥M Γ''≤Γ'
-      with u , eq , equivA ← ⊥M (ctx≤[ Γ''≤Γ' ] Γ'≤Γ)
-        rewrite ctx≤[]-compose Γ''≤Γ' Γ'≤Γ M = u , eq , equivA
+    kripkeGluingTm {A = `N}                            = kripkeGluingNat
+    kripkeGluingTm {A = A `→ B} {M = M} Γ'≤Γ gM Γ''≤Γ'
+      rewrite ctx≤[]-compose Γ''≤Γ' Γ'≤Γ M             = gM (ctx≤[ Γ''≤Γ' ] Γ'≤Γ)
 
     kripkeGluingSub : ∀ {σ ρ} (Γ'≤Γ : Γ' Ctx≤ Γ) →
                        Γ ⊢s σ `: Δ ® ρ →
                       -------------------------------
                        Γ' ⊢s ctx≤[ Γ'≤Γ ] σ `: Δ ® ρ
-    kripkeGluingSub {Δ = `·}     {σ = `·}     {ρ = tt}    Γ'≤Γ tt        = tt
-    kripkeGluingSub {Δ = Δ `, x} {σ = σ `, M} {ρ = ρ , a} Γ'≤Γ (gσ , ga) = kripkeGluingSub Γ'≤Γ gσ , kripkeGluingTm {M = M} Γ'≤Γ ga
+    kripkeGluingSub {Δ = `·}     {σ = `·}     Γ'≤Γ tt        = tt
+    kripkeGluingSub {Δ = _ `, _} {σ = _ `, M} Γ'≤Γ (gσ , ga) = kripkeGluingSub Γ'≤Γ gσ , kripkeGluingTm {M = M} Γ'≤Γ ga
 
   open KripkeProperty
 
   module EquivRespect where
+    gluing⊥-respects-Equiv : ∀ {M M' u*} →
+                              Γ ⊢ M `: A ®⊥ u* →
+                              Γ ⊢ M ≋ M' `: A →
+                             --------------------
+                              Γ ⊢ M' `: A ®⊥ u*
+    gluing⊥-respects-Equiv ⊥M M≋M' Γ'≤Γ
+      with u , eq , equiv ← ⊥M Γ'≤Γ     = u , eq , `trans (`sym (Equiv-Ctx≤ Γ'≤Γ M≋M')) equiv
+
     gluingNat-respects-Equiv : ∀ {M M' a} →
                                  Γ ⊢ M ®Nat a →
                                  Γ ⊢ M ≋ M' `: `N →
                                 --------------------
                                  Γ ⊢ M' ®Nat a
-    gluingNat-respects-Equiv {a = `zero}  equiv                M≋M'      = `trans (`sym M≋M') equiv
-    gluingNat-respects-Equiv {a = `suc a} (M' , equiv , natM') M≋M'      = M' , `trans (`sym M≋M') equiv , natM'
-    gluingNat-respects-Equiv {a = `⇑ x}   ⊥M                   M≋M' Γ'≤Γ
-      with u , eq , equiv ← ⊥M Γ'≤Γ                                       = u , eq , `trans (`sym (Equiv-Ctx≤ Γ'≤Γ M≋M')) equiv
+    gluingNat-respects-Equiv {a = `zero}  equiv                M≋M' = `trans (`sym M≋M') equiv
+    gluingNat-respects-Equiv {a = `suc a} (M' , equiv , natM') M≋M' = M' , `trans (`sym M≋M') equiv , natM'
+    gluingNat-respects-Equiv {a = `⇑ x}                             = gluing⊥-respects-Equiv
 
     gluingTm-respects-Equiv : ∀ {M M' a} →
                                Γ ⊢ M `: A ® a →
@@ -1099,8 +1119,8 @@ module Soundness where
 
   open EquivRespect
 
-  gluingTm⊥-var : Γ `, A ⊢ `! here `: A ®⊥ Ne*! Γ A
-  gluingTm⊥-var Γ'≤Γ,A
+  gluingTm⊥-var : ∀ A → Γ `, A ⊢ `! here `: A ®⊥ Ne*! Γ A
+  gluingTm⊥-var _ Γ'≤Γ,A
     with eq ← dec-yes-irr (_ Ctx≤? _) Ctx≤-Irrelevant Γ'≤Γ,A
       rewrite eq = `! ctx≤[ Γ'≤Γ,A ] here , refl , Equiv-refl
 
@@ -1109,21 +1129,20 @@ module Soundness where
                    Γ ⊢ N `: A ®⊤ a →
                   ---------------------------------------
                    Γ ⊢ M `$ N `: B ®⊥ (u* Ne*$ ↓[ A ] a)
-  gluingTm⊥-app {a = a} ⊥A→B ⊤A {Γ'} Γ'≤Γ
-    with u , eq , equivA→B ← ⊥A→B Γ'≤Γ
-       | equivA ← ⊤A Γ'≤Γ
-      rewrite eq                       = u `$ ↓[ _ ] a _ , refl , `ξ- equivA→B `$ equivA
+  gluingTm⊥-app ⊥u* ⊤a Γ'≤Γ
+    with u , eq , equivA→B ← ⊥u* Γ'≤Γ
+      rewrite eq            = _ , refl , `ξ- equivA→B `$ ⊤a Γ'≤Γ
 
   module GluingRealizability where
     realizability-nat-top : ∀ {M n} →
                              Γ ⊢ M ®Nat n →
                             ------------------
                              Γ ⊢ M `: `N ®⊤ n
-    realizability-nat-top {M = M} {n = `zero}  equiv                Γ'≤Γ = Equiv-Ctx≤ Γ'≤Γ equiv
-    realizability-nat-top {M = M} {n = `suc n} (M' , equiv , natM') Γ'≤Γ = `trans (Equiv-Ctx≤ Γ'≤Γ equiv) (`ξ- `ξ-`suc `$ realizability-nat-top natM' Γ'≤Γ)
-    realizability-nat-top {M = M} {n = `⇑ x}   ⊥M                   Γ'≤Γ
+    realizability-nat-top {n = `zero}  equiv                Γ'≤Γ = Equiv-Ctx≤ Γ'≤Γ equiv
+    realizability-nat-top {n = `suc n} (M' , equiv , natM') Γ'≤Γ = `trans (Equiv-Ctx≤ Γ'≤Γ equiv) (`ξ- `ξ-`suc `$ realizability-nat-top natM' Γ'≤Γ)
+    realizability-nat-top {n = `⇑ x}   ⊥M                   Γ'≤Γ
       with u , eq , equiv ← ⊥M Γ'≤Γ
-        rewrite eq                                                       = equiv
+        rewrite eq                                               = equiv
 
     realizability-bot : ∀ {M u} →
                          Γ ⊢ M `: A ®⊥ u →
@@ -1134,19 +1153,19 @@ module Soundness where
                         ------------------
                          Γ ⊢ M `: A ®⊤ a
 
-    gluingTm-var : Γ `, A ⊢ `! here `: A ® ↑[ A ] (Ne*! Γ A)
-    gluingTm-var {A = A} = realizability-bot (gluingTm⊥-var {A = A})
+    gluingTm-var : ∀ A → Γ `, A ⊢ `! here `: A ® ↑[ A ] (Ne*! Γ A)
+    gluingTm-var A = realizability-bot (gluingTm⊥-var A)
 
     realizability-bot {A = `N}     ⊥N           = ⊥N
     realizability-bot {A = A `→ B} ⊥A→B Γ'≤Γ gA = realizability-bot (gluingTm⊥-app (kripkeGluingTm⊥ Γ'≤Γ ⊥A→B) (realizability-top gA))
 
-    realizability-top {A = `N}                             = realizability-nat-top
-    realizability-top {A = A `→ B} {M = M} {a = a} gA Γ'≤Γ =
-      begin Γ'⊢M                                        ≈˘⟨ `η-`→ ⟩
-            `λ wk1 Γ'⊢M `$ `! here                      ≡⟨ cong `λ_ (cong (_`$ _) (ctx≤[]-compose (`wk ^id) Γ'≤Γ M)) ⟩
-            `λ Γ',A⊢M `$ `! here                        ≡˘⟨ cong `λ_ (cong (_`$ _) (wk[idWk]⇒id Γ',A⊢M)) ⟩
-            `λ wk[ ^id ] Γ',A⊢M `$ `! here              ≈⟨ `ξ-`λ (realizability-top (gA (`wk Γ'≤Γ) (gluingTm-var {A = A})) ^id) ⟩
-            `λ embed (↓[ B ] (a (↑[ A ] (Ne*! _ A))) _) ∎
+    realizability-top {A = `N}                     = realizability-nat-top
+    realizability-top {A = A `→ B} {M = M} gA Γ'≤Γ =
+      begin Γ'⊢M                           ≈˘⟨ `η-`→ ⟩
+            `λ wk1 Γ'⊢M `$ `! here         ≡⟨ cong (λ x → `λ x `$ _) (ctx≤[]-compose (`wk ^id) Γ'≤Γ M) ⟩
+            `λ Γ',A⊢M `$ `! here           ≡˘⟨ cong (λ x → `λ x `$ _) (wk[id]⇒id Γ',A⊢M) ⟩
+            `λ wk[ ^id ] Γ',A⊢M `$ `! here ≈⟨ `ξ-`λ (realizability-top (gA (`wk Γ'≤Γ) (gluingTm-var A)) ^id) ⟩
+            `λ _                           ∎
       where
         Γ'⊢M = ctx≤[ Γ'≤Γ ] M
         Γ',A⊢M = ctx≤[ `wk Γ'≤Γ ] M
@@ -1156,18 +1175,18 @@ module Soundness where
 
   initial-env-Sub : Γ ⊢s ^id `: Γ ® ↑[ Γ ]
   initial-env-Sub {`·}     = tt
-  initial-env-Sub {Γ `, A} = kripkeGluingSub (`wk ^id) initial-env-Sub , gluingTm-var {A = A}
+  initial-env-Sub {Γ `, A} = kripkeGluingSub (`wk ^id) initial-env-Sub , gluingTm-var A
 
   SoundnessTyping : ∀ Γ A (M : Γ ⊢Tm: A) → Set
   syntax SoundnessTyping Γ A M = Γ ⊨ M `: A
-  SoundnessTyping Γ A M = ∀ Δ σ ρ → Δ ⊢s σ `: Γ ® ρ → Δ ⊢ [ σ ] M `: A ® ⟦ M ⟧ ρ
+  SoundnessTyping Γ A M = ∀ {Δ σ ρ} → Δ ⊢s σ `: Γ ® ρ → Δ ⊢ [ σ ] M `: A ® ⟦ M ⟧ ρ
 
   soundness-fundamental-var : ∀ x → Γ ⊨ `! x `: A
-  soundness-fundamental-var {Γ = Γ `, B} here      Δ (σ `, M) (ρ , a) (gσ , ga) = ga
-  soundness-fundamental-var {Γ = Γ `, B} (there x) Δ (σ `, M) (ρ , a) (gσ , ga) = soundness-fundamental-var x Δ σ ρ gσ
+  soundness-fundamental-var {Γ = Γ `, B} here      {σ = σ `, M} (gσ , ga) = ga
+  soundness-fundamental-var {Γ = Γ `, B} (there x) {σ = σ `, M} (gσ , ga) = soundness-fundamental-var x gσ
 
   soundness-fundamental-rec : SoundnessTyping Γ (A `→ (`N `→ A `→ A) `→ `N `→ A) `rec
-  soundness-fundamental-rec         Δ σ ρ gσ Γ'≤Δ {Z} {z} gz {Γz} Γz≤Γ' {S} {s} gs {Γs} Γs≤Γz {N} {`zero}  equiv                = gluingTm-respects-Equiv (kripkeGluingTm {M = Γz⊢Z} Γs≤Γz (kripkeGluingTm {M = Z} Γz≤Γ' gz))
+  soundness-fundamental-rec         gσ Γ'≤Δ {Z} {z} gz {Γz} Γz≤Γ' {S} {s} gs {Γs} Γs≤Γz {N} {`zero}  equiv                = gluingTm-respects-Equiv (kripkeGluingTm {M = Γz⊢Z} Γs≤Γz (kripkeGluingTm {M = Z} Γz≤Γ' gz))
     (begin Γs⊢Z             ≈˘⟨ `β-`N₀ ⟩
            recbody `$ `zero ≈˘⟨ `ξ- Equiv-refl `$ equiv ⟩
            recbody `$ N     ∎)
@@ -1176,8 +1195,9 @@ module Soundness where
       Γs⊢Z = ctx≤[ Γs≤Γz ] Γz⊢Z
       recbody = `rec `$ Γs⊢Z `$ ctx≤[ Γs≤Γz ] S
       open Equiv-Reasoning _ _
-  soundness-fundamental-rec         Δ σ ρ gσ Γ'≤Δ {Z} {z} gz {Γz} Γz≤Γ' {S} {s} gs {Γs} Γs≤Γz {N} {`suc n} (N' , equiv , natM') = gluingTm-respects-Equiv (gs Γs≤Γz natM' ^id (soundness-fundamental-rec Δ σ ρ gσ Γ'≤Δ gz Γz≤Γ' gs Γs≤Γz natM'))
-    (begin wk[ ^id ] (Γs⊢S `$ N') `$ subrecexp ≡⟨ cong (_`$ subrecexp) (wk[idWk]⇒id (Γs⊢S `$ N')) ⟩
+  soundness-fundamental-rec         gσ Γ'≤Δ {Z} {z} gz {Γz} Γz≤Γ' {S} {s} gs {Γs} Γs≤Γz {N} {`suc n} (N' , equiv , natM')
+    with gsubrecexp ← soundness-fundamental-rec gσ Γ'≤Δ gz Γz≤Γ' gs Γs≤Γz natM'                                           = gluingTm-respects-Equiv (gs Γs≤Γz natM' ^id gsubrecexp)
+    (begin wk[ ^id ] (Γs⊢S `$ N') `$ subrecexp ≡⟨ cong (_`$ subrecexp) (wk[id]⇒id (Γs⊢S `$ N')) ⟩
            Γs⊢S `$ N' `$ subrecexp             ≈˘⟨ `β-`N₁ ⟩
            recbody `$ (`suc `$ N')             ≈˘⟨ `ξ- Equiv-refl `$ equiv ⟩
            recbody `$ N                        ∎)
@@ -1186,41 +1206,38 @@ module Soundness where
       recbody = `rec `$ ctx≤[ Γs≤Γz ] ctx≤[ Γz≤Γ' ] Z `$ Γs⊢S
       subrecexp = recbody `$ N'
       open Equiv-Reasoning Γs _
-  soundness-fundamental-rec {A = A} Δ σ ρ gσ Γ'≤Δ {Z} {z} gz {Γz} Γz≤Γ' {S} {s} gs {Γs} Γs≤Γz {N} {`⇑ u*}  ⊥N                   = realizability-bot rec⊥
+  soundness-fundamental-rec {A = A} gσ Γ'≤Δ {Z} {z} gz {Γz} Γz≤Γ' {S} {s} gs {Γs} Γs≤Γz {N} {`⇑ u*}  ⊥N                   = realizability-bot rec⊥
     where
       Γz⊢Z = ctx≤[ Γz≤Γ' ] Z
-      Γs⊢Z = ctx≤[ Γs≤Γz ] Γz⊢Z
       Γs⊢S = ctx≤[ Γs≤Γz ] S
-      recexp = `rec `$ Γs⊢Z `$ Γs⊢S `$ N
   
-      rec⊥ : Γs ⊢ recexp `: _ ®⊥ Ne*rec (↓[ _ ] z) (↓[ _ ] s) u*
+      rec⊥ : Γs ⊢ `rec `$ ctx≤[ Γs≤Γz ] Γz⊢Z `$ Γs⊢S `$ N `: _ ®⊥ Ne*rec (↓[ _ ] z) (↓[ _ ] s) u*
       rec⊥ Δ≤Γs
         with u , eq , equiv ← ⊥N Δ≤Γs
           rewrite eq = _ , refl , `ξ- `ξ- `ξ- `ξ-`rec `$ equiv-z `$ equiv-s `$ equiv
         where
-          Δ≤Γz = ctx≤[ Δ≤Γs ] Γs≤Γz
+          Δ≤Γz = Δ≤Γs `∘ Γs≤Γz
           Δ⊢S = ctx≤[ Δ≤Γz ] S
-          Δ,N≤Γz = ctx≤[ `wk Δ≤Γs ] Γs≤Γz
-          Δ,N⊢S = ctx≤[ Δ,N≤Γz ] S
+          Δ,N⊢S = ctx≤[ `wk Δ≤Γs `∘ Γs≤Γz ] S
   
           equiv-z =
-            begin ctx≤[ Δ≤Γs ] Γs⊢Z            ≡⟨ ctx≤[]-compose Δ≤Γs Γs≤Γz Γz⊢Z ⟩
-                  ctx≤[ Δ≤Γz ] Γz⊢Z            ≡⟨ ctx≤[]-compose Δ≤Γz Γz≤Γ' Z ⟩
-                  ctx≤[ ctx≤[ Δ≤Γz ] Γz≤Γ' ] Z ≈⟨ realizability-top gz (ctx≤[ Δ≤Γz ] Γz≤Γ') ⟩
-                  embed (↓[ _ ] z _)           ∎
+            begin ctx≤[ Δ≤Γs ] ctx≤[ Γs≤Γz ] Γz⊢Z ≡⟨ ctx≤[]-compose Δ≤Γs Γs≤Γz Γz⊢Z ⟩
+                  ctx≤[ Δ≤Γz ] Γz⊢Z               ≡⟨ ctx≤[]-compose Δ≤Γz Γz≤Γ' Z ⟩
+                  ctx≤[ Δ≤Γz `∘ Γz≤Γ' ] Z         ≈⟨ realizability-top gz (Δ≤Γz `∘ Γz≤Γ') ⟩
+                  embed (↓[ _ ] z _)              ∎
             where
               open Equiv-Reasoning _ _
   
           s`!1 = `! there here
           s`!0 = `! here
-          gs#0#1 = gs Δ,N≤Γz (λ {Δ'} → gluingTm⊥-var {A = `N}) (`wk ^id) (gluingTm-var {A = A})
+          gs#0#1 = gs (`wk Δ≤Γs `∘ Γs≤Γz) (λ {Δ'} → gluingTm⊥-var `N) (`wk ^id) (gluingTm-var A)
   
           equiv-s =
             begin ctx≤[ Δ≤Γs ] Γs⊢S                         ≡⟨ ctx≤[]-compose Δ≤Γs Γs≤Γz S ⟩
                   Δ⊢S                                       ≈˘⟨ `η-`→ ⟩
                   `λ wk1 Δ⊢S `$ `! here                     ≈˘⟨ `ξ-`λ `η-`→ ⟩
                   `λ `λ wk1 wk1 Δ⊢S `$ s`!1 `$ s`!0         ≡⟨ cong (λ x → `λ `λ wk1 x `$ s`!1 `$ s`!0) (ctx≤[]-compose (`wk ^id) Δ≤Γz S) ⟩
-                  `λ `λ wk1 Δ,N⊢S `$ s`!1 `$ s`!0           ≡˘⟨ cong (λ x → `λ `λ x) (wk[idWk]⇒id (wk1 Δ,N⊢S `$ s`!1 `$ s`!0)) ⟩
+                  `λ `λ wk1 Δ,N⊢S `$ s`!1 `$ s`!0           ≡˘⟨ cong (λ x → `λ `λ x) (wk[id]⇒id (wk1 Δ,N⊢S `$ s`!1 `$ s`!0)) ⟩
                   `λ `λ wk[ ^id ] wk1 Δ,N⊢S `$ s`!1 `$ s`!0 ≈⟨ `ξ-`λ (`ξ-`λ (realizability-top gs#0#1 ^id)) ⟩
                   embed (↓[ _ ] s _)                        ∎
             where
@@ -1229,38 +1246,39 @@ module Soundness where
   soundness-fundamental : ∀ M →
                           ------------
                            Γ ⊨ M `: A
-  soundness-fundamental (`! x)   Δ σ ρ gσ                          = soundness-fundamental-var x Δ σ ρ gσ
-  soundness-fundamental `zero    Δ σ ρ gσ                          = Equiv-refl
-  soundness-fundamental `suc     Δ σ ρ gσ Γ'≤Δ {N} ga              = N , Equiv-refl , ga
-  soundness-fundamental `rec     Δ σ ρ gσ                          = soundness-fundamental-rec Δ σ ρ gσ
-  soundness-fundamental (`λ M)   Δ σ ρ gσ Γ'≤Δ {N} ga              = gluingTm-respects-Equiv (soundness-fundamental M _ (Γ'⊢σ `, N) (ρ , _) (kripkeGluingSub Γ'≤Δ gσ , ga))
-    (begin [ Γ'⊢σ `, N ] M                                      ≡˘⟨ cong (λ x → [ x `, _ ] M) ([idSub]⇒id Γ'⊢σ) ⟩
-           [ [ ^id ] Γ'⊢σ `, N ] M                              ≡˘⟨ cong (λ x → [ [ x ] Γ'⊢σ `, _ ] M) ([]-idWk⇒id ^id) ⟩
-           [ [ [ ^id ] idWk ] Γ'⊢σ `, N ] M                     ≡˘⟨ cong (λ x → [ x `, _ ] M) ([]-wk[]-compose (^id `, N) (`wk ^id) Γ'⊢σ) ⟩
-           [ [ N 1] (wk1 Γ'⊢σ) `, N ] M                         ≡˘⟨ []-compose (^id `, N) (^ext Γ'⊢σ) M ⟩
-           [ N 1] [ ^ext Γ'⊢σ ] M                               ≡⟨ cong (λ x → [ N 1] [ x `, `! here ] M) (ctx≤[]-compose (`wk ^id) Γ'≤Δ σ) ⟩
-           [ N 1] [ Γ',A⊢σ `, `! here ] M                       ≡˘⟨ cong (λ x → [ N 1] [ wk[ x ] σ `, `! here ] M) (wk[]-idWk⇒id (fromCtx≤ (`wk Γ'≤Δ))) ⟩
-           [ N 1] [ wk[ ctx≤[ `wk Γ'≤Δ ] ^id ] σ `, `! here ] M ≡˘⟨ cong (λ x → [ N 1] [ x `, `! here ] M) (wk[]-compose Γ',A⊢Δ,A (`wk ^id) σ) ⟩
-           [ N 1] [ wk[ Γ',A⊢Δ,A ] wk1 σ `, `! here ] M         ≡˘⟨ cong ([ N 1]_) (wk[]-[]-compose Γ',A⊢Δ,A (^ext σ) M) ⟩
-           [ N 1] wk[ Γ',A⊢Δ,A ] [ ^ext σ ] M                   ≈˘⟨ `β-`→ ⟩
-           (`λ wk[ Γ',A⊢Δ,A ] [ ^ext σ ] M) `$ N                ∎)
+  soundness-fundamental (`! x)           gσ             = soundness-fundamental-var x gσ
+  soundness-fundamental `zero            gσ             = Equiv-refl
+  soundness-fundamental `suc             gσ Γ'≤Δ {N} ga = N , Equiv-refl , ga
+  soundness-fundamental `rec             gσ             = soundness-fundamental-rec gσ
+  soundness-fundamental (`λ M)   {σ = σ} gσ Γ'≤Δ {N} ga = gluingTm-respects-Equiv (soundness-fundamental M (kripkeGluingSub Γ'≤Δ gσ , ga))
+    (begin [ Γ'⊢σ `, N ] M                                  ≡˘⟨ cong (λ x → [ x `, _ ] M) ([id]⇒id Γ'⊢σ) ⟩
+           [ ^id `∘ Γ'⊢σ `, N ] M                           ≡˘⟨ cong (λ x → [ x `∘ Γ'⊢σ `, _ ] M) ([]-idWk⇒id ^id) ⟩
+           [ ([ ^id ] idWk) `∘ Γ'⊢σ `, N ] M                ≡˘⟨ cong (λ x → [ x `, _ ] M) ([]-wk[]-compose (^id `, N) (`wk ^id) Γ'⊢σ) ⟩
+           [ [ N 1] (wk1 Γ'⊢σ) `, N ] M                     ≡˘⟨ []-compose (^id `, N) (^ext Γ'⊢σ) M ⟩
+           [ N 1] [ ^ext Γ'⊢σ ] M                           ≡⟨ cong (λ x → [ N 1] [ x `, `!0 ] M) (ctx≤[]-compose (`wk ^id) Γ'≤Δ σ) ⟩
+           [ N 1] [ Γ',A⊢σ `, `!0 ] M                       ≡˘⟨ cong (λ x → [ N 1] [ wk[ x ] σ `, `!0 ] M) (`∘-identityʳ (fromCtx≤ (`wk Γ'≤Δ))) ⟩
+           [ N 1] [ wk[ ctx≤[ `wk Γ'≤Δ ] ^id ] σ `, `!0 ] M ≡˘⟨ cong (λ x → [ N 1] [ x `, `!0 ] M) (wk[]-compose Γ',A⊢Δ,A (`wk ^id) σ) ⟩
+           [ N 1] [ wk[ Γ',A⊢Δ,A ] wk1 σ `, `!0 ] M         ≡˘⟨ cong ([ N 1]_) (wk[]-[]-compose Γ',A⊢Δ,A (^ext σ) M) ⟩
+           [ N 1] wk[ Γ',A⊢Δ,A ] [ ^ext σ ] M               ≈˘⟨ `β-`→ ⟩
+           (`λ wk[ Γ',A⊢Δ,A ] [ ^ext σ ] M) `$ N            ∎)
     where
+      `!0 = `! here
       Γ',A⊢σ = ctx≤[ `wk Γ'≤Δ ] σ
       Γ'⊢σ = ctx≤[ Γ'≤Δ ] σ
       Γ',A⊢Δ,A = ^ext (fromCtx≤ Γ'≤Δ)
       open Equiv-Reasoning _ _
-  soundness-fundamental (M `$ N) Δ σ ρ gσ
-    with ⊨M ← soundness-fundamental M Δ σ ρ gσ
-       | ⊨N ← soundness-fundamental N Δ σ ρ gσ
-      with gM$N ← ⊨M ^id ⊨N                                        = subst (λ x → Δ ⊢ x `$ [ σ ] N `: _ ® ⟦ M ⟧ ρ (⟦ N ⟧ ρ)) (wk[idWk]⇒id ([ σ ] M)) gM$N
+  soundness-fundamental (M `$ N) {σ = σ} gσ
+    with ⊨M ← soundness-fundamental M gσ
+       | ⊨N ← soundness-fundamental N gσ
+      with gM$N ← ⊨M ^id ⊨N                             = subst (λ x → _ ⊢ x `$ _ `: _ ® _) (wk[id]⇒id ([ σ ] M)) gM$N
 
   soundness : ∀ {M} →
               ----------------------------
                Γ ⊢ M ≋ embed (nbe M) `: A
   soundness {M = M} =
-    begin M                   ≡˘⟨ [idSub]⇒id M ⟩
-          [ ^id ] M           ≡˘⟨ wk[idWk]⇒id ([ ^id ] M) ⟩
-          wk[ ^id ] [ ^id ] M ≈⟨ realizability-top (soundness-fundamental M _ _ _ initial-env-Sub) `id ⟩
+    begin M                   ≡˘⟨ [id]⇒id M ⟩
+          [ ^id ] M           ≡˘⟨ wk[id]⇒id ([ ^id ] M) ⟩
+          wk[ ^id ] [ ^id ] M ≈⟨ realizability-top (soundness-fundamental M initial-env-Sub) `id ⟩
           embed (nbe M)       ∎
     where
       open Equiv-Reasoning _ _
