@@ -1,5 +1,5 @@
-{-# OPTIONS --overlapping-instances #-}
-module NbE.STLC where
+{-# OPTIONS --backtracking-instance-search #-}
+module NbE.TypedSTLC where
 
 open import Data.Bool
 open import Data.Nat
@@ -16,10 +16,10 @@ open import Relation.Binary.PropositionalEquality hiding ([_])
 import Relation.Binary.Reasoning.Setoid as Setoid-Reasoning
 open import Relation.Binary.Structures
 
+infixr 40 _`→_
 data Ty : Set where
   `N   : Ty
   _`→_ : Ty → Ty → Ty
-infixr 40 _`→_
 
 _Ty≟_ : ∀ (A A' : Ty) →
         ----------------
@@ -29,25 +29,19 @@ _Ty≟_ : ∀ (A A' : Ty) →
 (A `→ B) Ty≟ `N         = no λ ()
 (A `→ B) Ty≟ (A' `→ B') = Dec.map′ (λ{ (refl , refl) → refl }) (λ{ refl → refl , refl }) ((A Ty≟ A') Dec.×-dec (B Ty≟ B'))
 
+infixl 30 _`,_
 data Ctx : Set where
   `·   : Ctx
   _`,_ : Ctx → Ty → Ctx
-infixl 30 _`,_
-pattern `·, A = `· `, A
 
 variable
   Γ Γ' Γ'' Γ₀ Γ₁ Γ₂ Γ₃ Δ Δ' Δ'' Δ₀ Δ₁ Δ₂ Δ₃ Ψ Ψ' Ψ'' Ψ₀ Ψ₁ Ψ₂ Ψ₃ : Ctx
   A A' A'' A₀ A₁ A₂ A₃ B B' B'' B₀ B₁ B₂ B₃ C C' C'' C₀ C₁ C₂ C₃ : Ty
 
+infixl 30 _`,,_
 _`,,_ : Ctx → Ctx → Ctx
 Γ `,, `· = Γ
 Γ `,, (Δ `, A) = (Γ `,, Δ) `, A
-
-infixl 30 _`,,_
-
-`,,-identityʳ : `· `,, Γ ≡ Γ
-`,,-identityʳ {`·}     = refl
-`,,-identityʳ {Γ `, A} = cong (_`, A) `,,-identityʳ
 
 _Ctx≟_ : ∀ (Γ Γ' : Ctx) →
          -----------------
@@ -70,7 +64,7 @@ module _ where
 Γ≢Γ,,Δ,A : ¬ Γ ≡ Γ `,, Γ' `, A
 Γ≢Γ,,Δ,A {Γ = Γ `, B} {Γ' = Γ' `, C} eq
   with eq' , refl ← `,-injective eq
-    rewrite `,,-associative Γ (`·, B) (Γ' `, C) = Γ≢Γ,,Δ,A eq'
+    rewrite `,,-associative Γ (`· `, B) (Γ' `, C) = Γ≢Γ,,Δ,A eq'
 
 data _Include_ : Ctx → Ty → Set
 IncludeSyntax : Ctx → Ty → Set
@@ -83,6 +77,10 @@ data _Include_ where
   there :  A ∈ Γ →
           --------------
            A ∈ Γ `, B
+
+infixr 37 `!_
+infixl 36 _`$_
+infixr 35 `λ_
 
 data _⊢Tm:_ : Ctx → Ty → Set where
   `!_   :  A ∈ Γ →
@@ -106,10 +104,6 @@ data _⊢Tm:_ : Ctx → Ty → Set where
            Γ ⊢Tm: A →
           -----------------
            Γ ⊢Tm: B
-
-infixr 37 `!_
-infixl 36 _`$_
-infixr 35 `λ_
 
 data _Ctx≤_ : Ctx → Ctx → Set where
   `id : ----------
@@ -184,7 +178,7 @@ idWk = ^id
             ¬ Γ Ctx≤ Δ
 Γ≰Γ,,Δ,A                                eq `id      = Γ≢Γ,,Δ,A eq
 Γ≰Γ,,Δ,A {Γ = Γ `, B} {Γ' = Γ'} {A = A} eq (`wk Γ≤)
-  rewrite `,,-associative Γ (`·, B) (Γ' `, A)       = Γ≰Γ,,Δ,A eq Γ≤
+  rewrite `,,-associative Γ (`· `, B) (Γ' `, A)       = Γ≰Γ,,Δ,A eq Γ≤
 
 Ctx≤-Irrelevant : Irrelevant _Ctx≤_
 Ctx≤-Irrelevant `id       `id        = refl
