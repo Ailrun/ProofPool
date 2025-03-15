@@ -1,7 +1,7 @@
 {-# OPTIONS --backtracking-instance-search #-}
 module NbE.STLC where
 
-open import Data.Bool
+open import Data.Bool hiding (T)
 open import Data.Nat hiding (_^_)
 open import Data.Nat.Properties
 open import Data.Product
@@ -16,6 +16,7 @@ open import Relation.Nullary.Decidable as Dec
 open import Relation.Binary.Bundles
 open import Relation.Binary.Definitions
 open import Relation.Binary.PropositionalEquality hiding ([_])
+import Relation.Binary.Reasoning.PartialSetoid as PartialSetoid-Reasoning
 import Relation.Binary.Reasoning.Setoid as Setoid-Reasoning
 open import Relation.Binary.Structures
 
@@ -75,6 +76,24 @@ data Tm : Set where
 
   _`$_  : Tm → Tm → Tm
 
+data Nf : Set
+data Ne : Set
+
+data Nf where
+  `zero : Nf
+  `suc  : Nf → Nf
+
+  `λ_   : Nf → Nf
+
+  `⇑    : Ne → Nf
+
+data Ne where
+  `!_   : ℕ → Ne
+
+  `rec  : Nf → Nf → Ne → Ne
+
+  _`$_  : Ne → Nf → Ne
+
 ------------------------------------------------------------
 -- The Problem of Inductive Reprentations of
 -- Weakenings and Substitutions
@@ -114,10 +133,11 @@ record Ext : Set where
 open Ext
 Sub = ℕ → Tm
 
-infix 30 -`,s_
--`,s_ : Tm → Sub
--`,s_ M zero    = M
--`,s_ _ (suc x) = `! x
+infixl 30 _`,s_
+_`,s_ : Sub → Tm → Sub
+_`,s_ σ M = λ where
+  zero    → M
+  (suc x) → σ x
 
 ext2ren : Ext → Ren
 ext2ren φ = φ .shift +_
@@ -130,6 +150,8 @@ variable
   Γ Γ' Γ'' Γ₀ Γ₁ Γ₂ Γ₃ Δ Δ' Δ'' Δ₀ Δ₁ Δ₂ Δ₃ Ψ Ψ' Ψ'' Ψ₀ Ψ₁ Ψ₂ Ψ₃ : Ctx
   A A' A'' A₀ A₁ A₂ A₃ B B' B'' B₀ B₁ B₂ B₃ C C' C'' C₀ C₁ C₂ C₃ : Ty
   L L' L'' L₀ L₁ L₂ L₃ M M' M'' M₀ M₁ M₂ M₃ N N' N'' N₀ N₁ N₂ N₃ : Tm
+  U U' U'' U₀ U₁ U₂ U₃ V V' V'' V₀ V₁ V₂ V₃ W W' W'' W₀ W₁ W₂ W₃ : Nf
+  R R' R'' R₀ R₁ R₂ R₃ S S' S'' S₀ S₁ S₂ S₃ T T' T'' T₀ T₁ T₂ T₃ : Ne
   δ δ' δ'' δ₀ δ₁ δ₂ δ₃ ε ε' ε'' ε₀ ε₁ ε₂ ε₃ : Ren
   φ φ' φ'' φ₀ φ₁ φ₂ φ₃ γ γ' γ'' γ₀ γ₁ γ₂ γ₃ : Ext
   σ σ' σ'' σ₀ σ₁ σ₂ σ₃ τ τ' τ'' τ₀ τ₁ τ₂ τ₃ : Sub
@@ -162,6 +184,11 @@ ctxLen-`,, (Γ' `, A) = trans (cong suc (ctxLen-`,, Γ')) (sym (+-suc _ (ctxLen 
 Γ≢Γ,,Δ,A {Γ = Γ `, B} {Γ' = Γ' `, C} eq
   with eq' , refl ← `,-injective eq
     rewrite `,,-associative Γ (`· `, B) (Γ' `, C) = Γ≢Γ,,Δ,A eq'
+
+`,s-≈-cong : σ ≈ τ → M ≡ N → σ `,s M ≈ τ `,s N
+`,s-≈-cong equiv refl = λ where
+  zero    → refl
+  (suc x) → equiv _
 
 infix 25 IncludeSyntax
 data _Include_`:_ : Ctx → ℕ → Ty → Set
@@ -223,13 +250,14 @@ _⊢s_`:_ = Wrap (λ Γ σ Δ → ∀ {A x} → x `: A ∈ Δ → Γ ⊢ σ x `:
 ⊢sub : (∀ {A x} → x `: A ∈ Δ → Γ ⊢ σ x `: A) → Γ ⊢s σ `: Δ
 ⊢sub = W[_]
 
-infix 30 ⊢-`,s_
-⊢-`,s_ :  Γ ⊢ M `: A →
-         -----------------------
-          Γ ⊢s -`,s M `: Γ `, A
-⊢-`,s ⊢M = ⊢sub λ where
+infixl 30 ⊢s_`,s_
+⊢s_`,s_ :  Γ ⊢s σ `: Δ →
+           Γ ⊢ M `: A →
+          ------------------------
+           Γ ⊢s σ `,s M `: Δ `, A
+⊢s ⊢σ `,s ⊢M = ⊢sub λ where
   here        → ⊢M
-  (there x∈Γ) → `! x∈Γ
+  (there x∈Γ) → ⊢σ .get x∈Γ
 
 ⊢ext2ren :  Γ ⊢e φ `: Δ →
            ---------------------
@@ -309,6 +337,24 @@ instance
   ⊢^ext ⦃ ⊢CtxExtRen ⦄ ⊢δ = ⊢ren λ where
       here        → here
       (there x∈Δ) → there (⊢δ .get x∈Δ)
+
+idRen : Ren
+idRen = ^id
+
+idSub : Sub
+idSub = ^id
+
+infix 30 -`,s_
+-`,s_ : Tm → Sub
+-`,s_ M = ^id `,s M
+
+infix 30 ⊢s-`,s_
+⊢s-`,s_ :  Γ ⊢ M `: A →
+          -----------------------
+           Γ ⊢s -`,s M `: Γ `, A
+⊢s-`,s ⊢M = ⊢sub λ where
+  here        → ⊢M
+  (there x∈Γ) → `! x∈Γ
 
 Ren^ext^id≈^id : ^ext ^id ≈ ^id ⦃ CtxIdRen ⦄
 Ren^ext^id≈^id zero    = refl
@@ -421,6 +467,16 @@ instance
   ⊢AppRenSub : ⊢AppRen Sub
   ⊢ren[_]_ ⦃ ⊢AppRenSub ⦄ ⊢δ ⊢σ = ⊢sub (⊢ren[ ⊢δ ]_ ∘ ⊢σ .get)
 
+ren[]-distrib-`,s : ren[ δ ] (σ `,s M) ≈ ren[ δ ] σ `,s ren[ δ ] M
+ren[]-distrib-`,s zero    = refl
+ren[]-distrib-`,s (suc x) = refl
+
+ren[]Ren-≈-cong : δ ≈ δ' → ren[ ε ] δ ≈ ren[ ε ] δ'
+ren[]Ren-≈-cong {ε = ε} equiv = cong ε ∘ equiv
+
+ren[]Sub-≈-cong : σ ≈ σ' → ren[ δ ] σ ≈ ren[ δ ] σ'
+ren[]Sub-≈-cong {δ = δ} equiv = cong ren[ δ ]_ ∘ equiv
+
 ren[^ext]^ext≈^extren[]Ren : ren[ ^ext δ ] (^ext ε) ≈ ^ext (ren[ δ ] ε)
 ren[^ext]^ext≈^extren[]Ren zero    = refl
 ren[^ext]^ext≈^extren[]Ren (suc x) = refl
@@ -449,22 +505,21 @@ ren[id]Sub⇒≈ _ = ren[id]⇒id
 
 instance
   CtxExtSub : CtxExt Sub
-  ^ext ⦃ CtxExtSub ⦄ σ zero    = `! zero
-  ^ext ⦃ CtxExtSub ⦄ σ (suc x) = wk1 (σ x)
+  ^ext ⦃ CtxExtSub ⦄ σ = wk1 σ `,s `! zero
 
   ⊢CtxExtSub : ⊢CtxExt Sub
-  ⊢^ext ⦃ ⊢CtxExtSub ⦄ ⊢σ = ⊢sub λ where
-      here        → `! here
-      (there x∈Δ) → ⊢wk1 (⊢σ .get x∈Δ)
+  ⊢^ext ⦃ ⊢CtxExtSub ⦄ ⊢σ = ⊢s ⊢wk1 ⊢σ `,s `! here 
 
 Sub^ext^id≈^id : ^ext ^id ≈ ^id ⦃ CtxIdSub ⦄
 Sub^ext^id≈^id zero    = refl
 Sub^ext^id≈^id (suc _) = refl
 
-Sub^ext-respects-≈ : σ ≈ τ → ^ext σ ≈ ^ext τ
-Sub^ext-respects-≈ equiv = λ where
-  zero    → refl
-  (suc x) → cong wk1_ (equiv x)
+Sub^ext-≈-cong : σ ≈ τ → ^ext σ ≈ ^ext τ
+Sub^ext-≈-cong equiv = `,s-≈-cong (ren[]Sub-≈-cong equiv) refl
+
+ren2sub-^ext : ∀ δ → ren2sub (^ext δ) ≈ ^ext (ren2sub δ)
+ren2sub-^ext δ zero    = refl
+ren2sub-^ext δ (suc x) = refl
 
 record AppSub (X : Set) : Set₁ where
   infixr 40 [_]_
@@ -485,7 +540,7 @@ record ⊢AppSub X {Y} ⦃ AppSubX : AppSub X ⦄ ⦃ ⊢ClassX : ⊢Class X Y �
 
   infixr 40 ⊢[_1]_
   ⊢[_1]_ : ∀ {x : X} {y : Y} → Γ ⊢ L `: A → ⊢Judgement (Γ `, A) x y → ⊢Judgement Γ ([ L 1] x) y
-  ⊢[ ⊢L 1] ⊢x = ⊢[ ⊢-`,s ⊢L ] ⊢x
+  ⊢[ ⊢L 1] ⊢x = ⊢[ ⊢s-`,s ⊢L ] ⊢x
 open ⊢AppSub ⦃...⦄
 
 record AppSubEquiv⇒Eq X ⦃ AppSubX : AppSub X ⦄ : Set where
@@ -541,7 +596,7 @@ instance
   [≈]⇒≡ ⦃ AppSubEquiv⇒EqTm ⦄ `zero    equiv = refl
   [≈]⇒≡ ⦃ AppSubEquiv⇒EqTm ⦄ `suc     equiv = refl
   [≈]⇒≡ ⦃ AppSubEquiv⇒EqTm ⦄ `rec     equiv = refl
-  [≈]⇒≡ ⦃ AppSubEquiv⇒EqTm ⦄ (`λ M)   equiv = cong `λ_ ([≈]⇒≡ M (Sub^ext-respects-≈ equiv))
+  [≈]⇒≡ ⦃ AppSubEquiv⇒EqTm ⦄ (`λ M)   equiv = cong `λ_ ([≈]⇒≡ M (Sub^ext-≈-cong equiv))
   [≈]⇒≡ ⦃ AppSubEquiv⇒EqTm ⦄ (M `$ N) equiv = cong₂ _`$_ ([≈]⇒≡ M equiv) ([≈]⇒≡ N equiv)
 
   AppSubId⇒IdTm : AppSubId⇒Id Tm
@@ -571,6 +626,12 @@ instance
   ⊢AppSubSub : ⊢AppSub Sub
   ⊢[_]_ ⦃ ⊢AppSubSub ⦄ ⊢σ ⊢τ = ⊢sub (⊢[ ⊢σ ]_ ∘ ⊢τ .get)
 
+[]Ren-≈-cong : δ ≈ δ' → [ σ ] δ ≈ [ σ ] δ'
+[]Ren-≈-cong {σ = σ} equiv = cong σ ∘ equiv
+
+[]Sub-≈-cong : σ ≈ σ' → [ τ ] σ ≈ [ τ ] σ'
+[]Sub-≈-cong {τ = τ} equiv = cong [ τ ]_ ∘ equiv
+
 [≈]Ren⇒≈ : σ ≈ τ → [ σ ] δ' ≈ [ τ ] δ'
 [≈]Ren⇒≈ equiv _ = equiv _
 
@@ -580,41 +641,16 @@ instance
 [id]Sub⇒≈ : [ ^id ] σ ≈ σ
 [id]Sub⇒≈ _ = [id]⇒id
 
+[]-distrib-`,s : [ σ ] (τ `,s M) ≈ [ σ ] τ `,s [ σ ] M
+[]-distrib-`,s zero    = refl
+[]-distrib-`,s (suc x) = refl
+
 record AppRenCompose X ⦃ AppRenX : AppRen X ⦄ : Set where
   field
     ren[]-compose : ∀ δ ε (x : X) →
                     -------------------------------------------
                      ren[ δ ] ren[ ε ] x ≡ ren[ ren[ δ ] ε ] x
-
-record AppSubRenCompose X ⦃ AppRenX : AppRen X ⦄ ⦃ AppSubX : AppSub X ⦄ ⦃ AppRenXOutput : AppRen (AppSubResult ⦃ AppSubX ⦄) ⦄ : Set where
-  field
-    ren[]-[]-compose : ∀ δ σ (x : X) →
-                       -------------------------------------
-                        ren[ δ ] [ σ ] x ≡ [ ren[ δ ] σ ] x
-
-record AppRenSubCompose X ⦃ AppRenX : AppRen X ⦄ ⦃ AppSubX : AppSub X ⦄ : Set where
-  field
-    []-ren[]-compose : ∀ σ δ (x : X) →
-                       ----------------------------------
-                        [ σ ] ren[ δ ] x ≡ [ [ σ ] δ ] x
-
-record AppSubCompose X ⦃ AppSubX : AppSub X ⦄  ⦃ AppSubXOutput : AppSub (AppSubResult ⦃ AppSubX ⦄) ⦄ : Set where
-  field
-    []-compose : ∀ σ τ (x : X) →
-                 -------------------------------------------------
-                  [ σ ] [ τ ] x ≡ AppSubResultMap ([ [ σ ] τ ] x)
-
-record CompatibleSubRen X ⦃ AppRenX : AppRen X ⦄ ⦃ AppSubX : AppSub X ⦄ : Set where
-  field
-    compatible-Sub-Ren : ∀ δ (x : X) →
-                         ------------------------------------------------
-                          [ ren2sub δ ] x ≡ AppSubResultMap (ren[ δ ] x)
-
 open AppRenCompose ⦃...⦄
-open AppSubRenCompose ⦃...⦄
-open AppRenSubCompose ⦃...⦄
-open AppSubCompose ⦃...⦄
-open CompatibleSubRen ⦃...⦄
 instance
   AppRenComposeVar : AppRenCompose ℕ
   ren[]-compose ⦃ AppRenComposeVar ⦄ _ _ _ = refl
@@ -636,23 +672,22 @@ ren[]Sub-composeEquiv : ∀ δ ε (σ : Sub) →
 ren[]Sub-composeEquiv δ ε = ren[]-compose δ ε ∘_
 
 ren[^ext]wk1≈wk1ren[]Tm : ren[ ^ext δ ] (wk1 M) ≡ wk1 (ren[ δ ] M)
-ren[^ext]wk1≈wk1ren[]Tm {M = `! x} = refl
-ren[^ext]wk1≈wk1ren[]Tm {M = `zero} = refl
-ren[^ext]wk1≈wk1ren[]Tm {M = `suc} = refl
-ren[^ext]wk1≈wk1ren[]Tm {M = `rec} = refl
-ren[^ext]wk1≈wk1ren[]Tm {M = `λ M} = cong `λ_
-  (begin ren[ ^ext (^ext _) ] ren[ ^ext suc ] M ≡⟨ ren[]-compose (^ext (^ext _)) (^ext suc) M ⟩
-         ren[ ren[ ^ext (^ext _) ] ^ext suc ] M ≡⟨ ren[≈]⇒≡ M ren[^ext]^ext≈^extren[]Ren ⟩
-         ren[ ^ext (ren[ suc ] _) ] M           ≡˘⟨ ren[≈]⇒≡ M ren[^ext]^ext≈^extren[]Ren ⟩
-         ren[ ren[ ^ext suc ] ^ext _ ] M        ≡˘⟨ ren[]-compose (^ext suc) (^ext _) M ⟩
-         ren[ ^ext suc ] ren[ ^ext _ ] M        ∎)
+ren[^ext]wk1≈wk1ren[]Tm {M = M} =
+  begin ren[ ^ext _ ] ren[ suc ] M ≡⟨ ren[]-compose (^ext _) suc M ⟩
+        ren[ wk1 _ ] M             ≡˘⟨ ren[]-compose suc _ M ⟩
+        ren[ suc ] ren[ _ ] M      ∎
   where
     open ≡-Reasoning
-ren[^ext]wk1≈wk1ren[]Tm {M = M `$ N} = cong₂ _`$_ ren[^ext]wk1≈wk1ren[]Tm ren[^ext]wk1≈wk1ren[]Tm
 
 ren[^ext]^ext≈^extren[]Sub : ren[ ^ext δ ] (^ext σ) ≈ ^ext (ren[ δ ] σ)
-ren[^ext]^ext≈^extren[]Sub zero    = refl
-ren[^ext]^ext≈^extren[]Sub (suc x) = ren[^ext]wk1≈wk1ren[]Tm
+ren[^ext]^ext≈^extren[]Sub = ≈-trans ren[]-distrib-`,s (`,s-≈-cong (λ _ → ren[^ext]wk1≈wk1ren[]Tm) refl)
+
+record AppSubRenCompose X ⦃ AppRenX : AppRen X ⦄ ⦃ AppSubX : AppSub X ⦄ ⦃ AppRenXOutput : AppRen (AppSubResult ⦃ AppSubX ⦄) ⦄ : Set where
+  field
+    ren[]-[]-compose : ∀ δ σ (x : X) →
+                       -------------------------------------
+                        ren[ δ ] [ σ ] x ≡ [ ren[ δ ] σ ] x
+open AppSubRenCompose ⦃...⦄
 
 instance
   AppSubRenComposeVar : AppSubRenCompose ℕ
@@ -683,6 +718,13 @@ ren[]-[]Sub-compose-Equiv δ σ = ren[]-[]-compose δ σ ∘_
 [^ext]^ext≈^ext[]Ren zero    = refl
 [^ext]^ext≈^ext[]Ren (suc x) = refl
 
+record AppRenSubCompose X ⦃ AppRenX : AppRen X ⦄ ⦃ AppSubX : AppSub X ⦄ : Set where
+  field
+    []-ren[]-compose : ∀ σ δ (x : X) →
+                       ----------------------------------
+                        [ σ ] ren[ δ ] x ≡ [ [ σ ] δ ] x
+open AppRenSubCompose ⦃...⦄
+
 instance
   AppRenSubComposeVar : AppRenSubCompose ℕ
   []-ren[]-compose ⦃ AppRenSubComposeVar ⦄ _ _ _ = refl
@@ -708,292 +750,281 @@ instance
                              [ σ ] ren[ δ ] τ ≈ [ [ σ ] δ ] τ
 []-ren[]Sub-compose-Equiv σ δ = []-ren[]-compose σ δ ∘_
 
---   CompatibleSubRenVar : CompatibleSubRen (_Include A)
---   compatible-Sub-Ren ⦃ CompatibleSubRenVar ⦄ (`wk δ) x          =
---     begin [ wk1 (fromRen δ) ] x           ≡˘⟨ ren[]-[]-compose (`wk ^id) (fromRen δ) x ⟩
---           wk1 [ fromRen δ ] x             ≡⟨ cong wk1_ (compatible-Sub-Ren δ x) ⟩
---           `! there (ren[ ^id ] ren[ δ ] x) ≡⟨ cong `!_ (cong there (ren[id]⇒id (ren[ δ ] x))) ⟩
---           `! there (ren[ δ ] x)           ∎
---     where
---       open ≡-Reasoning
---   compatible-Sub-Ren ⦃ CompatibleSubRenVar ⦄ (`ext δ) here      = refl
---   compatible-Sub-Ren ⦃ CompatibleSubRenVar ⦄ (`ext δ) (there x) =
---     begin [ wk1 (fromRen δ) ] x           ≡˘⟨ ren[]-[]-compose (`wk ^id) (fromRen δ) x ⟩
---           wk1 [ fromRen δ ] x             ≡⟨ cong wk1_ (compatible-Sub-Ren δ x) ⟩
---           `! there (ren[ ^id ] ren[ δ ] x) ≡⟨ cong `!_ (cong there (ren[id]⇒id (ren[ δ ] x))) ⟩
---           `! there (ren[ δ ] x)           ∎
---     where
---       open ≡-Reasoning
+[`,s]wk1≡[]Tm : ∀ (M : Tm) → [ σ `,s N ] (wk1 M) ≡ [ σ ] M
+[`,s]wk1≡[]Tm M = []-ren[]-compose (_ `,s _) suc M
 
---   CompatibleSubRenTm : CompatibleSubRen (_⊢Tm: A)
---   compatible-Sub-Ren ⦃ CompatibleSubRenTm ⦄ δ (`! x)   = compatible-Sub-Ren δ x
---   compatible-Sub-Ren ⦃ CompatibleSubRenTm ⦄ δ `zero    = refl
---   compatible-Sub-Ren ⦃ CompatibleSubRenTm ⦄ δ `suc     = refl
---   compatible-Sub-Ren ⦃ CompatibleSubRenTm ⦄ δ `rec     = refl
---   compatible-Sub-Ren ⦃ CompatibleSubRenTm ⦄ δ (`λ M)   = cong `λ_ (compatible-Sub-Ren (`ext δ) M)
---   compatible-Sub-Ren ⦃ CompatibleSubRenTm ⦄ δ (M `$ N) = cong₂ _`$_ (compatible-Sub-Ren δ M) (compatible-Sub-Ren δ N)
+[`,s]wk1≡[]Sub : ∀ (τ : Sub) → [ σ `,s N ] (wk1 τ) ≈ [ σ ] τ
+[`,s]wk1≡[]Sub τ = []-ren[]Sub-compose-Equiv (_ `,s _) suc τ
 
---   CompatibleSubRenSub : CompatibleSubRen (_⊢Sub: Ψ)
---   compatible-Sub-Ren ⦃ CompatibleSubRenSub ⦄ δ `·       = refl
---   compatible-Sub-Ren ⦃ CompatibleSubRenSub ⦄ δ (σ `, M) = cong₂ _`,_ (compatible-Sub-Ren δ σ) (compatible-Sub-Ren δ M)
+[^ext]wk1≈wk1[]Tm : ∀ (M : Tm) → [ ^ext σ ] (wk1 M) ≡ wk1 ([ σ ] M)
+[^ext]wk1≈wk1[]Tm M = trans ([`,s]wk1≡[]Tm M) (sym (ren[]-[]-compose suc _ M))
 
---   AppSubComposeVar : AppSubCompose (_Include A)
---   []-compose ⦃ AppSubComposeVar ⦄ σ (τ `, M) here      = refl
---   []-compose ⦃ AppSubComposeVar ⦄ σ (τ `, M) (there x) = []-compose σ τ x
+[^ext]^ext≈^ext[]Sub : [ ^ext σ ] (^ext τ) ≈ ^ext ([ σ ] τ)
+[^ext]^ext≈^ext[]Sub {τ = τ} = ≈-trans []-distrib-`,s (`,s-≈-cong ([^ext]wk1≈wk1[]Tm ∘ τ) refl)
 
---   AppSubComposeTm : AppSubCompose (_⊢Tm: A)
---   []-compose ⦃ AppSubComposeTm ⦄ σ τ (`! x)   = []-compose σ τ x
---   []-compose ⦃ AppSubComposeTm ⦄ σ τ `zero    = refl
---   []-compose ⦃ AppSubComposeTm ⦄ σ τ `suc     = refl
---   []-compose ⦃ AppSubComposeTm ⦄ σ τ `rec     = refl
---   []-compose ⦃ AppSubComposeTm ⦄ σ τ (`λ M)   = cong `λ_
---     (begin [ ^ext σ ] [ ^ext τ ] M               ≡⟨ []-compose (^ext σ) (^ext τ) M ⟩
---            [ [ ^ext σ ] wk1 τ `, `! here ] M     ≡⟨ cong (λ x → [ x `, _ ] M) ([]-ren[]-compose (^ext σ) (`wk ^id) τ) ⟩
---            [ [ [ wk1 σ ] idRen ] τ `, `! here ] M ≡⟨ cong (λ x → [ x `, _ ] M) (cong ([_] τ) ([]-idRen⇒id (wk1 σ))) ⟩
---            [ [ wk1 σ ] τ `, `! here ] M          ≡˘⟨ cong (λ x → [ x `, _ ] M) (ren[]-[]-compose (`wk ^id) σ τ) ⟩
---            [ ^ext ([ σ ] τ) ] M                  ∎)
---     where
---       open ≡-Reasoning
---   []-compose ⦃ AppSubComposeTm ⦄ σ τ (M `$ N) = cong₂ _`$_ ([]-compose σ τ M) ([]-compose σ τ N)
+record AppSubCompose X ⦃ AppSubX : AppSub X ⦄  ⦃ AppSubXOutput : AppSub (AppSubResult ⦃ AppSubX ⦄) ⦄ : Set where
+  field
+    []-compose : ∀ σ τ (x : X) →
+                 -------------------------------------------------
+                  [ σ ] [ τ ] x ≡ AppSubResultMap ([ [ σ ] τ ] x)
+open AppSubCompose ⦃...⦄
 
---   CtxComposeIdentitySub : CtxComposeIdentity _⊢Sub:_
---   `∘-identityʳ ⦃ CtxComposeIdentitySub ⦄ `·       = refl
---   `∘-identityʳ ⦃ CtxComposeIdentitySub ⦄ (σ `, M) = cong (_`, _)
---     (begin [ σ `, M ] wk1 idSub         ≡⟨ []-ren[]-compose (σ `, M) (`wk ^id) idSub ⟩
---            [ [ σ `, M ] `wk ^id ] idSub ≡⟨ cong ([_] idSub) ([]-idRen⇒id σ) ⟩
---            [ σ ] idSub                  ≡⟨ `∘-identityʳ σ ⟩
---            σ ∎)
---     where
---       open ≡-Reasoning
+instance
+  AppSubComposeVar : AppSubCompose ℕ
+  []-compose ⦃ AppSubComposeVar ⦄ _ _ _ = refl
 
--- idSub≡fromRen-idRen : ∀ {Γ} →
---                     -----------------------------
---                      idSub {Γ = Γ} ≡ fromRen idRen
--- idSub≡fromRen-idRen {`·}     = refl
--- idSub≡fromRen-idRen {Γ `, A} = cong (_`, `! here) (cong wk1_ idSub≡fromRen-idRen)
+  AppSubComposeTm : AppSubCompose Tm
+  []-compose ⦃ AppSubComposeTm ⦄ σ τ (`! x)   = []-compose σ τ x
+  []-compose ⦃ AppSubComposeTm ⦄ σ τ `zero    = refl
+  []-compose ⦃ AppSubComposeTm ⦄ σ τ `suc     = refl
+  []-compose ⦃ AppSubComposeTm ⦄ σ τ `rec     = refl
+  []-compose ⦃ AppSubComposeTm ⦄ σ τ (`λ M)   = cong `λ_
+    (begin [ ^ext σ ] [ ^ext τ ] M ≡⟨ []-compose (^ext σ) (^ext τ) M ⟩
+           [ [ ^ext σ ] ^ext τ ] M ≡⟨ [≈]⇒≡ M [^ext]^ext≈^ext[]Sub ⟩
+           [ ^ext ([ σ ] τ) ] M    ∎)
+    where
+      open ≡-Reasoning
+  []-compose ⦃ AppSubComposeTm ⦄ σ τ (M `$ N) = cong₂ _`$_ ([]-compose σ τ M) ([]-compose σ τ N)
 
--- [id]⇒id : ∀ {F}
---             ⦃ AppRenF : AppRen F ⦄
---             ⦃ AppSubF : AppSub F ⦄
---             ⦃ AppIdRen⇒IdF : AppIdRen⇒Id F ⦄
---             ⦃ CompatibleSubRenF : CompatibleSubRen F ⦄
---             (x : F Γ) →
---           -------------------------------------------
---            [ ^id ] x ≡ AppSubResultMap x
--- [id]⇒id x =
---   begin [ ^id ] x                     ≡⟨ cong ([_] x) idSub≡fromRen-idRen ⟩
---         [ fromRen ^id ] x              ≡⟨ compatible-Sub-Ren idRen x ⟩
---         AppSubResultMap (ren[ ^id ] x) ≡⟨ cong AppSubResultMap (ren[id]⇒id x) ⟩
---         AppSubResultMap x             ∎
---   where
---     open ≡-Reasoning
+  AppSubComposeRen : AppSubCompose Ren
+  []-compose ⦃ AppSubComposeRen ⦄ σ τ δ = refl
 
--- ctx≤[]-fromCtx≤-commute : ∀ (Γ''≤Γ' : Γ'' Ctx≤ Γ')
---                             (Γ'≤Γ : Γ' Ctx≤ Γ) →
---                           -----------------------------------------------------------------
---                            fromCtx≤ (ctx≤[ Γ''≤Γ' ] Γ'≤Γ) ≡ ctx≤[ Γ''≤Γ' ] (fromCtx≤ Γ'≤Γ)
--- ctx≤[]-fromCtx≤-commute `id          Γ'≤Γ = sym (ren[id]⇒id (fromCtx≤ Γ'≤Γ))
--- ctx≤[]-fromCtx≤-commute (`wk Γ''≤Γ') Γ'≤Γ = cong `wk (ctx≤[]-fromCtx≤-commute Γ''≤Γ' Γ'≤Γ)
+[]Sub-compose-Equiv : ∀ σ τ (σ' : Sub) →
+                      ---------------------------------
+                       [ σ ] [ τ ] σ' ≈ [ [ σ ] τ ] σ'
+[]Sub-compose-Equiv σ τ σ' = []-compose σ τ ∘ σ'
 
--- ctx≤[]-compose : ∀ {F}
---                    ⦃ AppRenF : AppRen F ⦄
---                    ⦃ AppRenComposeF : AppRenCompose F ⦄
---                    (Γ''≤Γ' : Γ'' Ctx≤ Γ')
---                    (Γ'≤Γ : Γ' Ctx≤ Γ)
---                    (x : F Γ) →
---                  ---------------------------------------------------------------
---                   ctx≤[ Γ''≤Γ' ] ctx≤[ Γ'≤Γ ] x ≡ ctx≤[ ctx≤[ Γ''≤Γ' ] Γ'≤Γ ] x
--- ctx≤[]-compose Γ''≤Γ' Γ'≤Γ x =
---   begin ctx≤[ Γ''≤Γ' ] ctx≤[ Γ'≤Γ ] x        ≡⟨ ren[]-compose (fromCtx≤ Γ''≤Γ') (fromCtx≤ Γ'≤Γ) x ⟩
---         ren[ ctx≤[ Γ''≤Γ' ] fromCtx≤ Γ'≤Γ ] x ≡˘⟨ cong (ren[_] x) (ctx≤[]-fromCtx≤-commute Γ''≤Γ' Γ'≤Γ) ⟩
---         ctx≤[ Γ''≤Γ' `∘ Γ'≤Γ ] x             ∎
---   where
---     open ≡-Reasoning
+record CompatibleSubRen X ⦃ AppRenX : AppRen X ⦄ ⦃ AppSubX : AppSub X ⦄ : Set where
+  field
+    compatible-Sub-Ren : ∀ δ (x : X) →
+                         ------------------------------------------------
+                          [ ren2sub δ ] x ≡ AppSubResultMap (ren[ δ ] x)
+open CompatibleSubRen ⦃...⦄
 
--- data Equiv : (Γ : Ctx) → (A : Ty) → Γ ⊢Tm: A → Γ ⊢Tm: A → Set
+instance
+  CompatibleSubRenVar : CompatibleSubRen ℕ
+  compatible-Sub-Ren ⦃ CompatibleSubRenVar ⦄ δ x = refl
 
--- syntax Equiv Γ A M M' = Γ ⊢ M ≋ M' `: A
+  CompatibleSubRenTm : CompatibleSubRen Tm
+  compatible-Sub-Ren ⦃ CompatibleSubRenTm ⦄ δ (`! x)   = compatible-Sub-Ren δ x
+  compatible-Sub-Ren ⦃ CompatibleSubRenTm ⦄ δ `zero    = refl
+  compatible-Sub-Ren ⦃ CompatibleSubRenTm ⦄ δ `suc     = refl
+  compatible-Sub-Ren ⦃ CompatibleSubRenTm ⦄ δ `rec     = refl
+  compatible-Sub-Ren ⦃ CompatibleSubRenTm ⦄ δ (`λ M)   = cong `λ_ (trans (sym ([≈]⇒≡ M (ren2sub-^ext δ))) (compatible-Sub-Ren (^ext δ) M))
+  compatible-Sub-Ren ⦃ CompatibleSubRenTm ⦄ δ (M `$ N) = cong₂ _`$_ (compatible-Sub-Ren δ M) (compatible-Sub-Ren δ N)
 
--- data Equiv where
---   `β-`→    : ∀ {M : Γ `, A ⊢Tm: B}
---                {N : Γ ⊢Tm: A} →
---              -----------------------------------
---               Γ ⊢ (`λ M) `$ N ≋ [ N 1] M `: B
+  CompatibleSubRenRen : CompatibleSubRen Ren
+  compatible-Sub-Ren ⦃ CompatibleSubRenRen ⦄ δ ε = refl
 
---   `β-`N₀   : ∀ {M N} →
---              --------------------------------------
---               Γ ⊢ `rec `$ M `$ N `$ `zero ≋ M `: A
+compatible-Sub-RenSub-Equiv : ∀ δ (σ : Sub) →
+                              ------------------------------
+                               [ ren2sub δ ] σ ≈ ren[ δ ] σ
+compatible-Sub-RenSub-Equiv δ = compatible-Sub-Ren δ ∘_
 
---   `β-`N₁   : ∀ {M N L} →
---              --------------------------------------------------------------------------
---               Γ ⊢ `rec `$ M `$ N `$ (`suc `$ L) ≋ N `$ L `$ (`rec `$ M `$ N `$ L) `: A
+data _⊢_≋_`:_ : Ctx → Tm → Tm → Ty → Set where
+  `β-`→    : ∀ {M N} →
+              Γ `, A ⊢ M `: B →
+              Γ ⊢ N `: A →
+             ---------------------------------
+              Γ ⊢ (`λ M) `$ N ≋ [ N 1] M `: B
 
---   `η-`→    : ∀ {M} →
---              ---------------------------------------------------
---               Γ ⊢ `λ wk1 M `$ `! here ≋ M `: A `→ B
+  `β-`N₀   : ∀ {M N} →
+              Γ ⊢ M `: A →
+              Γ ⊢ N `: `N `→ A `→ A →
+             --------------------------------------
+              Γ ⊢ `rec `$ M `$ N `$ `zero ≋ M `: A
 
---   `ξ-`!    : ∀ {x} →
---              -------------------------
---               Γ ⊢ `! x ≋ `! x `: A
+  `β-`N₁   : ∀ {M N L} →
+              Γ ⊢ M `: A →
+              Γ ⊢ N `: `N `→ A `→ A →
+              Γ ⊢ L `: `N →
+             --------------------------------------------------------------------------
+              Γ ⊢ `rec `$ M `$ N `$ (`suc `$ L) ≋ N `$ L `$ (`rec `$ M `$ N `$ L) `: A
 
---   `ξ-`zero : -------------------------
---               Γ ⊢ `zero ≋ `zero `: `N
+  `η-`→    : ∀ {M} →
+              Γ ⊢ M `: A `→ B →
+             ------------------------------------
+              Γ ⊢ `λ wk1 M `$ `! 0 ≋ M `: A `→ B
 
---   `ξ-`suc  : -----------------------------
---               Γ ⊢ `suc ≋ `suc `: `N `→ `N
+  `ξ-`!    : ∀ {x} →
+              x `: A ∈ Γ →
+             -------------------------
+              Γ ⊢ `! x ≋ `! x `: A
 
---   `ξ-`rec  : ---------------------------------------------------
---               Γ ⊢ `rec ≋ `rec `: A `→ (`N `→ A `→ A) `→ `N `→ A
+  `ξ-`zero : -------------------------
+              Γ ⊢ `zero ≋ `zero `: `N
 
---   `ξ-`λ_   : ∀ {M M'} →
---               Γ `, A ⊢ M ≋ M' `: B →
---              ----------------------------
---               Γ ⊢ `λ M ≋ `λ M' `: A `→ B
+  `ξ-`suc  : -----------------------------
+              Γ ⊢ `suc ≋ `suc `: `N `→ `N
 
---   `ξ-_`$_  : ∀ {M M' N N'} →
---               Γ ⊢ M ≋ M' `: A `→ B →
---               Γ ⊢ N ≋ N' `: A →
---              ----------------------------
---               Γ ⊢ M `$ N ≋ M' `$ N' `: B
+  `ξ-`rec  : ---------------------------------------------------
+              Γ ⊢ `rec ≋ `rec `: A `→ (`N `→ A `→ A) `→ `N `→ A
 
---   `sym     : ∀ {M M'} →
---               Γ ⊢ M ≋ M' `: A →
---              -------------------
---               Γ ⊢ M' ≋ M `: A
+  `ξ-`λ_   : ∀ {M M'} →
+              Γ `, A ⊢ M ≋ M' `: B →
+             ----------------------------
+              Γ ⊢ `λ M ≋ `λ M' `: A `→ B
 
---   `trans   : ∀ {M M' M''} →
---               Γ ⊢ M ≋ M' `: A →
---               Γ ⊢ M' ≋ M'' `: A →
---              ---------------------
---               Γ ⊢ M ≋ M'' `: A
+  `ξ-_`$_  : ∀ {M M' N N'} →
+              Γ ⊢ M ≋ M' `: A `→ B →
+              Γ ⊢ N ≋ N' `: A →
+             ----------------------------
+              Γ ⊢ M `$ N ≋ M' `$ N' `: B
 
--- Equiv-refl : ∀ {M} → Γ ⊢ M ≋ M `: A
--- Equiv-refl {M = `! x}   = `ξ-`!
--- Equiv-refl {M = `zero}  = `ξ-`zero
--- Equiv-refl {M = `suc}   = `ξ-`suc
--- Equiv-refl {M = `rec}   = `ξ-`rec
--- Equiv-refl {M = `λ M}   = `ξ-`λ Equiv-refl
--- Equiv-refl {M = M `$ N} = `ξ- Equiv-refl `$ Equiv-refl
+  `sym     : ∀ {M M'} →
+              Γ ⊢ M ≋ M' `: A →
+             -------------------
+              Γ ⊢ M' ≋ M `: A
 
--- Equiv-IsEquivalence : IsEquivalence (Equiv Γ A)
--- Equiv-IsEquivalence = record
---                       { refl = Equiv-refl
---                       ; sym = `sym
---                       ; trans = `trans
---                       }
+  `trans   : ∀ {M M' M''} →
+              Γ ⊢ M ≋ M' `: A →
+              Γ ⊢ M' ≋ M'' `: A →
+             ---------------------
+              Γ ⊢ M ≋ M'' `: A
 
--- Equiv-Setoid : Ctx → Ty → Setoid _ _
--- Equiv-Setoid Γ A = record
---                    { Carrier = Γ ⊢Tm: A
---                    ; _≈_ = Equiv Γ A
---                    ; isEquivalence = Equiv-IsEquivalence
---                    }
+≋-refl : ∀ {M} → Γ ⊢ M `: A → Γ ⊢ M ≋ M `: A
+≋-refl (`! x∈Γ)   = `ξ-`! x∈Γ
+≋-refl `zero      = `ξ-`zero
+≋-refl `suc       = `ξ-`suc
+≋-refl `rec       = `ξ-`rec
+≋-refl (`λ ⊢M)    = `ξ-`λ ≋-refl ⊢M
+≋-refl (⊢M `$ ⊢N) = `ξ- ≋-refl ⊢M `$ ≋-refl ⊢N
 
--- module Equiv-Reasoning Γ A = Setoid-Reasoning (Equiv-Setoid Γ A)
+≋-IsPartialEquivalence : IsPartialEquivalence (Γ ⊢_≋_`: A)
+≋-IsPartialEquivalence = record
+                         { sym = `sym
+                         ; trans = `trans
+                         }
 
--- Equiv-Sub : ∀ {M M'} σ →
---              Γ ⊢ M ≋ M' `: A →
---             -----------------------------
---              Δ ⊢ [ σ ] M ≋ [ σ ] M' `: A
--- Equiv-Sub {M = (`λ M) `$ N} {M' = _}  σ `β-`→                =
---   begin (`λ [ ^ext σ ] M) `$ [ σ ] N         ≈⟨ `β-`→ ⟩
---         [ [ σ ] N 1] [ ^ext σ ] M            ≡⟨ []-compose (^id `, [ σ ] N) (^ext σ) M ⟩
---         [ [ [ σ ] N 1] wk1 σ `, [ σ ] N ] M  ≡⟨ cong (λ x → [ x `, [ σ ] N ] M) ([]-ren[]-compose (^id `, [ σ ] N) (`wk ^id) σ) ⟩
---         [ ([ ^id ] idRen) `∘ σ `, [ σ ] N ] M ≡⟨ cong (λ x → [ [ x ] σ `, [ σ ] N ] M) ([]-idRen⇒id idSub) ⟩
---         [ ^id `∘ σ `, [ σ ] N ] M            ≡⟨ cong (λ x → [ x `, [ σ ] N ] M) ([id]⇒id σ) ⟩
---         [ σ `, [ σ ] N ] M                   ≡˘⟨ cong (λ x → [ x `, [ σ ] N ] M) (`∘-identityʳ σ) ⟩
---         [ σ `∘ ^id `, [ σ ] N ] M            ≡˘⟨ []-compose σ (^id `, N) M ⟩
---         [ σ ] [ ^id `, N ] M                 ∎
---   where
---     open Equiv-Reasoning _ _
--- Equiv-Sub                             σ `β-`N₀               = `β-`N₀
--- Equiv-Sub                             σ `β-`N₁               = `β-`N₁
--- Equiv-Sub                   {M' = M'} σ `η-`→                =
---   begin `λ [ ^ext σ ] wk1 M' `$ `! here     ≡⟨ cong (λ x → `λ x `$ _) ([]-ren[]-compose (^ext σ) (`wk ^id) M') ⟩
---         `λ [ [ wk1 σ ] idRen ] M' `$ `! here ≡⟨ cong (λ x → `λ [ x ] M' `$ _) ([]-idRen⇒id (wk1 σ)) ⟩
---         `λ [ wk1 σ ] M' `$ `! here          ≡˘⟨ cong (λ x → `λ x `$ _) (ren[]-[]-compose (`wk ^id) σ M') ⟩
---         `λ wk1 [ σ ] M' `$ `! here          ≈⟨ `η-`→ ⟩
---         [ σ ] M'                            ∎
---   where
---     open Equiv-Reasoning _ _
--- Equiv-Sub                             σ `ξ-`!                = Equiv-refl
--- Equiv-Sub                             σ `ξ-`zero             = `ξ-`zero
--- Equiv-Sub                             σ `ξ-`suc              = `ξ-`suc
--- Equiv-Sub                             σ `ξ-`rec              = `ξ-`rec
--- Equiv-Sub                             σ (`ξ-`λ M≋M')         = `ξ-`λ (Equiv-Sub (^ext σ) M≋M')
--- Equiv-Sub                             σ (`ξ- M≋M' `$ N≋N')   = `ξ- Equiv-Sub σ M≋M' `$ Equiv-Sub σ N≋N'
--- Equiv-Sub                             σ (`sym M≋M')          = `sym (Equiv-Sub σ M≋M')
--- Equiv-Sub                             σ (`trans M≋M' M'≋M'') = `trans (Equiv-Sub σ M≋M') (Equiv-Sub σ M'≋M'')
+≋-PartialSetoid : Ctx → Ty → PartialSetoid _ _
+≋-PartialSetoid Γ A = record
+                      { Carrier = Tm
+                      ; _≈_ = Γ ⊢_≋_`: A
+                      ; isPartialEquivalence = ≋-IsPartialEquivalence
+                      }
 
--- Equiv-Ren : ∀ {M M'} δ →
---             Γ ⊢ M ≋ M' `: A →
---            -----------------------------
---             Δ ⊢ ren[ δ ] M ≋ ren[ δ ] M' `: A
--- Equiv-Ren {M = M} {M'} δ
---   rewrite sym (compatible-Sub-Ren δ M)
---         | sym (compatible-Sub-Ren δ M') = Equiv-Sub (fromRen δ)
+module ≋-Reasoning Γ A = PartialSetoid-Reasoning (≋-PartialSetoid Γ A)
 
--- Equiv-Ctx≤ : ∀ {M M'} Γ≤Δ →
---               Γ ⊢ M ≋ M' `: A →
---              -----------------------------------------
---               Δ ⊢ ctx≤[ Γ≤Δ ] M ≋ ctx≤[ Γ≤Δ ] M' `: A
--- Equiv-Ctx≤ Γ≤Δ = Equiv-Ren (fromCtx≤ Γ≤Δ)
+≋-[] : ∀ {M M' σ} →
+        Γ ⊢s σ `: Δ →
+        Δ ⊢ M ≋ M' `: A →
+       -----------------------------
+        Γ ⊢ [ σ ] M ≋ [ σ ] M' `: A
+≋-[] {M = (`λ M) `$ N} {σ = σ} ⊢σ (`β-`→ ⊢M ⊢N) =
+  begin (`λ [ ^ext σ ] M) `$ [ σ ] N         ≈⟨ `β-`→ (⊢[ ⊢^ext ⊢σ ] ⊢M) (⊢[ ⊢σ ] ⊢N) ⟩
+        [ [ σ ] N 1] [ ^ext σ ] M            ≡⟨ []-compose (-`,s [ σ ] N) (^ext σ) M ⟩
+        [ [ [ σ ] N 1] ^ext σ ] M            ≡⟨ [≈]⇒≡ M []-distrib-`,s ⟩
+        [ [ [ σ ] N 1] wk1 σ `,s [ σ ] N ] M ≡⟨ [≈]⇒≡ M (`,s-≈-cong ([`,s]wk1≡[]Sub σ) refl) ⟩
+        [ [ ^id ] σ `,s [ σ ] N ] M          ≡⟨ [≈]⇒≡ M (`,s-≈-cong [id]Sub⇒≈ refl) ⟩
+        [ [ σ ] idSub `,s [ σ ] N ] M        ≡˘⟨ [≈]⇒≡ M []-distrib-`,s ⟩
+        [ [ σ ] (-`,s N) ] M                 ≡˘⟨ []-compose σ (-`,s N) M ⟩
+        [ σ ] [ N 1] M                       ∎
+  where
+    open ≋-Reasoning _ _
+≋-[] ⊢σ (`β-`N₀ ⊢M ⊢N) = `β-`N₀ (⊢[ ⊢σ ] ⊢M) (⊢[ ⊢σ ] ⊢N)
+≋-[] ⊢σ (`β-`N₁ ⊢M ⊢N ⊢L) = `β-`N₁ (⊢[ ⊢σ ] ⊢M) (⊢[ ⊢σ ] ⊢N) (⊢[ ⊢σ ] ⊢L)
+≋-[] {M' = M} {σ = σ} ⊢σ (`η-`→ ⊢M) =
+  begin `λ [ ^ext σ ] wk1 M `$ `! 0 ≈⟨ ≋-refl (`λ ⊢[ ⊢^ext ⊢σ ] ⊢wk1 ⊢M `$ `! here) ⟩
+        `λ [ ^ext σ ] wk1 M `$ `! 0 ≡⟨ cong (λ x → `λ x `$ _) ([]-ren[]-compose (^ext σ) suc M) ⟩
+        `λ [ wk1 σ ] M `$ `! 0      ≡˘⟨ cong (λ x → `λ x `$ _) (ren[]-[]-compose suc σ M) ⟩
+        `λ wk1 [ σ ] M `$ `! 0      ≈⟨ `η-`→ (⊢[ ⊢σ ] ⊢M) ⟩
+        [ σ ] M                     ∎
+  where
+    open ≋-Reasoning _ _
+≋-[] ⊢σ (`ξ-`! x∈Δ) = ≋-refl (⊢σ .get x∈Δ)
+≋-[] ⊢σ `ξ-`zero = `ξ-`zero
+≋-[] ⊢σ `ξ-`suc = `ξ-`suc
+≋-[] ⊢σ `ξ-`rec = `ξ-`rec
+≋-[] ⊢σ (`ξ-`λ M≋M') = `ξ-`λ (≋-[] (⊢^ext ⊢σ) M≋M')
+≋-[] ⊢σ (`ξ- M≋M' `$ N≋N') = `ξ- ≋-[] ⊢σ M≋M' `$ ≋-[] ⊢σ N≋N'
+≋-[] ⊢σ (`sym M≋M') = `sym (≋-[] ⊢σ M≋M')
+≋-[] ⊢σ (`trans M≋M' M'≋M'') = `trans (≋-[] ⊢σ M≋M') (≋-[] ⊢σ M'≋M'')
 
--- data Nf : Ctx → Ty → Set
--- data Ne : Ctx → Ty → Set
+≋-ren[] : ∀ {M M' δ} →
+            Γ ⊢r δ `: Δ →
+            Δ ⊢ M ≋ M' `: A →
+           -----------------------------
+            Γ ⊢ ren[ δ ] M ≋ ren[ δ ] M' `: A
+≋-ren[] {M = M} {M'} {δ} ⊢δ
+  rewrite sym (compatible-Sub-Ren δ M)
+        | sym (compatible-Sub-Ren δ M') = ≋-[] (⊢ren2sub ⊢δ)
 
--- syntax Nf Γ A = Γ ⊢⇇: A
--- syntax Ne Γ A = Γ ⊢⇉: A
+data _⊢_⇇_ : Ctx → Nf → Ty → Set
+data _⊢_⇉_ : Ctx → Ne → Ty → Set
 
--- data Nf where
---   `zero : ----------
---            Γ ⊢⇇: `N
+data _⊢_⇇_ where
+  `zero : ----------------
+           Γ ⊢ `zero ⇇ `N
 
---   `suc  :  Γ ⊢⇇: `N →
---           ------------
---            Γ ⊢⇇: `N
+  `suc  :  Γ ⊢ U ⇇ `N →
+          -----------------
+           Γ ⊢ `suc U ⇇ `N
 
---   `λ_   :  Γ `, A ⊢⇇: B →
---           ----------------
---            Γ ⊢⇇: A `→ B
+  `λ_   :  Γ `, A ⊢ U ⇇ B →
+          -------------------
+           Γ ⊢ `λ U ⇇ A `→ B
 
---   `⇑    :  Γ ⊢⇉: A →
---           -----------
---            Γ ⊢⇇: A
+  `⇑    :  Γ ⊢ R ⇉ A →
+          --------------
+           Γ ⊢ `⇑ R ⇇ A
 
--- data Ne where
---   `!_   :  A ∈ Γ →
---           ---------
---            Γ ⊢⇉: A
+data _⊢_⇉_ where
+  `!_   :  x `: A ∈ Γ →
+          --------------
+           Γ ⊢ `! x ⇉ A
 
---   `rec  :  Γ ⊢⇇: A →
---            Γ ⊢⇇: `N `→ A `→ A →
---            Γ ⊢⇉: `N →
---           ----------------------
---            Γ ⊢⇉: A
+  `rec  :  Γ ⊢ U ⇇ A →
+           Γ ⊢ V ⇇ `N `→ A `→ A →
+           Γ ⊢ R ⇉ `N →
+          ------------------------
+           Γ ⊢ `rec U V R ⇉ A
 
---   _`$_  :  Γ ⊢⇉: A `→ B →
---            Γ ⊢⇇: A →
---           ----------------
---            Γ ⊢⇉: B
+  _`$_  :  Γ ⊢ R ⇉ A `→ B →
+           Γ ⊢ U ⇇ A →
+          ------------------
+           Γ ⊢ R `$ U ⇉ B
 
--- record IntoTm (F : Ctx → Ty → Set) : Set where
---   field
---     embed : F Γ A → Γ ⊢Tm: A
+instance
+  ⊢ClassNf : ⊢Class Nf Ty
+  ⊢Judgement ⦃ ⊢ClassNf ⦄ = _⊢_⇇_
 
--- open IntoTm ⦃...⦄
--- instance
---   IntoTmNf : IntoTm Nf
---   IntoTmNe : IntoTm Ne
+  ⊢ClassNe : ⊢Class Ne Ty
+  ⊢Judgement ⦃ ⊢ClassNe ⦄ = _⊢_⇉_
 
---   embed ⦃ IntoTmNf ⦄ `zero    = `zero
---   embed ⦃ IntoTmNf ⦄ (`suc v) = `suc `$ embed v
---   embed ⦃ IntoTmNf ⦄ (`λ v)   = `λ embed v
---   embed ⦃ IntoTmNf ⦄ (`⇑ u)   = embed u
+record IntoTm (X : Set) : Set where
+  field
+    embed : X → Tm
+open IntoTm ⦃...⦄
 
---   embed ⦃ IntoTmNe ⦄ (`! x)       = `! x
---   embed ⦃ IntoTmNe ⦄ (`rec z s u) = `rec `$ embed z `$ embed s `$ embed u
---   embed ⦃ IntoTmNe ⦄ (u `$ v)     = embed u `$ embed v
+record ⊢IntoTm X ⦃ IntoTmX : IntoTm X ⦄ ⦃ ⊢ClassX : ⊢Class X Ty ⦄ : Set where
+  field
+    ⊢embed : ∀ {x : X} → ⊢Judgement Γ x A → Γ ⊢ embed x `: A
+open ⊢IntoTm ⦃...⦄
+
+instance
+  IntoTmNf : IntoTm Nf
+  IntoTmNe : IntoTm Ne
+
+  embed ⦃ IntoTmNf ⦄ `zero    = `zero
+  embed ⦃ IntoTmNf ⦄ (`suc U) = `suc `$ embed U
+  embed ⦃ IntoTmNf ⦄ (`λ U)   = `λ embed U
+  embed ⦃ IntoTmNf ⦄ (`⇑ R)   = embed R
+
+  embed ⦃ IntoTmNe ⦄ (`! x)       = `! x
+  embed ⦃ IntoTmNe ⦄ (`rec U V R) = `rec `$ embed U `$ embed V `$ embed R
+  embed ⦃ IntoTmNe ⦄ (R `$ U)     = embed R `$ embed U
+
+  ⊢IntoTmNf : ⊢IntoTm Nf
+  ⊢IntoTmNe : ⊢IntoTm Ne
+
+  ⊢embed ⦃ ⊢IntoTmNf ⦄ `zero     = `zero
+  ⊢embed ⦃ ⊢IntoTmNf ⦄ (`suc ⊢U) = `suc `$ ⊢embed ⊢U
+  ⊢embed ⦃ ⊢IntoTmNf ⦄ (`λ ⊢U)   = `λ ⊢embed ⊢U
+  ⊢embed ⦃ ⊢IntoTmNf ⦄ (`⇑ ⊢R)   = ⊢embed ⊢R
+
+  ⊢embed ⦃ ⊢IntoTmNe ⦄ (`! x∈Γ)        = `! x∈Γ
+  ⊢embed ⦃ ⊢IntoTmNe ⦄ (`rec ⊢U ⊢V ⊢R) = `rec `$ ⊢embed ⊢U `$ ⊢embed ⊢V `$ ⊢embed ⊢R
+  ⊢embed ⦃ ⊢IntoTmNe ⦄ (⊢R `$ ⊢U)      = ⊢embed ⊢R `$ ⊢embed ⊢U
 
 -- Nf* : Ty → Set
 -- Nf* A = ∀ Γ → Γ ⊢⇇: A
