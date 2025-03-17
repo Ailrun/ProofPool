@@ -70,7 +70,7 @@ data Tm : Set where
 
   `zero : Tm
   `suc  : Tm
-  `rec  : Tm
+  `rec  : Ty → Tm
 
   `λ_   : Tm → Tm
 
@@ -90,7 +90,7 @@ data Nf where
 data Ne where
   `!_   : ℕ → Ne
 
-  `rec  : Nf → Nf → Ne → Ne
+  `rec  : Ty → Nf → Nf → Ne → Ne
 
   _`$_  : Ne → Nf → Ne
 
@@ -214,8 +214,8 @@ data _⊢_`:_ : Ctx → Tm → Ty → Set where
   `suc  : ----------------------
            Γ ⊢ `suc `: `N `→ `N
 
-  `rec  : --------------------------------------------
-           Γ ⊢ `rec `: A `→ (`N `→ A `→ A) `→ `N `→ A
+  `rec  : ----------------------------------------------
+           Γ ⊢ `rec A `: A `→ (`N `→ A `→ A) `→ `N `→ A
 
   `λ_   :  Γ `, A ⊢ M `: B →
           --------------------
@@ -424,7 +424,7 @@ instance
   ren[_]_ ⦃ AppRenTm ⦄ δ (`! x)   = `! ren[ δ ] x
   ren[_]_ ⦃ AppRenTm ⦄ δ `zero    = `zero
   ren[_]_ ⦃ AppRenTm ⦄ δ `suc     = `suc
-  ren[_]_ ⦃ AppRenTm ⦄ δ `rec     = `rec
+  ren[_]_ ⦃ AppRenTm ⦄ δ (`rec A) = `rec A
   ren[_]_ ⦃ AppRenTm ⦄ δ (`λ M)   = `λ ren[ ^ext δ ] M
   ren[_]_ ⦃ AppRenTm ⦄ δ (M `$ N) = ren[ δ ] M `$ ren[ δ ] N
 
@@ -440,7 +440,7 @@ instance
   ren[≈]⇒≡ ⦃ AppRenEquiv⇒EqTm ⦄ (`! x)   equiv = cong `!_ (ren[≈]⇒≡ x equiv)
   ren[≈]⇒≡ ⦃ AppRenEquiv⇒EqTm ⦄ `zero    equiv = refl
   ren[≈]⇒≡ ⦃ AppRenEquiv⇒EqTm ⦄ `suc     equiv = refl
-  ren[≈]⇒≡ ⦃ AppRenEquiv⇒EqTm ⦄ `rec     equiv = refl
+  ren[≈]⇒≡ ⦃ AppRenEquiv⇒EqTm ⦄ (`rec A) equiv = refl
   ren[≈]⇒≡ ⦃ AppRenEquiv⇒EqTm ⦄ (`λ M)   equiv = cong `λ_ (ren[≈]⇒≡ M (Ren^ext-respects-≈ equiv))
   ren[≈]⇒≡ ⦃ AppRenEquiv⇒EqTm ⦄ (M `$ N) equiv = cong₂ _`$_ (ren[≈]⇒≡ M equiv) (ren[≈]⇒≡ N equiv)
 
@@ -448,7 +448,7 @@ instance
   ren[id]⇒id ⦃ AppRenId⇒IdTm ⦄ {x = `! x}   = cong `!_ ren[id]⇒id
   ren[id]⇒id ⦃ AppRenId⇒IdTm ⦄ {x = `zero}  = refl
   ren[id]⇒id ⦃ AppRenId⇒IdTm ⦄ {x = `suc}   = refl
-  ren[id]⇒id ⦃ AppRenId⇒IdTm ⦄ {x = `rec}   = refl
+  ren[id]⇒id ⦃ AppRenId⇒IdTm ⦄ {x = `rec A} = refl
   ren[id]⇒id ⦃ AppRenId⇒IdTm ⦄ {x = `λ M}   = cong `λ_ (trans (ren[≈]⇒≡ M Ren^ext^id≈^id) ren[id]⇒id)
   ren[id]⇒id ⦃ AppRenId⇒IdTm ⦄ {x = M `$ N} = cong₂ _`$_ ren[id]⇒id ren[id]⇒id
 
@@ -579,7 +579,7 @@ instance
   [_]_ ⦃ AppSubTm ⦄ σ (`! x)   = [ σ ] x
   [_]_ ⦃ AppSubTm ⦄ σ `zero    = `zero
   [_]_ ⦃ AppSubTm ⦄ σ `suc     = `suc
-  [_]_ ⦃ AppSubTm ⦄ σ `rec     = `rec
+  [_]_ ⦃ AppSubTm ⦄ σ (`rec A) = `rec A
   [_]_ ⦃ AppSubTm ⦄ σ (`λ M)   = `λ [ ^ext σ ] M
   [_]_ ⦃ AppSubTm ⦄ σ (M `$ N) = [ σ ] M `$ [ σ ] N
 
@@ -595,7 +595,7 @@ instance
   [≈]⇒≡ ⦃ AppSubEquiv⇒EqTm ⦄ (`! x)   equiv = [≈]⇒≡ x equiv
   [≈]⇒≡ ⦃ AppSubEquiv⇒EqTm ⦄ `zero    equiv = refl
   [≈]⇒≡ ⦃ AppSubEquiv⇒EqTm ⦄ `suc     equiv = refl
-  [≈]⇒≡ ⦃ AppSubEquiv⇒EqTm ⦄ `rec     equiv = refl
+  [≈]⇒≡ ⦃ AppSubEquiv⇒EqTm ⦄ (`rec A) equiv = refl
   [≈]⇒≡ ⦃ AppSubEquiv⇒EqTm ⦄ (`λ M)   equiv = cong `λ_ ([≈]⇒≡ M (Sub^ext-≈-cong equiv))
   [≈]⇒≡ ⦃ AppSubEquiv⇒EqTm ⦄ (M `$ N) equiv = cong₂ _`$_ ([≈]⇒≡ M equiv) ([≈]⇒≡ N equiv)
 
@@ -603,7 +603,7 @@ instance
   [id]⇒id ⦃ AppSubId⇒IdTm ⦄ {x = `! x}   = [id]⇒id ⦃ _ ⦄ ⦃ AppSubId⇒IdVar ⦄
   [id]⇒id ⦃ AppSubId⇒IdTm ⦄ {x = `zero}  = refl
   [id]⇒id ⦃ AppSubId⇒IdTm ⦄ {x = `suc}   = refl
-  [id]⇒id ⦃ AppSubId⇒IdTm ⦄ {x = `rec}   = refl
+  [id]⇒id ⦃ AppSubId⇒IdTm ⦄ {x = `rec A} = refl
   [id]⇒id ⦃ AppSubId⇒IdTm ⦄ {x = `λ M}   = cong `λ_ (trans ([≈]⇒≡ M Sub^ext^id≈^id) [id]⇒id)
   [id]⇒id ⦃ AppSubId⇒IdTm ⦄ {x = M `$ N} = cong₂ _`$_ [id]⇒id [id]⇒id
 
@@ -659,7 +659,7 @@ instance
   ren[]-compose ⦃ AppRenComposeTm ⦄ δ ε (`! x)   = cong `!_ (ren[]-compose δ ε x)
   ren[]-compose ⦃ AppRenComposeTm ⦄ δ ε `zero    = refl
   ren[]-compose ⦃ AppRenComposeTm ⦄ δ ε `suc     = refl
-  ren[]-compose ⦃ AppRenComposeTm ⦄ δ ε `rec     = refl
+  ren[]-compose ⦃ AppRenComposeTm ⦄ δ ε (`rec A) = refl
   ren[]-compose ⦃ AppRenComposeTm ⦄ δ ε (`λ M)   = cong `λ_ (trans (ren[]-compose (^ext δ) (^ext ε) M) (ren[≈]⇒≡ M ren[^ext]^ext≈^extren[]Ren))
   ren[]-compose ⦃ AppRenComposeTm ⦄ δ ε (M `$ N) = cong₂ _`$_ (ren[]-compose δ ε M) (ren[]-compose δ ε N)
 
@@ -697,7 +697,7 @@ instance
   ren[]-[]-compose ⦃ AppSubRenComposeTm ⦄ δ σ (`! x)   = ren[]-[]-compose δ σ x
   ren[]-[]-compose ⦃ AppSubRenComposeTm ⦄ δ σ `zero    = refl
   ren[]-[]-compose ⦃ AppSubRenComposeTm ⦄ δ σ `suc     = refl
-  ren[]-[]-compose ⦃ AppSubRenComposeTm ⦄ δ σ `rec     = refl
+  ren[]-[]-compose ⦃ AppSubRenComposeTm ⦄ δ σ (`rec A) = refl
   ren[]-[]-compose ⦃ AppSubRenComposeTm ⦄ δ σ (`λ M)   = cong `λ_
     (begin ren[ ^ext δ ] [ ^ext σ ] M ≡⟨ ren[]-[]-compose (^ext δ) (^ext σ) M ⟩
            [ ren[ ^ext δ ] ^ext σ ] M ≡⟨ [≈]⇒≡ M ren[^ext]^ext≈^extren[]Sub ⟩
@@ -733,7 +733,7 @@ instance
   []-ren[]-compose ⦃ AppRenSubComposeTm ⦄ σ δ (`! x)   = []-ren[]-compose σ δ x
   []-ren[]-compose ⦃ AppRenSubComposeTm ⦄ σ δ `zero    = refl
   []-ren[]-compose ⦃ AppRenSubComposeTm ⦄ σ δ `suc     = refl
-  []-ren[]-compose ⦃ AppRenSubComposeTm ⦄ σ δ `rec     = refl
+  []-ren[]-compose ⦃ AppRenSubComposeTm ⦄ σ δ (`rec A) = refl
   []-ren[]-compose ⦃ AppRenSubComposeTm ⦄ σ δ (`λ M)   = cong `λ_
     (begin [ ^ext σ ] ren[ ^ext δ ] M ≡⟨ []-ren[]-compose (^ext σ) (^ext δ) M ⟩
            [ [ ^ext σ ] ^ext δ ] M    ≡⟨ [≈]⇒≡ M [^ext]^ext≈^ext[]Ren ⟩
@@ -777,7 +777,7 @@ instance
   []-compose ⦃ AppSubComposeTm ⦄ σ τ (`! x)   = []-compose σ τ x
   []-compose ⦃ AppSubComposeTm ⦄ σ τ `zero    = refl
   []-compose ⦃ AppSubComposeTm ⦄ σ τ `suc     = refl
-  []-compose ⦃ AppSubComposeTm ⦄ σ τ `rec     = refl
+  []-compose ⦃ AppSubComposeTm ⦄ σ τ (`rec A) = refl
   []-compose ⦃ AppSubComposeTm ⦄ σ τ (`λ M)   = cong `λ_
     (begin [ ^ext σ ] [ ^ext τ ] M ≡⟨ []-compose (^ext σ) (^ext τ) M ⟩
            [ [ ^ext σ ] ^ext τ ] M ≡⟨ [≈]⇒≡ M [^ext]^ext≈^ext[]Sub ⟩
@@ -809,7 +809,7 @@ instance
   compatible-Sub-Ren ⦃ CompatibleSubRenTm ⦄ δ (`! x)   = compatible-Sub-Ren δ x
   compatible-Sub-Ren ⦃ CompatibleSubRenTm ⦄ δ `zero    = refl
   compatible-Sub-Ren ⦃ CompatibleSubRenTm ⦄ δ `suc     = refl
-  compatible-Sub-Ren ⦃ CompatibleSubRenTm ⦄ δ `rec     = refl
+  compatible-Sub-Ren ⦃ CompatibleSubRenTm ⦄ δ (`rec A) = refl
   compatible-Sub-Ren ⦃ CompatibleSubRenTm ⦄ δ (`λ M)   = cong `λ_ (trans (sym ([≈]⇒≡ M (ren2sub-^ext δ))) (compatible-Sub-Ren (^ext δ) M))
   compatible-Sub-Ren ⦃ CompatibleSubRenTm ⦄ δ (M `$ N) = cong₂ _`$_ (compatible-Sub-Ren δ M) (compatible-Sub-Ren δ N)
 
@@ -831,15 +831,15 @@ data _⊢_≋_`:_ : Ctx → Tm → Tm → Ty → Set where
   `β-`N₀   : ∀ {M N} →
               Γ ⊢ M `: A →
               Γ ⊢ N `: `N `→ A `→ A →
-             --------------------------------------
-              Γ ⊢ `rec `$ M `$ N `$ `zero ≋ M `: A
+             ----------------------------------------
+              Γ ⊢ `rec A `$ M `$ N `$ `zero ≋ M `: A
 
   `β-`N₁   : ∀ {M N L} →
               Γ ⊢ M `: A →
               Γ ⊢ N `: `N `→ A `→ A →
               Γ ⊢ L `: `N →
-             --------------------------------------------------------------------------
-              Γ ⊢ `rec `$ M `$ N `$ (`suc `$ L) ≋ N `$ L `$ (`rec `$ M `$ N `$ L) `: A
+             ------------------------------------------------------------------------------
+              Γ ⊢ `rec A `$ M `$ N `$ (`suc `$ L) ≋ N `$ L `$ (`rec A `$ M `$ N `$ L) `: A
 
   `η-`→    : ∀ {M} →
               Γ ⊢ M `: A `→ B →
@@ -857,8 +857,8 @@ data _⊢_≋_`:_ : Ctx → Tm → Tm → Ty → Set where
   `ξ-`suc  : -----------------------------
               Γ ⊢ `suc ≋ `suc `: `N `→ `N
 
-  `ξ-`rec  : ---------------------------------------------------
-              Γ ⊢ `rec ≋ `rec `: A `→ (`N `→ A `→ A) `→ `N `→ A
+  `ξ-`rec  : -------------------------------------------------------
+              Γ ⊢ `rec A ≋ `rec A `: A `→ (`N `→ A `→ A) `→ `N `→ A
 
   `ξ-`λ_   : ∀ {M M'} →
               Γ `, A ⊢ M ≋ M' `: B →
@@ -949,6 +949,8 @@ module ≋-Reasoning Γ A = PartialSetoid-Reasoning (≋-PartialSetoid Γ A)
   rewrite sym (compatible-Sub-Ren δ M)
         | sym (compatible-Sub-Ren δ M') = ≋-[] (⊢ren2sub ⊢δ)
 
+infix 25 _⊢_⇇_
+infix 25 _⊢_⇉_
 data _⊢_⇇_ : Ctx → Nf → Ty → Set
 data _⊢_⇉_ : Ctx → Ne → Ty → Set
 
@@ -976,8 +978,8 @@ data _⊢_⇉_ where
   `rec  :  Γ ⊢ U ⇇ A →
            Γ ⊢ V ⇇ `N `→ A `→ A →
            Γ ⊢ R ⇉ `N →
-          ------------------------
-           Γ ⊢ `rec U V R ⇉ A
+          ----------------------
+           Γ ⊢ `rec A U V R ⇉ A
 
   _`$_  :  Γ ⊢ R ⇉ A `→ B →
            Γ ⊢ U ⇇ A →
@@ -1010,9 +1012,9 @@ instance
   embed ⦃ IntoTmNf ⦄ (`λ U)   = `λ embed U
   embed ⦃ IntoTmNf ⦄ (`⇑ R)   = embed R
 
-  embed ⦃ IntoTmNe ⦄ (`! x)       = `! x
-  embed ⦃ IntoTmNe ⦄ (`rec U V R) = `rec `$ embed U `$ embed V `$ embed R
-  embed ⦃ IntoTmNe ⦄ (R `$ U)     = embed R `$ embed U
+  embed ⦃ IntoTmNe ⦄ (`! x)         = `! x
+  embed ⦃ IntoTmNe ⦄ (`rec A U V R) = `rec A `$ embed U `$ embed V `$ embed R
+  embed ⦃ IntoTmNe ⦄ (R `$ U)       = embed R `$ embed U
 
   ⊢IntoTmNf : ⊢IntoTm Nf
   ⊢IntoTmNe : ⊢IntoTm Ne
@@ -1025,6 +1027,285 @@ instance
   ⊢embed ⦃ ⊢IntoTmNe ⦄ (`! x∈Γ)        = `! x∈Γ
   ⊢embed ⦃ ⊢IntoTmNe ⦄ (`rec ⊢U ⊢V ⊢R) = `rec `$ ⊢embed ⊢U `$ ⊢embed ⊢V `$ ⊢embed ⊢R
   ⊢embed ⦃ ⊢IntoTmNe ⦄ (⊢R `$ ⊢U)      = ⊢embed ⊢R `$ ⊢embed ⊢U
+
+infixr 37 `λ_﹫_
+infixr 36 `suc∙_
+infixr 36 `rec_∙_
+infixr 36 `rec_∙_∙_
+infixr 36 `rec_∙_∙_∙_
+infix  37 `#_
+
+data Dom : Set
+data DomNe : Set
+data DomNf : Set
+
+Env = ℕ → Dom
+
+data Dom where
+  `λ_﹫_     : Tm → Env → Dom
+
+  `zero     : Dom
+  `suc      : Dom
+  `suc∙_    : Dom → Dom
+  `rec      : Ty → Dom
+  `rec_∙_   : Ty → Dom → Dom
+  `rec_∙_∙_ : Ty → Dom → Dom → Dom
+
+  `⇑        : Ty → DomNe → Dom
+
+data DomNe where
+  `#_         : ℕ → DomNe
+
+  _`$_        : DomNe → DomNf → DomNe
+
+  `rec_∙_∙_∙_ : Ty → Dom → Dom → DomNe → DomNe
+
+data DomNf where
+  `⇓ : Ty → Dom → DomNf
+
+variable
+  ρ ρ' ρ'' ρ₀ ρ₁ ρ₂ ρ₃ ω ω' ω'' ω₀ ω₁ ω₂ ω₃ : Env
+  l l' l'' l₀ l₁ l₂ l₃ m m' m'' m₀ m₁ m₂ m₃ n n' n'' n₀ n₁ n₂ n₃ : Dom
+  u u' u'' u₀ u₁ u₂ u₃ v v' v'' v₀ v₁ v₂ v₃ w w' w'' w₀ w₁ w₂ w₃ : DomNf
+  r r' r'' r₀ r₁ r₂ r₃ s s' s'' s₀ s₁ s₂ s₃ t t' t'' t₀ t₁ t₂ t₃ : DomNe
+
+infixl 30 _`,E_
+_`,E_ : Env → Dom → Env
+_`,E_ ρ m = λ where
+  zero    → m
+  (suc x) → ρ x
+
+dropE : Env → Env
+dropE = _∘ suc
+
+infix 25 Tm⟦_⟧_↘_
+infix 25 ∥_∙_∥↘_
+infix 25 ∥rec_∙_∙_∙_∥↘_
+
+record Evaluation (X : Set) (Y : Set) : Set₁ where
+  infix 25 ⟦_⟧_↘_
+  field
+    ⟦_⟧_↘_ : X → Env → Y → Set
+
+open Evaluation ⦃...⦄
+
+data Tm⟦_⟧_↘_ : Tm → Env → Dom → Set
+data ∥_∙_∥↘_ : Dom → Dom → Dom → Set
+data ∥rec_∙_∙_∙_∥↘_ : Ty → Dom → Dom → Dom → Dom → Set
+
+instance
+  EvaluationTm : Evaluation Tm Dom
+  ⟦_⟧_↘_ ⦃ EvaluationTm ⦄ = Tm⟦_⟧_↘_
+
+data Tm⟦_⟧_↘_ where
+  `!-    : --------------------
+            Tm⟦ `! x ⟧ ρ ↘ ρ x
+
+  `λ-    : -------------------------
+            Tm⟦ `λ M ⟧ ρ ↘ `λ M ﹫ ρ
+
+  _`$_&_ :  ⟦ M ⟧ ρ ↘ m →
+            ⟦ N ⟧ ρ ↘ n →
+            ∥ m ∙ n ∥↘ l →
+           --------------------
+            Tm⟦ M `$ N ⟧ ρ ↘ l
+
+  `zero  : -----------------------
+            Tm⟦ `zero ⟧ ρ ↘ `zero
+
+  `suc   : ---------------------
+            Tm⟦ `suc ⟧ ρ ↘ `suc
+
+  `rec   : -------------------------
+            Tm⟦ `rec A ⟧ ρ ↘ `rec A
+
+data ∥_∙_∥↘_ where
+  `λ-       :  ⟦ M ⟧ ρ `,E n ↘ l →
+              ---------------------
+               ∥ `λ M ﹫ ρ ∙ n ∥↘ l
+
+  `suc      : -----------------------
+               ∥ `suc ∙ n ∥↘ `suc∙ n
+
+  `rec      : ----------------------------
+               ∥ `rec A ∙ n ∥↘ `rec A ∙ n
+
+  `rec-∙-   : --------------------------------------
+               ∥ `rec A ∙ n ∙ n' ∥↘ `rec A ∙ n ∙ n'
+
+  `rec-∙-∙- :  ∥rec A ∙ n ∙ n' ∙ m ∥↘ l →
+              ----------------------------
+               ∥ `rec A ∙ n ∙ n' ∙ m ∥↘ l
+
+  `⇑        : -------------------------------------------
+               ∥ `⇑ (A `→ B) r ∙ n ∥↘ `⇑ B (r `$ `⇓ A n)
+
+data ∥rec_∙_∙_∙_∥↘_ where
+  `zero  : -----------------------------
+            ∥rec A ∙ n ∙ n' ∙ `zero ∥↘ n
+
+  `suc∙- :  ∥rec A ∙ n ∙ n' ∙ m ∥↘ l →
+            ∥ n' ∙ m ∥↘ l' →
+            ∥ l' ∙ l ∥↘ l'' →
+           ----------------------------------
+            ∥rec A ∙ n ∙ n' ∙ `suc∙ m ∥↘ l''
+
+  `⇑     : --------------------------------------------------------
+            ∥rec A ∙ n ∙ n' ∙ `⇑ B r ∥↘ `⇑ A (`rec A ∙ n ∙ n' ∙ r)
+
+instance
+  EvaluationSub : Evaluation Sub Env
+  ⟦_⟧_↘_ ⦃ EvaluationSub ⦄ σ ρ ρ' = ∀ x → ⟦ σ x ⟧ ρ ↘ ρ' x
+
+infix 25 Rnf_#_↘_
+infix 25 Rne_#_↘_
+
+data Rnf_#_↘_ : DomNf → ℕ → Nf → Set
+data Rne_#_↘_ : DomNe → ℕ → Ne → Set
+
+data Rnf_#_↘_ where
+  `λ-   :  ∥ m ∙ `⇑ A (`# z) ∥↘ n →
+           Rnf `⇓ B n # suc z ↘ U →
+          ------------------------------
+           Rnf `⇓ (A `→ B) m # z ↘ `λ U
+
+  `zero : -----------------------------
+           Rnf `⇓ `N `zero # z ↘ `zero
+
+  `suc  :  Rnf `⇓ `N m # z ↘ U →
+          ----------------------------------
+           Rnf `⇓ `N (`suc∙ m) # z ↘ `suc U
+
+  `⇑`N  :  Rne r # z ↘ R →
+          -------------------------------
+           Rnf `⇓ `N (`⇑ A r) # z ↘ `⇑ R
+
+data Rne_#_↘_ where
+  `!-  : -------------------------------
+          Rne `# x # z ↘ `! (z ∸ 1 ∸ x)
+
+  _`$_ :  Rne r # z ↘ R →
+          Rnf u # z ↘ U →
+         -------------------------
+          Rne r `$ u # z ↘ R `$ U
+
+  `rec :  Rnf `⇓ A n # z ↘ U →
+          Rnf `⇓ A n' # z ↘ U' →
+          Rne r # z ↘ R →
+         ---------------------------------------------
+          Rne `rec A ∙ n ∙ n' ∙ r # z ↘ `rec A U U' R
+
+Relation : Set → Set₁
+Relation A = A → A → Set
+
+_≣_∈_ : ∀ {A : Set} → A → A → Relation A → Set
+x ≣ y ∈ f = f x y
+
+PER⊥ : Relation DomNe
+PER⊥ r r' = ∀ z → ∃[ R ] Rne r # z ↘ R × Rne r' # z ↘ R
+
+PER⊤ : Relation DomNf
+PER⊤ u u' = ∀ z → ∃[ U ] Rnf u # z ↘ U × Rnf u' # z ↘ U
+
+data PER`N : Relation Dom where
+  `zero  : -----------------------
+            `zero ≣ `zero ∈ PER`N
+
+  `suc∙_ :  m ≣ m' ∈ PER`N →
+           ----------------------------
+            `suc∙ m ≣ `suc∙ m' ∈ PER`N
+
+  `⇑     :  r ≣ r' ∈ PER⊥ →
+           ---------------------------
+            `⇑ A r ≣ `⇑ A' r' ∈ PER`N
+
+PER`→ : Relation Dom → Relation Dom → Relation Dom
+PER`→ RI RO m m' =
+  ∀ n n' →
+   n ≣ n' ∈ RI →
+   ∃[ l ] ∃[ l' ]
+     ∥ m ∙ n ∥↘ l ×
+     ∥ m' ∙ n' ∥↘ l' ×
+     l ≣ l' ∈ RO
+
+PER-Ty : Ty → Relation Dom
+PER-Ty `N       = PER`N
+PER-Ty (A `→ B) = PER`→ (PER-Ty A) (PER-Ty B)
+
+PER⊥Var : ∀ x →
+          --------------------
+           `# x ≣ `# x ∈ PER⊥
+PER⊥Var _ _ = _ , `!- , `!-
+
+PER⊥⇒PER`N :  r ≣ r' ∈ PER⊥ →
+             ----------------------------
+              `⇑ `N r ≣ `⇑ `N r' ∈ PER`N
+PER⊥⇒PER`N = `⇑
+
+PER`N⇒PER⊤ :  m ≣ m' ∈ PER`N →
+             ---------------------------
+              `⇓ `N m ≣ `⇓ `N m' ∈ PER⊤
+PER`N⇒PER⊤ `zero        z                   = _ , `zero , `zero
+PER`N⇒PER⊤ (`suc∙ m≣m') z
+  with _ , Rnfm , Rnfm' ← PER`N⇒PER⊤ m≣m' z = _ , `suc Rnfm , `suc Rnfm'
+PER`N⇒PER⊤ (`⇑ r≣r')    z
+  with _ , Rner , Rner' ← r≣r' z            = _ , `⇑`N Rner , `⇑`N Rner'
+
+PER⊥⇒PER-Ty : ∀ A →
+               r ≣ r' ∈ PER⊥ →
+              -----------------------------
+               `⇑ A r ≣ `⇑ A r' ∈ PER-Ty A
+PER-Ty⇒PER⊤ : ∀ A →
+               m ≣ m' ∈ PER-Ty A →
+              -------------------------
+               `⇓ A m ≣ `⇓ A m' ∈ PER⊤
+
+PER⊥⇒PER-Ty `N                      = PER⊥⇒PER`N
+PER⊥⇒PER-Ty (A `→ B) r≡r' n n' n≣n' = _ , _ , `⇑ , `⇑ , PER⊥⇒PER-Ty B helper
+  where
+    helper : _ ≣ _ ∈ PER⊥
+    helper z
+      with _ , Rner , Rner' ← r≡r' z
+         | _ , Rnfn , Rnfn' ← PER-Ty⇒PER⊤ A n≣n' z = _ , Rner `$ Rnfn , Rner' `$ Rnfn'
+
+PER-Ty⇒PER⊤ `N                                         = PER`N⇒PER⊤
+PER-Ty⇒PER⊤ (A `→ B) m≡m' z
+  with _ , _ , m∙z↘l , m'∙z↘l' , l≣l' ← m≡m' _ _ (PER⊥⇒PER-Ty A (PER⊥Var z))
+    with _ , Rnfl , Rnfl' ← PER-Ty⇒PER⊤ B l≣l' (suc z) = _ , `λ- m∙z↘l Rnfl , `λ- m'∙z↘l' Rnfl'
+
+PER`· : Relation Env
+PER`· ρ ρ' = ⊤
+
+PER`, : Relation Env → Relation Dom → Relation Env
+PER`, RT RH ρ ρ' = dropE ρ ≣ dropE ρ' ∈ RT × ρ 0 ≣ ρ' 0 ∈ RH
+
+PER-Ctx : Ctx → Relation Env
+PER-Ctx `·       = PER`·
+PER-Ctx (Γ `, A) = PER`, (PER-Ctx Γ) (PER-Ty A)
+
+_⊨_≋_`:_ : Ctx → Tm → Tm → Ty → Set
+Γ ⊨ M ≋ M' `: A =
+  ∀ ρ ρ' →
+   ρ ≣ ρ' ∈ PER-Ctx Γ →
+   ∃[ m ] ∃[ m' ]
+     ⟦ M ⟧ ρ ↘ m ×
+     ⟦ M' ⟧ ρ' ↘ m' ×
+     m ≣ m' ∈ PER-Ty A
+
+_⊨s_≋_`:_ : Ctx → Sub → Sub → Ctx → Set
+Γ ⊨s σ ≋ σ' `: Δ =
+  ∀ ρ ρ' →
+   ρ ≣ ρ' ∈ PER-Ctx Γ →
+   ∃[ ω ] ∃[ ω' ]
+     ⟦ σ ⟧ ρ ↘ ω ×
+     ⟦ σ' ⟧ ρ' ↘ ω' ×
+     ω ≣ ω' ∈ PER-Ctx Δ
+
+⊨[_]_ :  Γ ⊨s σ ≋ σ' `: Δ →
+         Δ ⊨ M ≋ M' `: A →
+        ------------------------------
+         Γ ⊨ [ σ ] M ≋ [ σ' ] M' `: A
+(⊨[ σ≋σ' ] M≋M') ρ ρ' ρ≣ρ' = {!σ≋σ' _ _ ρ≣ρ'!}
 
 -- Nf* : Ty → Set
 -- Nf* A = ∀ Γ → Γ ⊢⇇: A
