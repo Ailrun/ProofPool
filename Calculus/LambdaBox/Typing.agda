@@ -5,8 +5,8 @@
 {-# OPTIONS --safe #-}
 module Calculus.LambdaBox.Typing where
 
-open import Data.Nat using (ℕ; suc)
 open import Data.List using (List; []; _∷_)
+open import Data.Nat using (ℕ; suc)
 
 open import Calculus.LambdaBox.Syntax
 
