@@ -186,9 +186,12 @@ ctxLen-`,, (Γ' `, A) = trans (cong suc (ctxLen-`,, Γ')) (sym (+-suc _ (ctxLen 
     rewrite `,,-associative Γ (`· `, B) (Γ' `, C) = Γ≢Γ,,Δ,A eq'
 
 `,s-≈-cong : σ ≈ τ → M ≡ N → σ `,s M ≈ τ `,s N
-`,s-≈-cong equiv refl = λ where
-  zero    → refl
+`,s-≈-cong equiv eq = λ where
+  zero    → eq
   (suc x) → equiv _
+
+`,s-≈-congˡ : σ ≈ τ → σ `,s M ≈ τ `,s M
+`,s-≈-congˡ equiv = `,s-≈-cong equiv refl
 
 infix 25 IncludeSyntax
 data _Include_`:_ : Ctx → ℕ → Ty → Set
@@ -914,8 +917,8 @@ module ≋-Reasoning Γ A = PartialSetoid-Reasoning (≋-PartialSetoid Γ A)
   begin (`λ [ ^ext σ ] M) `$ [ σ ] N         ≈⟨ `β-`→ (⊢[ ⊢^ext ⊢σ ] ⊢M) (⊢[ ⊢σ ] ⊢N) ⟩
         [ [ σ ] N 1] [ ^ext σ ] M            ≡⟨ []-compose (-`,s [ σ ] N) (^ext σ) M ⟩
         [ [ [ σ ] N 1] ^ext σ ] M            ≡⟨ [≈]⇒≡ M []-distrib-`,s ⟩
-        [ [ [ σ ] N 1] wk1 σ `,s [ σ ] N ] M ≡⟨ [≈]⇒≡ M (`,s-≈-cong ([`,s]wk1≡[]Sub σ) refl) ⟩
-        [ [ ^id ] σ `,s [ σ ] N ] M          ≡⟨ [≈]⇒≡ M (`,s-≈-cong [id]Sub⇒≈ refl) ⟩
+        [ [ [ σ ] N 1] wk1 σ `,s [ σ ] N ] M ≡⟨ [≈]⇒≡ M (`,s-≈-congˡ ([`,s]wk1≡[]Sub σ)) ⟩
+        [ [ ^id ] σ `,s [ σ ] N ] M          ≡⟨ [≈]⇒≡ M (`,s-≈-congˡ [id]Sub⇒≈) ⟩
         [ [ σ ] idSub `,s [ σ ] N ] M        ≡˘⟨ [≈]⇒≡ M []-distrib-`,s ⟩
         [ [ σ ] (-`,s N) ] M                 ≡˘⟨ []-compose σ (-`,s N) M ⟩
         [ σ ] [ N 1] M                       ∎
@@ -924,8 +927,7 @@ module ≋-Reasoning Γ A = PartialSetoid-Reasoning (≋-PartialSetoid Γ A)
 ≋-[] ⊢σ (`β-`N₀ ⊢M ⊢N) = `β-`N₀ (⊢[ ⊢σ ] ⊢M) (⊢[ ⊢σ ] ⊢N)
 ≋-[] ⊢σ (`β-`N₁ ⊢M ⊢N ⊢L) = `β-`N₁ (⊢[ ⊢σ ] ⊢M) (⊢[ ⊢σ ] ⊢N) (⊢[ ⊢σ ] ⊢L)
 ≋-[] {M' = M} {σ = σ} ⊢σ (`η-`→ ⊢M) =
-  begin `λ [ ^ext σ ] wk1 M `$ `! 0 ≈⟨ ≋-refl (`λ ⊢[ ⊢^ext ⊢σ ] ⊢wk1 ⊢M `$ `! here) ⟩
-        `λ [ ^ext σ ] wk1 M `$ `! 0 ≡⟨ cong (λ x → `λ x `$ _) ([]-ren[]-compose (^ext σ) suc M) ⟩
+  begin `λ [ ^ext σ ] wk1 M `$ `! 0 ≡⟨ cong (λ x → `λ x `$ _) ([]-ren[]-compose (^ext σ) suc M) ⟩
         `λ [ wk1 σ ] M `$ `! 0      ≡˘⟨ cong (λ x → `λ x `$ _) (ren[]-[]-compose suc σ M) ⟩
         `λ wk1 [ σ ] M `$ `! 0      ≈⟨ `η-`→ (⊢[ ⊢σ ] ⊢M) ⟩
         [ σ ] M                     ∎
@@ -1301,11 +1303,16 @@ _⊨s_≋_`:_ : Ctx → Sub → Sub → Ctx → Set
      ⟦ σ' ⟧ ρ' ↘ ω' ×
      ω ≣ ω' ∈ PER-Ctx Δ
 
+------------------------------------------------------------
+-- The Problematic One
+------------------------------------------------------------
+-- This one is problematic for a calculus without
+-- explicit substitutions.
 ⊨[_]_ :  Γ ⊨s σ ≋ σ' `: Δ →
          Δ ⊨ M ≋ M' `: A →
         ------------------------------
          Γ ⊨ [ σ ] M ≋ [ σ' ] M' `: A
-(⊨[ σ≋σ' ] M≋M') ρ ρ' ρ≣ρ' = {!σ≋σ' _ _ ρ≣ρ'!}
+(⊨[ σ≋σ' ] M≋M') ρ ρ' ρ≣ρ' = {!!}
 
 -- Nf* : Ty → Set
 -- Nf* A = ∀ Γ → Γ ⊢⇇: A
