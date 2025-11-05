@@ -1031,8 +1031,7 @@ module LogRelProp where
       with rM₁M₂ ← rK Idᵉ (ext[-]-preserves-ℜ δ rM₁) (ext[-]-preserves-ℜ δ rM₂) ε
         rewrite ext[Idᵉ]ᶜ-id K        = rM₁M₂
   eval {σ = σ} rσ (`let M `in N)
-    with rM ← eval rσ M
-      rewrite ext[Idᵉ]-id ([| σ |] M) =
+    with rM ← eval rσ M =
     ℜ-∧-elim
       rM
       λ δ {M₁ = M₁} {M₂ = M₂} rM₁ rM₂ →
