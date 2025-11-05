@@ -34,9 +34,6 @@ module Syntax where
     A A′ A′₀ A′₁ A′₂ A′₃ A″ A″₀ A″₁ A″₂ A″₃ A‴ A‴₀ A‴₁ A‴₂ A‴₃ A₀ A₁ A₂ A₃ : Tp
     B B′ B′₀ B′₁ B′₂ B′₃ B″ B″₀ B″₁ B″₂ B″₃ B‴ B‴₀ B‴₁ B‴₂ B‴₃ B₀ B₁ B₂ B₃ : Tp
     C C′ C′₀ C′₁ C′₂ C′₃ C″ C″₀ C″₁ C″₂ C″₃ C‴ C‴₀ C‴₁ C‴₂ C‴₃ C₀ C₁ C₂ C₃ : Tp
-    D D′ D′₀ D′₁ D′₂ D′₃ D″ D″₀ D″₁ D″₂ D″₃ D‴ D‴₀ D‴₁ D‴₂ D‴₃ D₀ D₁ D₂ D₃ : Tp
-    E E′ E′₀ E′₁ E′₂ E′₃ E″ E″₀ E″₁ E″₂ E″₃ E‴ E‴₀ E‴₁ E‴₂ E‴₃ E₀ E₁ E₂ E₃ : Tp
-    F F′ F′₀ F′₁ F′₂ F′₃ F″ F″₀ F″₁ F″₂ F″₃ F‴ F‴₀ F‴₁ F‴₂ F‴₃ F₀ F₁ F₂ F₃ : Tp
     Γ Γ′ Γ′₀ Γ′₁ Γ′₂ Γ′₃ Γ″ Γ″₀ Γ″₁ Γ″₂ Γ″₃ Γ‴ Γ‴₀ Γ‴₁ Γ‴₂ Γ‴₃ Γ₀ Γ₁ Γ₂ Γ₃ : Ctx
     Δ Δ′ Δ′₀ Δ′₁ Δ′₂ Δ′₃ Δ″ Δ″₀ Δ″₁ Δ″₂ Δ″₃ Δ‴ Δ‴₀ Δ‴₁ Δ‴₂ Δ‴₃ Δ₀ Δ₁ Δ₂ Δ₃ : Ctx
     Ψ Ψ′ Ψ′₀ Ψ′₁ Ψ′₂ Ψ′₃ Ψ″ Ψ″₀ Ψ″₁ Ψ″₂ Ψ″₃ Ψ‴ Ψ‴₀ Ψ‴₁ Ψ‴₂ Ψ‴₃ Ψ₀ Ψ₁ Ψ₂ Ψ₃ : Ctx
@@ -796,7 +793,6 @@ module LogRel where
 
   variable
     K K′ K′₀ K′₁ K′₂ K′₃ K″ K″₀ K″₁ K″₂ K″₃ K‴ K‴₀ K‴₁ K‴₂ K‴₃ K₀ K₁ K₂ K₃ : Cont∧ Γ A B
-    J J′ J′₀ J′₁ J′₂ J′₃ J″ J″₀ J″₁ J″₂ J″₃ J‴ J‴₀ J‴₁ J‴₂ J‴₃ J₀ J₁ J₂ J₃ : Cont∧ Γ A B
 
   data Nfᶜ : Cont∧ Γ A B → Set where
     []   : -------------------------------
@@ -815,18 +811,6 @@ module LogRel where
   ext[ δ ]ᶜ []      = []
   ext[ δ ]ᶜ (N ∷ K) = ext[ qᵉ qᵉ δ ] N ∷ ext[ δ ]ᶜ K
 
-  infix 4 _↠ᶜ_
-  _↠ᶜ_ : Cont∧ Γ A B → Cont∧ Γ A B → Set
-  K ↠ᶜ K′ = ∀ M → K `$$ᶜ M ↠ K′ `$$ᶜ M
-
-  infix   4 _↠ᶜ*_
-  _↠ᶜ*_ : Rel (Cont∧ Γ A B) _
-  K ↠ᶜ* K′ = ∀ M → K `$$ᶜ M ↠* K′ `$$ᶜ M
-
-  infix 4 _haltsᶜ
-  _haltsᶜ : Cont∧ Γ A B → Set
-  K haltsᶜ = ∃[ K′ ] K ↠ᶜ* K′ × Nfᶜ K′
-
   mutual
     infix 4 ℜ[_]_
     ℜ[_]_ : ∀ A {Γ} → Tm Γ A → Set
@@ -836,7 +820,7 @@ module LogRel where
 
     infix 4 ℜᶜ[_&_]_
     ℜᶜ[_&_]_ : ∀ A₁ A₂ {Γ} → Cont∧ Γ (A₁ `∧ A₂) B → Set
-    ℜᶜ[ A₁ & A₂ ] K = ∀ {Δ} (δ : Ext Δ _) {M₁ M₂} → ℜ[ A₁ ] M₁ → ℜ[ A₂ ] M₂ → ∀ {M′} → M′ ↠* (M₁ `, M₂) → (ext[ δ ]ᶜ K `$$ᶜ M′) halts
+    ℜᶜ[ A₁ & A₂ ] K = ∀ {Δ} (δ : Ext Δ _) {M₁ M₂} → ℜ[ A₁ ] M₁ → ℜ[ A₂ ] M₂ → (ext[ δ ]ᶜ K `$$ᶜ (M₁ `, M₂)) halts
 
   infix 4 ℜˢ[_]_
   ℜˢ[_]_ : ∀ Δ → ∀ {Γ} → Sub Γ Δ → Set
@@ -941,7 +925,7 @@ module LogRelProp where
     reify base               rM = rM
     reify (A `→ B)           rM = halts-closed (`λ-halts (reify B (rM Wk1ᵉ (reflect (`# here refl))))) (`→η ↠-refl)
     reify (A₁ `∧ A₂) {M = M} rM
-      with hM ← rM Idᵉ [] (λ δ rM₁ rM₂ M′↠* → halts-closed* (`,-halts (reify A₁ rM₁) (reify A₂ rM₂)) M′↠*)
+      with hM ← rM Idᵉ [] (λ δ rM₁ rM₂ → `,-halts (reify A₁ rM₁) (reify A₂ rM₂))
         rewrite ext[Idᵉ]-id M       = hM
 
     reflect : Ne M → ℜ[ A ] M
@@ -956,15 +940,14 @@ module LogRelProp where
           (rK
             (Wkᵉ (_ ∷ _ ∷ []))
             (reflect (`# here refl))
-            (reflect (`# there (here refl)))
-            ε))
+            (reflect (`# there (here refl)))))
         (K `$$ᶜ↠ `∧η ↠-refl ◅ `∧cᶜ↠* K)
 
   ℜ-∧-elim : ℜ[ A₁ `∧ A₂ ] M →
              (∀ {Δ} (δ : Ext Δ _) {M₁ M₂} → ℜ[ A₁ ] M₁ → ℜ[ A₂ ] M₂ → ℜ[ B ] ([| !ˢ M₂ ,ˢ M₁ |] ext[ qᵉ qᵉ δ ] N)) →
              ℜ[ B ] (`let M `in N)
   ℜ-∧-elim {M = M} {B = base}     {N = N} rM rN
-    with hMN ← rM Idᵉ (_ ∷ []) (λ δ rM₁ rM₂ M′↠* → halts-closed* (halts-closed (rN δ rM₁ rM₂) (`∧β ↠-refl ↠-refl ↠-refl)) (ξ-of-↠* (`let_`in _) (`let_`in ↠-refl) M′↠*))
+    with hMN ← rM Idᵉ (_ ∷ []) (λ δ rM₁ rM₂ → halts-closed (rN δ rM₁ rM₂) (`∧β ↠-refl ↠-refl ↠-refl))
       rewrite ext[Idᵉ]-id M                                  = hMN
   ℜ-∧-elim {M = M} {B = B `→ C}   {N = N} rM rN {N = L} δ rL =
     ℜ-closed
@@ -992,8 +975,8 @@ module LogRelProp where
     rM
       δ
       (_ ∷ K)
-      λ γ {M₁ = M₁} {M₂ = M₂} rM₁ rM₂ M′↠* →
-        halts-closed*
+      λ γ {M₁ = M₁} {M₂ = M₂} rM₁ rM₂ →
+        halts-closed
           (subst
             (λ L → (ext[ γ ]ᶜ K `$$ᶜ L) halts)
             (begin _ ≡⟨ ext[Idᵉ]-id ([| !ˢ M₂ ,ˢ M₁ |] ext[ qᵉ qᵉ (γ ∘ᵉ δ) ] N) ⟩
@@ -1001,7 +984,7 @@ module LogRelProp where
                    _ ≡˘⟨ cong [| !ˢ M₂ ,ˢ M₁ |]_ (ext[-]-ext[-]≡ext[-∘ᵉ-] N) ⟩
                    _ ∎)
             (rN (γ ∘ᵉ δ) rM₁ rM₂ Idᵉ (ext[ γ ]ᶜ K) (ext[-]-preserves-ℜᶜ {K = K} γ rK)))
-          (ext[ γ ]ᶜ K `$$ᶜ↠* (ξ-of-↠* (`let_`in _) (`let_`in ↠-refl) M′↠* Star.◅◅ `∧β ↠-refl ↠-refl ↠-refl ◅ ε))
+          (ext[ γ ]ᶜ K `$$ᶜ↠ `∧β ↠-refl ↠-refl ↠-refl)
     where
       open ≡-Reasoning
 
@@ -1028,7 +1011,7 @@ module LogRelProp where
   eval {σ = σ} rσ (M₁ `, M₂) δ K rK
     with rM₁ ← eval rσ M₁
        | rM₂ ← eval rσ M₂
-      with rM₁M₂ ← rK Idᵉ (ext[-]-preserves-ℜ δ rM₁) (ext[-]-preserves-ℜ δ rM₂) ε
+      with rM₁M₂ ← rK Idᵉ (ext[-]-preserves-ℜ δ rM₁) (ext[-]-preserves-ℜ δ rM₂)
         rewrite ext[Idᵉ]ᶜ-id K        = rM₁M₂
   eval {σ = σ} rσ (`let M `in N)
     with rM ← eval rσ M =
