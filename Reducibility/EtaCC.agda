@@ -860,12 +860,6 @@ module LogRelProp where
   []      `$$ᶜ↠ M↠M′ = M↠M′
   (_ ∷ K) `$$ᶜ↠ M↠M′ = K `$$ᶜ↠ (`let M↠M′ `in ↠-refl)
 
-  _`$$ᶜ↠*_ : ∀ (K : Cont∧ Γ A B) →
-             M ↠* M′ →
-             K `$$ᶜ M ↠* K `$$ᶜ M′
-  K `$$ᶜ↠* ε               = ε
-  K `$$ᶜ↠* (M↠M′ ◅ M′↠*M″) = K `$$ᶜ↠ M↠M′ ◅ K `$$ᶜ↠* M′↠*M″
-
   ext[Idᵉ]ᶜ-id : ∀ (K : Cont∧ Γ A B) →
                  ext[ Idᵉ ]ᶜ K ≡ K
   ext[Idᵉ]ᶜ-id []      = refl
@@ -1028,3 +1022,24 @@ module LogRelProp where
           (eval {σ = (δ ᵉ∘ˢ σ) ,ˢ M₂ ,ˢ M₁} ((ᵉ∘ˢ-preserves-ℜˢ δ rσ , rM₂) , rM₁) N)
     where
       open ≡-Reasoning
+
+  Wkᵉʳ : ∀ Δ → Ext (Δ ʳ++ Γ) Γ
+  Wkᵉʳ []      = Idᵉ
+  Wkᵉʳ (A ∷ Δ) = Wkᵉʳ Δ ∘ there
+
+  initial-sub-gen : ∀ (Δ Γ : Ctx) →
+                    ℜˢ[ Γ ] forgetˢ (Wkᵉʳ Δ)
+  initial-sub-gen Δ []      = tt
+  initial-sub-gen Δ (A ∷ Γ)
+    rewrite [|forgetˢ-|]≡ext[-] (Wkᵉʳ {Γ = A ∷ Γ} Δ) `#0 = initial-sub-gen (A ∷ Δ) Γ , reflect (`# Wkᵉʳ Δ (here refl))
+
+  initial-sub : ℜˢ[ Γ ] Idˢ
+  initial-sub = initial-sub-gen [] _
+
+open LogRelProp
+
+weak-normalization : ∀ (M : Tm Γ A) →
+                     M halts
+weak-normalization M
+  with rM ← eval {σ = Idˢ} initial-sub M
+    rewrite [|Idˢ|]-id M = reify _ rM
