@@ -62,7 +62,7 @@ module _ ⦃ _ : VarSubBase {ℓ₁} R ⦄ where
 
   record RawVarSubOutHead : Set (ℓ₀ ⊔ ℓ₁) where
     field
-      R-head : R (A ∷ Γ) A
+      R-headᵛ : R (A ∷ Γ) A
 
   open RawVarSubOutHead ⦃...⦄ public
 
@@ -106,6 +106,7 @@ module _ ⦃ _ : VarSubBase R₁ ⦄ where
   instance
     RawVarSubLiftSelf : RawVarSubLift
     RawVarSubLiftSelf .liftᵛ = id
+    {-# OVERLAPPABLE RawVarSubLiftSelf #-}
 
 module _
   ⦃ varSub₁ : VarSubBase R₁ ⦄
@@ -134,7 +135,7 @@ module _
     ⦃ _ : RawVarSubApp ⦃ varSub₁ ⦄ ⦃ varSub₂ ⦄ ⦃ varSub₃ ⦄ ⦄ where
     infixr 7 qᵛ_
     qᵛ_ : VarSub₂ Δ Γ → VarSub₃ (A ∷ Δ) (A ∷ Γ)
-    qᵛ σ = (Wkᵛ ∘ᵛ σ) ,ᵛ R-head
+    qᵛ σ = (Wkᵛ ∘ᵛ σ) ,ᵛ R-headᵛ
 
     infixr 7 qᵛ_of_
     qᵛ_of_ : VarSub₂ Δ Γ → ∀ A → VarSub₃ (A ∷ Δ) (A ∷ Γ)

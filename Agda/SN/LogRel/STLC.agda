@@ -96,7 +96,7 @@ module Syntax where
     RawExtWk .Wkᵛ = there
 
     RawExtOutHead : RawVarSubOutHead ⦃ ExtVarSub ⦄
-    RawExtOutHead .R-head = here refl
+    RawExtOutHead .R-headᵛ = here refl
 
   instance
     SubVarSub : VarSubBase Tm
@@ -116,7 +116,7 @@ module Syntax where
     RawSubWk .Wkᵛ = liftᵛ∘ Wkᵛ
 
     RawSubOutHead : RawVarSubOutHead ⦃ SubVarSub ⦄
-    RawSubOutHead .R-head = liftᵛ R-head
+    RawSubOutHead .R-headᵛ = liftᵛ R-headᵛ
 
   variable
     γ γ′ γ′₀ γ′₁ γ′₂ γ′₃ γ″ γ″₀ γ″₁ γ″₂ γ″₃ γ‴ γ‴₀ γ‴₁ γ‴₂ γ‴₃ γ₀ γ₁ γ₂ γ₃ : Ext Γ Δ
@@ -157,11 +157,26 @@ module Syntax where
   qˢ_ = qᵛ_ ⦃ ExtVarSub ⦄ ⦃ SubVarSub ⦄ ⦃ SubVarSub ⦄
 
   module Properties where
+    ----------------------------------------------------------
+    -- Useful Properties for Substitutions
+    ----------------------------------------------------------
 
-    ----------------------------------------------------------
-    -- Useful Properties for Equivalence of Extensions
-    ----------------------------------------------------------
+    liftᵛ-preserves-qᵛ : ∀ (δ : Ext Γ Δ) →
+                         liftᵛ∘ (qᵉ δ) ≈ᵛ qˢ_ {A = A} (liftᵛ∘ δ)
+    liftᵛ-preserves-qᵛ δ = liftᵛ-preserves-,ᵛ (Wkᵛ ∘ᵛ δ) (here refl)
+
     instance
+      ExtLiftSubOutHead : VarSubLiftOutHead ⦃ ExtVarSub ⦄ ⦃ SubVarSub ⦄
+      ExtLiftSubOutHead .liftᵛ-preserves-R-headᵛ = refl
+
+      OutHeadAppExt : ∀ {R} ⦃ varSub : VarSubBase {lzero} R ⦄ →
+                      VarSubOutHeadApp ⦃ varSub ⦄ ⦃ ExtVarSub ⦄ ⦃ varSub ⦄
+      OutHeadAppExt .Appᵛ-R-headᵛ σ = refl
+
+      WkCancelExt : ∀ {R} ⦃ varSub : VarSubBase {lzero} R ⦄ →
+                    VarSubWkCancel ⦃ varSub ⦄ ⦃ ExtVarSub ⦄ ⦃ varSub ⦄
+      WkCancelExt .∘ᵛWkᵛ-cancel-,ᵛ σ M x = refl
+
       AppExtExtensional : ∀ {R} ⦃ varSub : VarSubBase {lzero} R ⦄ →
                           VarSubAppExtensional ⦃ varSub ⦄ ⦃ ExtVarSub ⦄ ⦃ varSub ⦄
       AppExtExtensional .⟦-⟧ᵛ-extensional M equiv = equiv M
@@ -170,13 +185,21 @@ module Syntax where
                                VarSubAppCompositional ⦃ varSub ⦄ ⦃ ExtVarSub ⦄ ⦃ varSub ⦄ ⦃ ExtVarSub ⦄ ⦃ ExtVarSub ⦄ ⦃ varSub ⦄
       AppExtCompositionalExt .⟦-⟧ᵛ-compositional _ _ M = refl
 
-      AppSubCompositionalExt : ∀ {R}
-                                 ⦃ varSub : VarSubBase {lzero} R ⦄
-                                 ⦃ _ : RawVarSubOutHead ⦃ varSub ⦄ ⦄
-                                 ⦃ _ : RawVarSubLift ⦃ varSub ⦄ ⦃ SubVarSub ⦄ ⦄
-                                 ⦃ _ : RawVarSubApp ⦃ ExtVarSub ⦄ ⦃ varSub ⦄ ⦃ varSub ⦄ ⦄ →
-                               VarSubAppCompositional ⦃ varSub ⦄ ⦃ SubVarSub ⦄ ⦃ SubVarSub ⦄ ⦃ ExtVarSub ⦄ ⦃ SubVarSub ⦄ ⦃ SubVarSub ⦄
-      AppSubCompositionalExt .⟦-⟧ᵛ-compositional σ τ x = refl
+      OutHeadAppSub : ∀ {R}
+                        ⦃ varSub : VarSubBase {lzero} R ⦄
+                        ⦃ _ : RawVarSubOutHead ⦃ varSub ⦄ ⦄
+                        ⦃ _ : RawVarSubLift ⦃ varSub ⦄ ⦃ SubVarSub ⦄ ⦄
+                        ⦃ _ : RawVarSubApp ⦃ ExtVarSub ⦄ ⦃ varSub ⦄ ⦃ varSub ⦄ ⦄ →
+                      VarSubOutHeadApp ⦃ varSub ⦄ ⦃ SubVarSub ⦄ ⦃ SubVarSub ⦄ ⦃ RawSubOutHead ⦄
+      OutHeadAppSub .Appᵛ-R-headᵛ σ = refl
+
+      WkCancelSub : ∀ {R}
+                      ⦃ varSub : VarSubBase {lzero} R ⦄
+                      ⦃ _ : RawVarSubOutHead ⦃ varSub ⦄ ⦄
+                      ⦃ _ : RawVarSubLift ⦃ varSub ⦄ ⦃ SubVarSub ⦄ ⦄
+                      ⦃ _ : RawVarSubApp ⦃ ExtVarSub ⦄ ⦃ varSub ⦄ ⦃ varSub ⦄ ⦄ →
+                    VarSubWkCancel ⦃ varSub ⦄ ⦃ SubVarSub ⦄ ⦃ SubVarSub ⦄
+      WkCancelSub .∘ᵛWkᵛ-cancel-,ᵛ σ M x = refl
 
       AppSubExtensional : ∀ {R}
                             ⦃ varSub : VarSubBase {lzero} R ⦄
@@ -189,68 +212,50 @@ module Syntax where
       AppSubExtensional .⟦-⟧ᵛ-extensional (`λ M)   equiv = cong `λ_ (⟦-⟧ᵛ-extensional M (qᵛ-congᵛ equiv))
       AppSubExtensional .⟦-⟧ᵛ-extensional (M `$ N) equiv = cong₂ _`$_ (⟦-⟧ᵛ-extensional M equiv) (⟦-⟧ᵛ-extensional N equiv)
 
-    qᵉ-distrib-∘ᵛ : ∀ {δ : Ext Ψ Δ} {γ : Ext Δ Γ} → qᵉ_ {A = A} (δ ∘ᵛ γ) ≈ᵛ qᵉ δ ∘ᵛ qᵉ γ
-    qᵉ-distrib-∘ᵛ {δ = δ} = symᵛ (∘ᵛ-distrib-,ᵛ {σ = qᵉ δ} _)
+      AppSubCompositionalExt : ∀ {R}
+                                 ⦃ varSub : VarSubBase {lzero} R ⦄
+                                 ⦃ _ : RawVarSubOutHead ⦃ varSub ⦄ ⦄
+                                 ⦃ _ : RawVarSubLift ⦃ varSub ⦄ ⦃ SubVarSub ⦄ ⦄
+                                 ⦃ _ : RawVarSubApp ⦃ ExtVarSub ⦄ ⦃ varSub ⦄ ⦃ varSub ⦄ ⦄ →
+                               VarSubAppCompositional ⦃ varSub ⦄ ⦃ SubVarSub ⦄ ⦃ SubVarSub ⦄ ⦃ ExtVarSub ⦄ ⦃ SubVarSub ⦄ ⦃ SubVarSub ⦄
+      AppSubCompositionalExt .⟦-⟧ᵛ-compositional σ τ x = refl
+
+      ExtLiftSubApp : VarSubLiftApp ⦃ ExtVarSub ⦄ ⦃ SubVarSub ⦄ ⦃ SubVarSub ⦄ ⦃ SubVarSub ⦄
+      ExtLiftSubApp .liftᵛ-preserves-Appᵛ δ (`# x)   = refl
+      ExtLiftSubApp .liftᵛ-preserves-Appᵛ δ (`λ M)   = cong `λ_ (trans (⟦-⟧ᵛ-extensional M (symᵛ (liftᵛ-preserves-qᵛ δ))) (liftᵛ-preserves-Appᵛ (qᵉ δ) M))
+      ExtLiftSubApp .liftᵛ-preserves-Appᵛ δ (M `$ N) = cong₂ _`$_ (liftᵛ-preserves-Appᵛ δ M) (liftᵛ-preserves-Appᵛ δ N)
+
+    qᵉ-distrib-∘ᵛ = qᵛ-distrib-∘ᵛ ⦃ ExtVarSub ⦄ ⦃ ExtVarSub ⦄ ⦃ ExtVarSub ⦄ ⦃ ExtVarSub ⦄
 
     instance
       ExtAppExtCompositionalSub : VarSubAppCompositional ⦃ ExtVarSub ⦄ ⦃ ExtVarSub ⦄ ⦃ ExtVarSub ⦄ ⦃ SubVarSub ⦄ ⦃ SubVarSub ⦄ ⦃ SubVarSub ⦄
       ExtAppExtCompositionalSub .⟦-⟧ᵛ-compositional δ γ (`# x)   = refl
-      ExtAppExtCompositionalSub .⟦-⟧ᵛ-compositional δ γ (`λ M)   = cong `λ_ (trans (⟦-⟧ᵛ-compositional (qᵉ δ) (qᵉ γ) M) (sym (⟦-⟧ᵛ-extensional M (qᵉ-distrib-∘ᵛ {δ = δ}))))
+      ExtAppExtCompositionalSub .⟦-⟧ᵛ-compositional δ γ (`λ M)   = cong `λ_ (trans (⟦-⟧ᵛ-compositional (qᵉ δ) (qᵉ γ) M) (sym (⟦-⟧ᵛ-extensional M (qᵉ-distrib-∘ᵛ δ _))))
       ExtAppExtCompositionalSub .⟦-⟧ᵛ-compositional δ γ (M `$ N) = cong₂ _`$_ (⟦-⟧ᵛ-compositional δ γ M) (⟦-⟧ᵛ-compositional δ γ N)
 
-    qˢ-distrib-∘ᵛˢᵉ : ∀ {σ : Sub Ψ Δ} {δ : Ext Δ Γ} → qˢ_ {A = A} (σ ∘ᵛ δ) ≈ᵛ qˢ σ ∘ᵛ qᵉ δ
-    qˢ-distrib-∘ᵛˢᵉ {σ = σ} = symᵛ (∘ᵛ-distrib-,ᵛ {σ = qˢ σ} _)
+    qˢ-distrib-∘ᵛˢᵉ = qᵛ-distrib-∘ᵛ ⦃ ExtVarSub ⦄ ⦃ SubVarSub ⦄ ⦃ ExtVarSub ⦄ ⦃ SubVarSub ⦄
 
     instance
       SubAppExtCompositionalSub : VarSubAppCompositional ⦃ SubVarSub ⦄ ⦃ ExtVarSub ⦄ ⦃ SubVarSub ⦄ ⦃ SubVarSub ⦄ ⦃ SubVarSub ⦄ ⦃ SubVarSub ⦄
       SubAppExtCompositionalSub .⟦-⟧ᵛ-compositional σ δ (`# x)   = refl
-      SubAppExtCompositionalSub .⟦-⟧ᵛ-compositional σ δ (`λ M)   = cong `λ_ (trans (⟦-⟧ᵛ-compositional (qˢ σ) (qᵉ δ) M) (sym (⟦-⟧ᵛ-extensional M (qˢ-distrib-∘ᵛˢᵉ {σ = σ}))))
+      SubAppExtCompositionalSub .⟦-⟧ᵛ-compositional σ δ (`λ M)   = cong `λ_ (trans (⟦-⟧ᵛ-compositional (qˢ σ) (qᵉ δ) M) (sym (⟦-⟧ᵛ-extensional M (qˢ-distrib-∘ᵛˢᵉ σ _))))
       SubAppExtCompositionalSub .⟦-⟧ᵛ-compositional σ δ (M `$ N) = cong₂ _`$_ (⟦-⟧ᵛ-compositional σ δ M) (⟦-⟧ᵛ-compositional σ δ N)
 
-    qˢ-distrib-∘ᵛᵉˢ : ∀ {δ : Ext Ψ Δ} {σ : Sub Δ Γ} → qˢ_ {A = A} (δ ∘ᵛ σ) ≈ᵛ qᵉ δ ∘ᵛ qˢ σ
-    qˢ-distrib-∘ᵛᵉˢ {δ = δ} {σ = σ} =
-      begin qˢ (δ ∘ᵛ σ)                    ≈⟨ ,ᵛ-congᵛˡ _ (∘ᵛ-assocᵛ _ _ σ) ⟩
-            ((qᵉ δ ∘ᵛ Wkᵛ) ∘ᵛ σ) ,ᵛ `#zero ≈˘⟨ ,ᵛ-congᵛˡ _ (∘ᵛ-assocᵛ _ _ σ) ⟩
-            (qᵉ δ ∘ᵛ Wkᵛ ∘ᵛ σ) ,ᵛ `#zero   ≈˘⟨ ∘ᵛ-distrib-,ᵛ ⦃ _ ⦄ ⦃ _ ⦄ ⦃ _ ⦄ ⦃ RawAppSub ⦃ ExtVarSub ⦄ ⦄ _ ⟩
-            qᵉ δ ∘ᵛ qˢ σ                   ∎
-      where
-        open VarSub-Reasoning ⦃ SubVarSub ⦄ _ _
+    qˢ-distrib-∘ᵛᵉˢ = qᵛ-distrib-∘ᵛ ⦃ ExtVarSub ⦄ ⦃ ExtVarSub ⦄ ⦃ SubVarSub ⦄ ⦃ SubVarSub ⦄
 
     instance
       ExtAppSubCompositionalSub : VarSubAppCompositional ⦃ ExtVarSub ⦄ ⦃ SubVarSub ⦄ ⦃ SubVarSub ⦄ ⦃ SubVarSub ⦄ ⦃ SubVarSub ⦄ ⦃ SubVarSub ⦄
       ExtAppSubCompositionalSub .⟦-⟧ᵛ-compositional δ σ (`# x)   = refl
-      ExtAppSubCompositionalSub .⟦-⟧ᵛ-compositional δ σ (`λ M)   = cong `λ_ (trans (⟦-⟧ᵛ-compositional (qᵉ δ) (qˢ σ) M) (sym (⟦-⟧ᵛ-extensional M (qˢ-distrib-∘ᵛᵉˢ {σ = σ}))))
+      ExtAppSubCompositionalSub .⟦-⟧ᵛ-compositional δ σ (`λ M)   = cong `λ_ (trans (⟦-⟧ᵛ-compositional (qᵉ δ) (qˢ σ) M) (sym (⟦-⟧ᵛ-extensional M (qˢ-distrib-∘ᵛᵉˢ _ σ))))
       ExtAppSubCompositionalSub .⟦-⟧ᵛ-compositional δ σ (M `$ N) = cong₂ _`$_ (⟦-⟧ᵛ-compositional δ σ M) (⟦-⟧ᵛ-compositional δ σ N)
 
-    qˢ-distrib-∘ᵛ : ∀ {σ : Sub Ψ Δ} {τ : Sub Δ Γ} → qˢ_ {A = A} (σ ∘ᵛ τ) ≈ᵛ qˢ σ ∘ᵛ qˢ τ
-    qˢ-distrib-∘ᵛ {σ = σ} {τ = τ} =
-      begin qˢ (σ ∘ᵛ τ)                    ≈⟨ ,ᵛ-congᵛˡ _ (∘ᵛ-assocᵛ _ σ τ) ⟩
-            ((qˢ σ ∘ᵛ Wkᵛ) ∘ᵛ τ) ,ᵛ `#zero ≈˘⟨ ,ᵛ-congᵛˡ _ (∘ᵛ-assocᵛ _ Wkᵛ τ) ⟩
-            (qˢ σ ∘ᵛ Wkᵛ ∘ᵛ τ) ,ᵛ `#zero   ≈˘⟨ ∘ᵛ-distrib-,ᵛ `#zero ⟩
-            qˢ σ ∘ᵛ qˢ τ                   ∎
-      where
-        open VarSub-Reasoning ⦃ SubVarSub ⦄ _ _
+    qˢ-distrib-∘ᵛ = qᵛ-distrib-∘ᵛ ⦃ ExtVarSub ⦄ ⦃ SubVarSub ⦄ ⦃ SubVarSub ⦄ ⦃ SubVarSub ⦄
 
     instance
       SubAppSubCompositionalSub : VarSubAppCompositional ⦃ SubVarSub ⦄ ⦃ SubVarSub ⦄ ⦃ SubVarSub ⦄ ⦃ SubVarSub ⦄ ⦃ SubVarSub ⦄ ⦃ SubVarSub ⦄
       SubAppSubCompositionalSub .⟦-⟧ᵛ-compositional σ τ (`# x)   = refl
-      SubAppSubCompositionalSub .⟦-⟧ᵛ-compositional σ τ (`λ M)   = cong `λ_ (trans (⟦-⟧ᵛ-compositional (qᵛ σ) (qᵛ τ) M) (sym (⟦-⟧ᵛ-extensional M (qˢ-distrib-∘ᵛ {τ = τ}))))
+      SubAppSubCompositionalSub .⟦-⟧ᵛ-compositional σ τ (`λ M)   = cong `λ_ (trans (⟦-⟧ᵛ-compositional (qᵛ σ) (qᵛ τ) M) (sym (⟦-⟧ᵛ-extensional M (qˢ-distrib-∘ᵛ _ τ))))
       SubAppSubCompositionalSub .⟦-⟧ᵛ-compositional σ τ (M `$ N) = cong₂ _`$_ (⟦-⟧ᵛ-compositional σ τ M) (⟦-⟧ᵛ-compositional σ τ N)
-
-    liftᵛ-distrib-,ᵛ : ∀ (δ : Ext Γ Δ) (x : A ∈ Γ) →
-                       liftᵛ∘ ⦃ _ ⦄ ⦃ SubVarSub ⦄ (δ ,ᵛ x) ≈ᵛ liftᵛ∘ δ ,ᵛ liftᵛ x
-    liftᵛ-distrib-,ᵛ _ _ (here refl) = refl
-    liftᵛ-distrib-,ᵛ _ _ (there _)   = refl
-
-    qˢ-liftᵛ≈ᵛliftᵛ-qᵉ : ∀ (δ : Ext Γ Δ) →
-                         qˢ_ {A = A} (liftᵛ∘ δ) ≈ᵛ liftᵛ∘ (qᵉ δ)
-    qˢ-liftᵛ≈ᵛliftᵛ-qᵉ δ = symᵛ (liftᵛ-distrib-,ᵛ (Wkᵛ ∘ᵛ δ) (here refl))
-
-    instance
-      ExtLiftSubApp : VarSubLiftApp ⦃ ExtVarSub ⦄ ⦃ SubVarSub ⦄ ⦃ SubVarSub ⦄ ⦃ SubVarSub ⦄
-      ExtLiftSubApp .liftᵛ-preserves-Appᵛ δ (`# x)   = refl
-      ExtLiftSubApp .liftᵛ-preserves-Appᵛ δ (`λ M)   = cong `λ_ (trans (⟦-⟧ᵛ-extensional M (qˢ-liftᵛ≈ᵛliftᵛ-qᵉ δ)) (liftᵛ-preserves-Appᵛ (qᵉ δ) M))
-      ExtLiftSubApp .liftᵛ-preserves-Appᵛ δ (M `$ N) = cong₂ _`$_ (liftᵛ-preserves-Appᵛ δ M) (liftᵛ-preserves-Appᵛ δ N)
 
     ----------------------------------------------------------
     -- Other Useful Properties for Extensions/Substitutions
@@ -350,7 +355,7 @@ module OpSem where
 
   module Properties where
     infixr 30 ⟦_⟧ᵉ⟶_
-    ⟦_⟧ᵉ⟶_ : ∀ {M M′ : Tm Δ A} (δ : Ext Γ Δ) → M ⟶ M′ → ⟦ δ ⟧ᵛ M ⟶ ⟦ δ ⟧ᵛ M′
+    ⟦_⟧ᵉ⟶_ : (δ : Ext Γ Δ) → ∀ {M M′ : Tm Δ A} → M ⟶ M′ → ⟦ δ ⟧ᵛ M ⟶ ⟦ δ ⟧ᵛ M′
     ⟦ δ ⟧ᵉ⟶ (`λ M⟶)           = `λ (⟦ qᵉ δ ⟧ᵉ⟶ M⟶)
     ⟦ δ ⟧ᵉ⟶ (M⟶ `$?)          = (⟦ δ ⟧ᵉ⟶ M⟶) `$?
     ⟦ δ ⟧ᵉ⟶ (?`$ M⟶)          = ?`$ (⟦ δ ⟧ᵉ⟶ M⟶)
@@ -394,18 +399,18 @@ module OpSem where
     infixr 7 qˢ⟦_⟧_
     qˢ⟦_⟧_ = qᵛ⟦_⟧_ ⦃ ExtVarSub ⦄ ⦃ SubVarSub ⦄ ⦃ SubVarSub ⦄
 
-    [qˢ[_]!ᵛ⟶_]_ : ∀ {L L′ : Tm Δ B} Ψ → L ⟶ L′ → (x : A ∈ _) → (qˢ⟦ Ψ ⟧ (!ᵛ L)) x ⟶* (qˢ⟦ Ψ ⟧ (!ᵛ L′)) x
-    [qˢ[ []    ]!ᵛ⟶ L⟶ ] x         = [!ᵛ⟶ L⟶ ] x
-    [qˢ[ _ ∷ Ψ ]!ᵛ⟶ L⟶ ] here refl = ε
-    [qˢ[ _ ∷ Ψ ]!ᵛ⟶ L⟶ ] there x   = ⟦ Wkᵛ ⟧ᵉ⟶* ([qˢ[ Ψ ]!ᵛ⟶ L⟶ ] x) 
+    [qˢ⟦_⟧!ᵛ⟶_]_ : ∀ {L L′ : Tm Δ B} Ψ → L ⟶ L′ → (x : A ∈ _) → (qˢ⟦ Ψ ⟧ (!ᵛ L)) x ⟶* (qˢ⟦ Ψ ⟧ (!ᵛ L′)) x
+    [qˢ⟦ []    ⟧!ᵛ⟶ L⟶ ] x         = [!ᵛ⟶ L⟶ ] x
+    [qˢ⟦ _ ∷ Ψ ⟧!ᵛ⟶ L⟶ ] here refl = ε
+    [qˢ⟦ _ ∷ Ψ ⟧!ᵛ⟶ L⟶ ] there x   = ⟦ Wkᵛ ⟧ᵉ⟶* ([qˢ⟦ Ψ ⟧!ᵛ⟶ L⟶ ] x) 
 
-    [|qˢ[_]!ᵛ⟶_|]_ : ∀ {L L′ : Tm Δ B} Ψ → L ⟶ L′ → (M : Tm _ A) → ⟦ qˢ⟦ Ψ ⟧ !ᵛ L ⟧ᵛ M ⟶* ⟦ qˢ⟦ Ψ ⟧ !ᵛ L′ ⟧ᵛ M
-    [|qˢ[ Ψ ]!ᵛ⟶ L⟶ |] `# x     = [qˢ[ Ψ ]!ᵛ⟶ L⟶ ] x
-    [|qˢ[ Ψ ]!ᵛ⟶ L⟶ |] (`λ M)   = ξ-of-⟶*′ _ `λ_ ([|qˢ[ _ ∷ Ψ ]!ᵛ⟶ L⟶ |] M)
-    [|qˢ[ Ψ ]!ᵛ⟶ L⟶ |] (M `$ N) = ξ-of-⟶*′ _ _`$? ([|qˢ[ Ψ ]!ᵛ⟶ L⟶ |] M) ◅◅ ξ-of-⟶*′ _ ?`$_ ([|qˢ[ Ψ ]!ᵛ⟶ L⟶ |] N)
+    ⟦qˢ⟦_⟧!ᵛ⟶_⟧ᵛ_ : ∀ {L L′ : Tm Δ B} Ψ → L ⟶ L′ → (M : Tm _ A) → ⟦ qˢ⟦ Ψ ⟧ !ᵛ L ⟧ᵛ M ⟶* ⟦ qˢ⟦ Ψ ⟧ !ᵛ L′ ⟧ᵛ M
+    ⟦qˢ⟦ Ψ ⟧!ᵛ⟶ L⟶ ⟧ᵛ `# x     = [qˢ⟦ Ψ ⟧!ᵛ⟶ L⟶ ] x
+    ⟦qˢ⟦ Ψ ⟧!ᵛ⟶ L⟶ ⟧ᵛ (`λ M)   = ξ-of-⟶*′ _ `λ_ (⟦qˢ⟦ _ ∷ Ψ ⟧!ᵛ⟶ L⟶ ⟧ᵛ M)
+    ⟦qˢ⟦ Ψ ⟧!ᵛ⟶ L⟶ ⟧ᵛ (M `$ N) = ξ-of-⟶*′ _ _`$? (⟦qˢ⟦ Ψ ⟧!ᵛ⟶ L⟶ ⟧ᵛ M) ◅◅ ξ-of-⟶*′ _ ?`$_ (⟦qˢ⟦ Ψ ⟧!ᵛ⟶ L⟶ ⟧ᵛ N)
 
-    [|!ᵛ⟶_|]_ : ∀ {L L′ : Tm Δ B} → L ⟶ L′ → (M : Tm _ A) → ⟦ Sub _ _ ∋ !ᵛ L ⟧ᵛ M ⟶* ⟦ Sub _ _ ∋ !ᵛ L′ ⟧ᵛ M
-    [|!ᵛ⟶_|]_ = [|qˢ[ [] ]!ᵛ⟶_|]_
+    ⟦!ᵛ⟶_⟧ᵛ_ : ∀ {L L′ : Tm Δ B} → L ⟶ L′ → (M : Tm _ A) → ⟦ Sub _ _ ∋ !ᵛ L ⟧ᵛ M ⟶* ⟦ Sub _ _ ∋ !ᵛ L′ ⟧ᵛ M
+    ⟦!ᵛ⟶_⟧ᵛ_ = ⟦qˢ⟦ [] ⟧!ᵛ⟶_⟧ᵛ_
 
     ⟶*-cases : M ⟶* M′ → M ≡ M′ ⊎ M′ +⟵ M
     ⟶*-cases =
@@ -459,8 +464,8 @@ module AccessibilitySN where
       acc λ where
         (`λ x) → `λ∈sn (Mrec x)
 
-    [|_|]∈sn : ∀ {M : Tm Γ A} (σ : Sub Δ Γ) → ⟦ σ ⟧ᵛ M ∈sn → M ∈sn
-    [| σ |]∈sn (acc [|σ|]Mrec) = acc λ M⟶ → [| σ |]∈sn ([|σ|]Mrec (⟦ σ ⟧ˢ⟶ M⟶))
+    ⟦_⟧ᵛ∈sn : ∀ {M : Tm Γ A} (σ : Sub Δ Γ) → ⟦ σ ⟧ᵛ M ∈sn → M ∈sn
+    ⟦ σ ⟧ᵛ∈sn (acc ⟦σ⟧Mrec) = acc λ M⟶ → ⟦ σ ⟧ᵛ∈sn (⟦σ⟧Mrec (⟦ σ ⟧ˢ⟶ M⟶))
 
     `$∈sn-invˡ : M `$ N ∈sn → M ∈sn
     `$∈sn-invˡ (acc MNrec) = acc λ M⟶ → `$∈sn-invˡ (MNrec (M⟶ `$?))
@@ -476,7 +481,7 @@ module AccessibilitySN where
           acc λ where
             ((`λ M⟶) `$?)   → go refl (Lrec (subst (_ +⟵_) eq [ ⟦ !ᵛ _ ⟧ˢ⟶ M⟶ ])) Nsn
             (       ?`$ N⟶) →
-              case ⟶*-cases ([|!ᵛ⟶ N⟶ |] M) of λ where
+              case ⟶*-cases (⟦!ᵛ⟶ N⟶ ⟧ᵛ M) of λ where
                 (inj₁ eq′) → go (trans (sym eq′) eq) Lsn (Nrec N⟶)
                 (inj₂ M⟶+) → go refl (Lrec (subst (_ +⟵_) eq M⟶+)) (Nrec N⟶)
             `→β             → subst _∈sn (sym eq) (TransClosure.accessible⁻ _⟵_ Lsn)
@@ -502,7 +507,7 @@ module AccessibilitySN where
                                                                       (⟶sn-⟶-confluence M⟶sn M⟶)
     ⟶sn-⟶-confluence                   (M⟶sn `$-) (?`$ N⟶)        = inj₂ (_ , ?`$ N⟶ ◅ ε , M⟶sn `$-)
     ⟶sn-⟶-confluence                   (`→β Nsn)  ((`λ M⟶) `$?)   = inj₂ (_ , ⟦ !ᵛ _ ⟧ˢ⟶ M⟶ ◅ ε , `→β Nsn)
-    ⟶sn-⟶-confluence {M = (`λ M) `$ _} (`→β Nsn)  (       ?`$ N⟶) = inj₂ (_ , [|!ᵛ⟶ N⟶ |] M , `→β (acc-inverse Nsn N⟶))
+    ⟶sn-⟶-confluence {M = (`λ M) `$ _} (`→β Nsn)  (       ?`$ N⟶) = inj₂ (_ , ⟦!ᵛ⟶ N⟶ ⟧ᵛ M , `→β (acc-inverse Nsn N⟶))
     ⟶sn-⟶-confluence                   (`→β Nsn)  `→β             = inj₁ refl
 
     `$∈sn-closed⁻¹ : M ∈sn → N ∈sn → M ⟶sn M′ → M′ `$ N ∈sn → M `$ N ∈sn
@@ -567,44 +572,44 @@ module InductiveSN where
            (`λ M) `$ N ⟶SN ⟦ Sub _ _ ∋ !ᵛ N ⟧ᵛ M
 
   module Properties where
-    infixr 30 ext[_]∈SN_
-    infixr 30 ext[_]∈SNe_
-    infixr 30 ext[_]⟶SN_
-    ext[_]∈SN_  : ∀ {M : Tm Γ A} (δ : Ext Δ Γ) → M ∈SN → ⟦ δ ⟧ᵛ M ∈SN
-    ext[_]∈SNe_ : ∀ {M : Tm Γ A} (δ : Ext Δ Γ) → M ∈SNe → ⟦ δ ⟧ᵛ M ∈SNe
-    ext[_]⟶SN_  : ∀ {M : Tm Γ A} (δ : Ext Δ Γ) → M ⟶SN M′ → ⟦ δ ⟧ᵛ M ⟶SN ⟦ δ ⟧ᵛ M′
+    infixr 30 ⟦_⟧ᵉ∈SN_
+    infixr 30 ⟦_⟧ᵉ∈SNe_
+    infixr 30 ⟦_⟧ᵉ⟶SN_
+    ⟦_⟧ᵉ∈SN_  : ∀ {M : Tm Γ A} (δ : Ext Δ Γ) → M ∈SN → ⟦ δ ⟧ᵛ M ∈SN
+    ⟦_⟧ᵉ∈SNe_ : ∀ {M : Tm Γ A} (δ : Ext Δ Γ) → M ∈SNe → ⟦ δ ⟧ᵛ M ∈SNe
+    ⟦_⟧ᵉ⟶SN_  : ∀ {M : Tm Γ A} (δ : Ext Δ Γ) → M ⟶SN M′ → ⟦ δ ⟧ᵛ M ⟶SN ⟦ δ ⟧ᵛ M′
 
-    ext[ δ ]∈SN (`λ MSN)        = `λ (ext[ qᵉ δ ]∈SN MSN)
-    ext[ δ ]∈SN `Ne MSNe        = `Ne (ext[ δ ]∈SNe MSNe)
-    ext[ δ ]∈SN `bclo M⟶SN M′SN = `bclo (ext[ δ ]⟶SN M⟶SN) (ext[ δ ]∈SN M′SN)
+    ⟦ δ ⟧ᵉ∈SN (`λ MSN)        = `λ (⟦ qᵉ δ ⟧ᵉ∈SN MSN)
+    ⟦ δ ⟧ᵉ∈SN `Ne MSNe        = `Ne (⟦ δ ⟧ᵉ∈SNe MSNe)
+    ⟦ δ ⟧ᵉ∈SN `bclo M⟶SN M′SN = `bclo (⟦ δ ⟧ᵉ⟶SN M⟶SN) (⟦ δ ⟧ᵉ∈SN M′SN)
 
-    ext[ δ ]∈SNe (`# x)        = `# δ x
-    ext[ δ ]∈SNe (MSNe `$ NSN) = (ext[ δ ]∈SNe MSNe) `$ (ext[ δ ]∈SN NSN)
+    ⟦ δ ⟧ᵉ∈SNe (`# x)        = `# δ x
+    ⟦ δ ⟧ᵉ∈SNe (MSNe `$ NSN) = (⟦ δ ⟧ᵉ∈SNe MSNe) `$ (⟦ δ ⟧ᵉ∈SN NSN)
 
-    ext[ δ ]⟶SN (M⟶SN `$-)              = (ext[ δ ]⟶SN M⟶SN) `$-
-    ext[ δ ]⟶SN `→β {M = M} {N = N} NSN
+    ⟦ δ ⟧ᵉ⟶SN (M⟶SN `$-)              = (⟦ δ ⟧ᵉ⟶SN M⟶SN) `$-
+    ⟦ δ ⟧ᵉ⟶SN `→β {M = M} {N = N} NSN
       rewrite ⟦-⟧ᵛ-compositional δ (!ᵛ N) M
             | sym (⟦-⟧ᵛ-extensional M (!ᵛ-∘ᵛ-qᵉ δ N))
-            | sym (⟦-⟧ᵛ-compositional (!ᵛ ⟦ δ ⟧ᵛ N) (qᵉ δ) M) = `→β (ext[ δ ]∈SN NSN)
+            | sym (⟦-⟧ᵛ-compositional (!ᵛ ⟦ δ ⟧ᵛ N) (qᵉ δ) M) = `→β (⟦ δ ⟧ᵉ∈SN NSN)
 
-    infixr 30 ext[_]⁻¹∈SN_of_by_
-    infixr 30 ext[_]⁻¹∈SNe_of_by_
-    infixr 30 ext[_]⁻¹⟶SN_of_by_
-    ext[_]⁻¹∈SN_of_by_  : ∀ {M₀ : Tm Δ A} (δ : Ext Δ Γ) → M₀ ∈SN → ∀ M → M₀ ≡ ⟦ δ ⟧ᵛ M → M ∈SN
-    ext[_]⁻¹∈SNe_of_by_ : ∀ {M₀ : Tm Δ A} (δ : Ext Δ Γ) → M₀ ∈SNe → ∀ M → M₀ ≡ ⟦ δ ⟧ᵛ M → M ∈SNe
-    ext[_]⁻¹⟶SN_of_by_  : ∀ {M₀ : Tm Δ A} (δ : Ext Δ Γ) → M₀ ⟶SN M′₀ → ∀ M → M₀ ≡ ⟦ δ ⟧ᵛ M → ∃[ M′ ] M ⟶SN M′ × ⟦ δ ⟧ᵛ M′ ≡ M′₀
+    infixr 30 ⟦_⟧ᵉ⁻¹∈SN_of_by_
+    infixr 30 ⟦_⟧ᵉ⁻¹∈SNe_of_by_
+    infixr 30 ⟦_⟧ᵉ⁻¹⟶SN_of_by_
+    ⟦_⟧ᵉ⁻¹∈SN_of_by_  : ∀ {M₀ : Tm Δ A} (δ : Ext Δ Γ) → M₀ ∈SN → ∀ M → M₀ ≡ ⟦ δ ⟧ᵛ M → M ∈SN
+    ⟦_⟧ᵉ⁻¹∈SNe_of_by_ : ∀ {M₀ : Tm Δ A} (δ : Ext Δ Γ) → M₀ ∈SNe → ∀ M → M₀ ≡ ⟦ δ ⟧ᵛ M → M ∈SNe
+    ⟦_⟧ᵉ⁻¹⟶SN_of_by_  : ∀ {M₀ : Tm Δ A} (δ : Ext Δ Γ) → M₀ ⟶SN M′₀ → ∀ M → M₀ ≡ ⟦ δ ⟧ᵛ M → ∃[ M′ ] M ⟶SN M′ × ⟦ δ ⟧ᵛ M′ ≡ M′₀
 
-    ext[ δ ]⁻¹∈SN `λ M₀SN           of `λ M by refl = `λ (ext[ qᵉ δ ]⁻¹∈SN M₀SN of M by refl)
-    ext[ δ ]⁻¹∈SN `Ne M₀SNe         of M    by eq   = `Ne (ext[ δ ]⁻¹∈SNe M₀SNe of M by eq)
-    ext[ δ ]⁻¹∈SN `bclo M₀⟶SN M′₀SN of M    by eq
-      with _ , M⟶SN , refl ← ext[ δ ]⁻¹⟶SN M₀⟶SN of M by eq = `bclo M⟶SN (ext[ δ ]⁻¹∈SN M′₀SN of _ by refl)
+    ⟦ δ ⟧ᵉ⁻¹∈SN `λ M₀SN           of `λ M by refl = `λ (⟦ qᵉ δ ⟧ᵉ⁻¹∈SN M₀SN of M by refl)
+    ⟦ δ ⟧ᵉ⁻¹∈SN `Ne M₀SNe         of M    by eq   = `Ne (⟦ δ ⟧ᵉ⁻¹∈SNe M₀SNe of M by eq)
+    ⟦ δ ⟧ᵉ⁻¹∈SN `bclo M₀⟶SN M′₀SN of M    by eq
+      with _ , M⟶SN , refl ← ⟦ δ ⟧ᵉ⁻¹⟶SN M₀⟶SN of M by eq = `bclo M⟶SN (⟦ δ ⟧ᵉ⁻¹∈SN M′₀SN of _ by refl)
 
-    ext[ δ ]⁻¹∈SNe `# y          of `# x   by eq = `# x
-    ext[ δ ]⁻¹∈SNe M₀SNe `$ N₀SN of M `$ N by refl = (ext[ δ ]⁻¹∈SNe M₀SNe of M by refl) `$ (ext[ δ ]⁻¹∈SN N₀SN of N by refl)
+    ⟦ δ ⟧ᵉ⁻¹∈SNe `# y          of `# x   by eq = `# x
+    ⟦ δ ⟧ᵉ⁻¹∈SNe M₀SNe `$ N₀SN of M `$ N by refl = (⟦ δ ⟧ᵉ⁻¹∈SNe M₀SNe of M by refl) `$ (⟦ δ ⟧ᵉ⁻¹∈SN N₀SN of N by refl)
 
-    ext[ δ ]⁻¹⟶SN M₀⟶SN `$- of M `$ N      by refl
-      with _ , M⟶SN , refl ← ext[ δ ]⁻¹⟶SN M₀⟶SN of M by refl = _ , M⟶SN `$- , refl
-    ext[ δ ]⁻¹⟶SN `→β N₀SN  of (`λ M) `$ N by refl = _ , `→β (ext[ δ ]⁻¹∈SN N₀SN of N by refl)
+    ⟦ δ ⟧ᵉ⁻¹⟶SN M₀⟶SN `$- of M `$ N      by refl
+      with _ , M⟶SN , refl ← ⟦ δ ⟧ᵉ⁻¹⟶SN M₀⟶SN of M by refl = _ , M⟶SN `$- , refl
+    ⟦ δ ⟧ᵉ⁻¹⟶SN `→β N₀SN  of (`λ M) `$ N by refl = _ , `→β (⟦ δ ⟧ᵉ⁻¹∈SN N₀SN of N by refl)
                                                    , (begin _ ≡⟨ ⟦-⟧ᵛ-compositional δ (!ᵛ N) M ⟩
                                                             _ ≡˘⟨ ⟦-⟧ᵛ-extensional M (!ᵛ-∘ᵛ-qᵉ δ N) ⟩
                                                             _ ≡˘⟨ ⟦-⟧ᵛ-compositional (!ᵛ ⟦ δ ⟧ᵛ N) (qᵉ δ) M ⟩
@@ -612,24 +617,24 @@ module InductiveSN where
       where
         open ≡-Reasoning
 
-    infixr 30 ext[_]⁻¹∈SN_
-    ext[_]⁻¹∈SN_ : ∀ {M : Tm Γ A} (δ : Ext Δ Γ) → ⟦ δ ⟧ᵛ M ∈SN → M ∈SN
-    ext[ δ ]⁻¹∈SN [δ]MSN = ext[ δ ]⁻¹∈SN [δ]MSN of _ by refl
+    infixr 30 ⟦_⟧ᵉ⁻¹∈SN_
+    ⟦_⟧ᵉ⁻¹∈SN_ : ∀ {M : Tm Γ A} (δ : Ext Δ Γ) → ⟦ δ ⟧ᵛ M ∈SN → M ∈SN
+    ⟦ δ ⟧ᵉ⁻¹∈SN [δ]MSN = ⟦ δ ⟧ᵉ⁻¹∈SN [δ]MSN of _ by refl
 
-    infixr 30 ext[_]⁻¹∈SNe_
-    ext[_]⁻¹∈SNe_ : ∀ {M : Tm Γ A} (δ : Ext Δ Γ) → ⟦ δ ⟧ᵛ M ∈SNe → M ∈SNe
-    ext[ δ ]⁻¹∈SNe [δ]MSNe = ext[ δ ]⁻¹∈SNe [δ]MSNe of _ by refl
+    infixr 30 ⟦_⟧ᵉ⁻¹∈SNe_
+    ⟦_⟧ᵉ⁻¹∈SNe_ : ∀ {M : Tm Γ A} (δ : Ext Δ Γ) → ⟦ δ ⟧ᵛ M ∈SNe → M ∈SNe
+    ⟦ δ ⟧ᵉ⁻¹∈SNe [δ]MSNe = ⟦ δ ⟧ᵉ⁻¹∈SNe [δ]MSNe of _ by refl
 
-    infixr 30 ext[_]⁻¹⟶SN_
-    ext[_]⁻¹⟶SN_ : ∀ {M : Tm Γ A} (δ : Ext Δ Γ) → ⟦ δ ⟧ᵛ M ⟶SN M′ → ∃[ M″ ] M ⟶SN M″ × ⟦ δ ⟧ᵛ M″ ≡ M′
-    ext[ δ ]⁻¹⟶SN [δ]M⟶SN = ext[ δ ]⁻¹⟶SN [δ]M⟶SN of _ by refl
+    infixr 30 ⟦_⟧ᵉ⁻¹⟶SN_
+    ⟦_⟧ᵉ⁻¹⟶SN_ : ∀ {M : Tm Γ A} (δ : Ext Δ Γ) → ⟦ δ ⟧ᵛ M ⟶SN M′ → ∃[ M″ ] M ⟶SN M″ × ⟦ δ ⟧ᵛ M″ ≡ M′
+    ⟦ δ ⟧ᵉ⁻¹⟶SN [δ]M⟶SN = ⟦ δ ⟧ᵉ⁻¹⟶SN [δ]M⟶SN of _ by refl
 
     ∈SN-extensionality : M `$ (`# x) ∈SN → M ∈SN
     ∈SN-extensionality (`Ne (MSNe `$ xSN))                                = `Ne MSNe
     ∈SN-extensionality (`bclo                   (Mx⟶SN `$-)        M′xSN) = `bclo Mx⟶SN (∈SN-extensionality M′xSN)
     ∈SN-extensionality (`bclo {M = (`λ M) `$ _} (`→β (`Ne (`# x))) M′xSN)
-      rewrite sym (⟦-⟧ᵛ-extensional M (liftᵛ-distrib-,ᵛ Idᵛ x))
-            | liftᵛ-preserves-Appᵛ (!ᵛ x) M                               = `λ (ext[ !ᵛ x ]⁻¹∈SN M′xSN)
+      rewrite sym (⟦-⟧ᵛ-extensional ⦃ SubVarSub ⦄ M (liftᵛ-preserves-,ᵛ Idᵛ x))
+            | liftᵛ-preserves-Appᵛ (!ᵛ x) M                               = `λ (⟦ !ᵛ x ⟧ᵉ⁻¹∈SN M′xSN)
 
 open InductiveSN hiding (module Properties) public
 open InductiveSN.Properties public
@@ -680,13 +685,13 @@ module LogicalRelation where
     reflect : M ∈SNe → M ∈ℜ[ A ]
 
     reify {A = base}   Mℜ = Mℜ
-    reify {A = _ `→ _} Mℜ = ext[ Wkᵛ ]⁻¹∈SN ∈SN-extensionality (reify (Mℜ Wkᵛ (reflect (`# here refl))))
+    reify {A = _ `→ _} Mℜ = ⟦ Wkᵛ ⟧ᵉ⁻¹∈SN ∈SN-extensionality (reify (Mℜ Wkᵛ (reflect (`# here refl))))
 
     bclosed {A = base}   M⟶SN M′ℜ      = `bclo M⟶SN M′ℜ
-    bclosed {A = _ `→ _} M⟶SN M′ℜ δ Nℜ = bclosed ((ext[ δ ]⟶SN M⟶SN) `$-) (M′ℜ δ Nℜ)
+    bclosed {A = _ `→ _} M⟶SN M′ℜ δ Nℜ = bclosed ((⟦ δ ⟧ᵉ⟶SN M⟶SN) `$-) (M′ℜ δ Nℜ)
 
     reflect {A = base}   MSNe      = `Ne MSNe
-    reflect {A = _ `→ _} MSNe δ Nℜ = reflect ((ext[ δ ]∈SNe MSNe) `$ (reify Nℜ))
+    reflect {A = _ `→ _} MSNe δ Nℜ = reflect ((⟦ δ ⟧ᵉ∈SNe MSNe) `$ (reify Nℜ))
 
     liftᵛ∈ℜs : ∀ Δ (δ : Ext Γ Δ) → liftᵛ∘ δ ∈ℜs[ Δ ]
     liftᵛ∈ℜs []      δ = tt
@@ -695,16 +700,16 @@ module LogicalRelation where
     Idˢ∈ℜs : ∀ Γ → Idᵛ ∈ℜs[ Γ ]
     Idˢ∈ℜs Γ = liftᵛ∈ℜs Γ Idᵛ
 
-    infixr 30 ext[_]∈ℜ_
-    ext[_]∈ℜ_ : ∀ (δ : Ext Γ Δ) → M ∈ℜ[ A ] → ⟦ δ ⟧ᵛ M ∈ℜ[ A ]
-    ext[_]∈ℜ_ {A = base}           δ Mℜ      = ext[ δ ]∈SN Mℜ
-    ext[_]∈ℜ_ {A = _ `→ _} {M = M} δ Mℜ ρ Nℜ
+    infixr 30 ⟦_⟧ᵉ∈ℜ_
+    ⟦_⟧ᵉ∈ℜ_ : ∀ (δ : Ext Γ Δ) → M ∈ℜ[ A ] → ⟦ δ ⟧ᵛ M ∈ℜ[ A ]
+    ⟦_⟧ᵉ∈ℜ_ {A = base}           δ Mℜ      = ⟦ δ ⟧ᵉ∈SN Mℜ
+    ⟦_⟧ᵉ∈ℜ_ {A = _ `→ _} {M = M} δ Mℜ ρ Nℜ
       rewrite ⟦-⟧ᵛ-compositional ρ δ M       = Mℜ (ρ ∘ᵛ δ) Nℜ
 
-    infixr 30 ext[_]∈ℜs_
-    ext[_]∈ℜs_ : ∀ (δ : Ext Γ Δ) → σ ∈ℜs[ Ψ ] → δ ∘ᵛ σ ∈ℜs[ Ψ ]
-    ext[_]∈ℜs_ {Ψ = []}    δ σℜ = tt
-    ext[_]∈ℜs_ {Ψ = _ ∷ _} δ σℜ = ext[ δ ]∈ℜs σℜ .proj₁ , ext[ δ ]∈ℜ (σℜ .proj₂)
+    infixr 30 ⟦_⟧ᵉ∈ℜs_
+    ⟦_⟧ᵉ∈ℜs_ : ∀ (δ : Ext Γ Δ) → σ ∈ℜs[ Ψ ] → δ ∘ᵛ σ ∈ℜs[ Ψ ]
+    ⟦_⟧ᵉ∈ℜs_ {Ψ = []}    δ σℜ = tt
+    ⟦_⟧ᵉ∈ℜs_ {Ψ = _ ∷ _} δ σℜ = ⟦ δ ⟧ᵉ∈ℜs σℜ .proj₁ , ⟦ δ ⟧ᵉ∈ℜ (σℜ .proj₂)
 
     fundamental-lemma-∈ : ∀ x → σ ∈ℜs[ Δ ] → σ x ∈ℜ[ A ]
     fundamental-lemma-∈ (here refl) σℜ = σℜ .proj₂
@@ -713,10 +718,10 @@ module LogicalRelation where
     fundamental-lemma : ∀ {σ : Sub Γ Δ} (M : Tm Δ A) → σ ∈ℜs[ Δ ] → ⟦ σ ⟧ᵛ M ∈ℜ[ A ]
     fundamental-lemma         (`# x)   σℜ          = fundamental-lemma-∈ x σℜ
     fundamental-lemma {σ = σ} (`λ M)   σℜ δ {N} Nℜ
-      with Mℜ ← fundamental-lemma {σ = (δ ∘ᵛ σ) ,ᵛ _} M ((ext[ δ ]∈ℜs σℜ) , Nℜ)
+      with Mℜ ← fundamental-lemma {σ = (δ ∘ᵛ σ) ,ᵛ _} M ((⟦ δ ⟧ᵉ∈ℜs σℜ) , Nℜ)
         rewrite sym (⟦-⟧ᵛ-extensional M (!ᵛ-∘ᵛ-qˢ′ (δ ∘ᵛ σ) N))
               | sym (⟦-⟧ᵛ-compositional (!ᵛ N) (qˢ (δ ∘ᵛ σ)) M)
-              | ⟦-⟧ᵛ-extensional M (qˢ-distrib-∘ᵛᵉˢ {δ = δ} {σ = σ})
+              | ⟦-⟧ᵛ-extensional M (qˢ-distrib-∘ᵛᵉˢ δ σ)
               | sym (⟦-⟧ᵛ-compositional (qᵉ δ) (qˢ σ) M) = bclosed (`→β (reify Nℜ)) Mℜ
     fundamental-lemma {σ = σ} (M `$ N) σℜ
       rewrite sym (⟦Idᵉ⟧ᵛ-id (⟦ σ ⟧ᵛ M))           = fundamental-lemma M σℜ Idᵛ (fundamental-lemma N σℜ)
