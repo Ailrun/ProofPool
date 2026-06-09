@@ -2,21 +2,16 @@
 module SN.LogRel.STLC where
 
 open import Agda.Primitive using (Level; lzero)
-open import Data.Empty as ⊥
-open import Data.List as List hiding ([_])
-open import Data.List.Membership.Propositional as List
-import Data.List.Properties as List
-open import Data.List.Relation.Unary.Any as Any using (here; there)
-import Data.List.Relation.Unary.Any.Properties as Any
-open import Data.Nat as ℕ
-import Data.Nat.Properties as ℕ
+open import Data.List hiding ([_])
+open import Data.List.Membership.Propositional using (_∈_)
+open import Data.List.Relation.Unary.Any using (here; there)
 open import Data.Product as Σ
 open import Data.Sum as ⊎
 open import Data.Unit as ⊤
 open import Function.Base
 open import Function.Core using (Morphism)
 open import Induction.WellFounded using (WellFounded; Acc; acc; acc-inverse)
-open import Relation.Binary using (IsEquivalence; REL; Rel; Setoid; Symmetric; Trans; Transitive; _Preserves_⟶_; _Preserves₂_⟶_⟶_; _=[_]⇒_)
+open import Relation.Binary using (REL; Rel; Setoid; Symmetric; Trans; Transitive; _Preserves_⟶_; _Preserves₂_⟶_⟶_; _=[_]⇒_)
 open import Relation.Binary.Construct.Closure.ReflexiveTransitive using (Star; ε; _◅_; _◅◅_)
 import Relation.Binary.Construct.Closure.ReflexiveTransitive as Star
 import Relation.Binary.Construct.Closure.ReflexiveTransitive.Properties as Star
@@ -85,7 +80,6 @@ module Syntax where
     ExtVarSub : VarSubBase (flip _∈_)
     ExtVarSub = record {}
 
-  Ext : Rel Ctx _
   Ext = VarSub ⦃ ExtVarSub ⦄
 
   instance
@@ -102,7 +96,6 @@ module Syntax where
     SubVarSub : VarSubBase Tm
     SubVarSub = record {}
 
-  Sub : Rel Ctx _
   Sub = VarSub ⦃ SubVarSub ⦄
 
   instance
