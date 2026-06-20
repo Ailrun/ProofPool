@@ -5,7 +5,7 @@ open import Data.List.Membership.Propositional as List
 open import Data.List.Relation.Unary.Any as Any using (here; there)
 open import Data.Product as Σ
 open import Data.Sum as ⊎
-open import Function using (case_returning_of_; flip; id; _on_; _∋_; _∘_)
+open import Function using (case_returning_of_; flip; id; it; _on_; _∋_; _∘_)
 open import Relation.Binary using (IsEquivalence; Reflexive; REL; Rel; Setoid; Symmetric; Transitive; _Preserves_⟶_; _Preserves₂_⟶_⟶_; _⇒_)
 import Relation.Binary as 𝟚
 open import Relation.Binary.PropositionalEquality using (_≡_; refl; cong; subst; sym; trans; _≗_)
@@ -75,9 +75,9 @@ module _
   ⦃ varSub₂ : VarSubBase {ℓ₂} R₂ ⦄ where
   record VarSubLiftCong
     ⦃ _ : RawVarSubLift ⦃ varSub₁ ⦄ ⦃ varSub₂ ⦄ ⦄
-    : Set (ℓ₀ ⊔ ℓ₂) where
+    : Set (ℓ₀ ⊔ ℓ₁ ⊔ ℓ₂) where
     field
-      liftᵛ-congᵛ : liftᵛ∘ Preserves _≈ᵛ_ {Δ = Δ} {Γ} ⟶ _≈ᵛ_
+      liftᵛ-congᵛ : liftᵛ∘ ⦃ varSub₁ ⦄ ⦃ varSub₂ ⦄ Preserves _≈ᵛ_ {Δ = Δ} {Γ} ⟶ _≈ᵛ_
 
   open VarSubLiftCong ⦃...⦄ public
 
@@ -87,7 +87,7 @@ module _
     ⦃ _ : RawVarSubLift ⦃ varSub₁ ⦄ ⦃ varSub₂ ⦄ ⦄
     : Set (ℓ₀ ⊔ ℓ₂) where
     field
-      liftᵛ-preserves-Idᵛ : liftᵛ∘ Idᵛ ≈ᵛ Idᵛ {Γ = Γ}
+      liftᵛ-preserves-Idᵛ : liftᵛ∘ ⦃ varSub₁ ⦄ Idᵛ ≈ᵛ Idᵛ ⦃ varSub₂ ⦄ {Γ = Γ}
 
   open VarSubLiftId ⦃...⦄ public
 
@@ -97,7 +97,7 @@ module _
     ⦃ _ : RawVarSubLift ⦃ varSub₁ ⦄ ⦃ varSub₂ ⦄ ⦄
     : Set (ℓ₀ ⊔ ℓ₂) where
     field
-      liftᵛ-preserves-Wkᵛ : liftᵛ∘ Wkᵛ ≈ᵛ Wkᵛ {A = A} {Γ}
+      liftᵛ-preserves-Wkᵛ : liftᵛ∘ ⦃ varSub₁ ⦄ Wkᵛ ≈ᵛ Wkᵛ ⦃ varSub₂ ⦄ {A = A} {Γ}
 
   open VarSubLiftWk ⦃...⦄ public
 
@@ -107,23 +107,46 @@ module _
     ⦃ _ : RawVarSubLift ⦃ varSub₁ ⦄ ⦃ varSub₂ ⦄ ⦄
     : Set (ℓ₀ ⊔ ℓ₂) where
     field
-      liftᵛ-preserves-R-headᵛ : liftᵛ ⦃ varSub₁ ⦄ ⦃ varSub₂ ⦄ R-headᵛ ≡ R-headᵛ {A = A} {Γ}
+      liftᵛ-preserves-R-headᵛ : liftᵛ ⦃ varSub₁ ⦄ R-headᵛ ≡ R-headᵛ ⦃ varSub₂ ⦄ {A = A} {Γ}
 
   open VarSubLiftOutHead ⦃...⦄ public
 
-module _ ⦃ _ : VarSubBase {ℓ₁} R₁ ⦄ where
-  instance
-    VarSubLiftIdSelf : ⦃ _ : RawVarSubId ⦄ → VarSubLiftId
-    VarSubLiftIdSelf .liftᵛ-preserves-Idᵛ = reflexiveᵛ Idᵛ
-    {-# OVERLAPPABLE VarSubLiftIdSelf #-}
+instance
+  VarSubLiftIdSelf : ⦃ _ : VarSubBase R ⦄ ⦃ _ : RawVarSubId ⦄ → VarSubLiftId
+  VarSubLiftIdSelf .liftᵛ-preserves-Idᵛ = reflexiveᵛ Idᵛ
+  {-# OVERLAPPABLE VarSubLiftIdSelf #-}
 
-    VarSubLiftWkSelf : ⦃ _ : RawVarSubWk ⦄ → VarSubLiftWk
-    VarSubLiftWkSelf .liftᵛ-preserves-Wkᵛ = reflexiveᵛ Wkᵛ
-    {-# OVERLAPPABLE VarSubLiftWkSelf #-}
+  VarSubLiftWkSelf : ⦃ _ : VarSubBase R ⦄ ⦃ _ : RawVarSubWk ⦄ → VarSubLiftWk
+  VarSubLiftWkSelf .liftᵛ-preserves-Wkᵛ = reflexiveᵛ Wkᵛ
+  {-# OVERLAPPABLE VarSubLiftWkSelf #-}
 
-    VarSubLiftOutHeadSelf : ⦃ _ : RawVarSubOutHead ⦄ → VarSubLiftOutHead
-    VarSubLiftOutHeadSelf .liftᵛ-preserves-R-headᵛ = refl
-    {-# OVERLAPPABLE VarSubLiftOutHeadSelf #-}
+  VarSubLiftOutHeadSelf : ⦃ _ : VarSubBase R ⦄ ⦃ _ : RawVarSubOutHead ⦄ → VarSubLiftOutHead
+  VarSubLiftOutHeadSelf .liftᵛ-preserves-R-headᵛ = refl
+  {-# OVERLAPPABLE VarSubLiftOutHeadSelf #-}
+
+  VarSubLiftIdLiftId : ⦃ varSub₁ : VarSubBase R₁ ⦄
+                       ⦃ varSub₂ : VarSubBase R₂ ⦄
+                       ⦃ varSubId₁ : RawVarSubId ⦃ varSub₁ ⦄ ⦄
+                       ⦃ _ : RawVarSubLift ⦃ varSub₁ ⦄ ⦃ varSub₂ ⦄ ⦄ →
+                       VarSubLiftId ⦃ _ ⦄ ⦃ _ ⦄ ⦃ it ⦄ ⦃ RawVarSubLiftId ⦃ _ ⦄ ⦃ varSub₂ ⦄ ⦄
+  VarSubLiftIdLiftId .liftᵛ-preserves-Idᵛ = reflexiveᵛ (liftᵛ∘ Idᵛ)
+  {-# OVERLAPPABLE VarSubLiftIdLiftId #-}
+
+  VarSubLiftWkLiftWk : ⦃ varSub₁ : VarSubBase R₁ ⦄
+                       ⦃ varSub₂ : VarSubBase R₂ ⦄
+                       ⦃ varSubWk₁ : RawVarSubWk ⦃ varSub₁ ⦄ ⦄
+                       ⦃ _ : RawVarSubLift ⦃ varSub₁ ⦄ ⦃ varSub₂ ⦄ ⦄ →
+                       VarSubLiftWk ⦃ _ ⦄ ⦃ _ ⦄ ⦃ it ⦄ ⦃ RawVarSubLiftWk ⦃ _ ⦄ ⦃ varSub₂ ⦄ ⦄
+  VarSubLiftWkLiftWk .liftᵛ-preserves-Wkᵛ = reflexiveᵛ (liftᵛ∘ Wkᵛ)
+  {-# OVERLAPPABLE VarSubLiftWkLiftWk #-}
+
+  VarSubLiftOutHeadLiftOutHead : ⦃ varSub₁ : VarSubBase R₁ ⦄
+                                 ⦃ varSub₂ : VarSubBase R₂ ⦄
+                                 ⦃ varSubOutHead₁ : RawVarSubOutHead ⦃ varSub₁ ⦄ ⦄
+                                 ⦃ _ : RawVarSubLift ⦃ varSub₁ ⦄ ⦃ varSub₂ ⦄ ⦄ →
+                                 VarSubLiftOutHead ⦃ _ ⦄ ⦃ _ ⦄ ⦃ it ⦄ ⦃ RawVarSubLiftOutHead ⦃ _ ⦄ ⦃ varSub₂ ⦄ ⦄
+  VarSubLiftOutHeadLiftOutHead .liftᵛ-preserves-R-headᵛ = refl
+  {-# OVERLAPPABLE VarSubLiftOutHeadLiftOutHead #-}
 
 module _
   ⦃ varSub₁ : VarSubBase {ℓ₁} R₁ ⦄
@@ -171,7 +194,7 @@ module _
     : Set (ℓ₀ ⊔ ℓ₁ ⊔ ℓ₂ ⊔ ℓ₃) where
     field
       ⟦-⟧ᵛ-extensional : ∀ (M : R₂ Γ A) →
-                         flip Appᵛ M Preserves _≈ᵛ₁_ {Δ = Δ} ⟶ _≡_
+                         (λ (δ : VarSub₁ _ _) → ⟦ δ ⟧ᵛ M) Preserves _≈ᵛ₁_ {Δ = Δ} ⟶ _≡_
 
     ∘ᵛ-congᵛ : _∘ᵛ_ Preserves₂ _≈ᵛ₁_ {Δ = Ψ} ⟶ _≈ᵛ₂_ {Δ = Δ} {Γ} ⟶ _≈ᵛ₃_
     ∘ᵛ-congᵛ equivσ equivτ x
@@ -192,7 +215,7 @@ module _
     : Set (ℓ₀ ⊔ ℓ₁ ⊔ ℓ₃) where
     field
       Appᵛ-R-headᵛ : ∀ (σ : VarSub₁ Δ (A ∷ Γ)) →
-                     ⟦ σ ⟧ᵛ (R₂ _ _ ∋ R-headᵛ) ≡ liftᵛ (σ (here refl))
+                     ⟦ σ ⟧ᵛ (R-headᵛ ⦃ varSub₂ ⦄) ≡ liftᵛ (σ (here refl))
 
   open VarSubOutHeadApp ⦃...⦄ public
 
@@ -211,7 +234,7 @@ module _
     : Set (ℓ₀ ⊔ ℓ₁ ⊔ ℓ₃ ⊔ ℓ₄) where
     field
       liftᵛ-preserves-Appᵛ : ∀ (σ : VarSub₁ Δ Γ) (M : R₃ _ A) →
-                             Appᵛ ⦃ varSub₂ ⦄ (liftᵛ∘ σ) M ≡ Appᵛ σ M
+                             ⟦ liftᵛ∘ ⦃ _ ⦄ ⦃ varSub₂ ⦄ σ ⟧ᵛ M ≡ ⟦ σ ⟧ᵛ M
 
   open VarSubLiftApp ⦃...⦄ public
 
@@ -236,10 +259,10 @@ module _
     : Set (ℓ₀ ⊔ ℓ₁ ⊔ ℓ₂ ⊔ ℓ₃ ⊔ ℓ₄ ⊔ ℓ₆) where
     field
       ⟦-⟧ᵛ-compositional : ∀ (σ : VarSub₁ Ψ Δ) (τ : VarSub₂ Δ Γ) (M : R₄ Γ A) →
-                           ⟦ σ ⟧ᵛ (R₅ _ _ ∋ ⟦ τ ⟧ᵛ M) ≡ ⟦ VarSub₃ _ _ ∋ σ ∘ᵛ τ ⟧ᵛ M
+                           ⟦ σ ⟧ᵛ ⟦ τ ⟧ᵛ M ≡ ⟦ σ ∘ᵛ τ ⟧ᵛ M
 
     ∘ᵛ-assocᵛ : ∀ (σ : VarSub₁ Φ Ψ) (τ : VarSub₂ Ψ Δ) (υ : VarSub₄ Δ Γ) →
-                σ ∘ᵛ (VarSub₅ _ _ ∋ τ ∘ᵛ υ) ≈ᵛ (VarSub₃ _ _ ∋ σ ∘ᵛ τ) ∘ᵛ υ
+                σ ∘ᵛ (τ ∘ᵛ υ) ≈ᵛ (σ ∘ᵛ τ) ∘ᵛ υ
     ∘ᵛ-assocᵛ _ _ υ x = ⟦-⟧ᵛ-compositional _ _ (υ x)
 
   open VarSubAppCompositional ⦃...⦄ public
@@ -248,11 +271,11 @@ module _
   ⦃ varSub₁ : VarSubBase R₁ ⦄
   ⦃ varSub₂ : VarSubBase R₂ ⦄ where
   open VarSubBase varSub₁ using () renaming (VarSub to VarSub₁)
-  open VarSubBase varSub₂ using () renaming (VarSub to VarSub₂)
+  open VarSubBase varSub₂ using () renaming (VarSub to VarSub₂; _≈ᵛ_ to _≈ᵛ₂_)
 
   module _ ⦃ _ : RawVarSubLift ⦃ varSub₁ ⦄ ⦃ varSub₂ ⦄ ⦄ where
     liftᵛ-preserves-,ᵛ : ∀ (σ : VarSub₁ Δ Γ) (M : R₁ _ A) →
-                         liftᵛ∘ (σ ,ᵛ M) ≈ᵛ liftᵛ∘ σ ,ᵛ liftᵛ M
+                         liftᵛ∘ (σ ,ᵛ M) ≈ᵛ₂ liftᵛ∘ σ ,ᵛ liftᵛ M
     liftᵛ-preserves-,ᵛ σ M (here refl) = refl
     liftᵛ-preserves-,ᵛ σ M (there x)   = refl
 
@@ -275,7 +298,7 @@ module _
     ⦃ _ : RawVarSubOutHead ⦃ varSub₃ ⦄ ⦄
     ⦃ _ : RawVarSubApp ⦃ varSub₁ ⦄ ⦃ varSub₂ ⦄ ⦃ varSub₃ ⦄ ⦄
     ⦃ _ : VarSubAppExtensional ⦃ varSub₁ ⦄ ⦃ varSub₂ ⦄ ⦃ varSub₃ ⦄ ⦄ where
-    qᵛ-congᵛ : qᵛ_ ⦃ varSub₁ ⦄ {Δ = Δ} {Γ} {A} Preserves _≈ᵛ₂_ ⟶ _≈ᵛ₃_
+    qᵛ-congᵛ : qᵛ_ Preserves _≈ᵛ₂_ {Δ = Δ} {Γ} ⟶ _≈ᵛ₃_ {Δ = A ∷ Δ}
     qᵛ-congᵛ equiv = ,ᵛ-congᵛˡ R-headᵛ (∘ᵛ-congᵛʳ Wkᵛ equiv)
 
 module _
@@ -307,17 +330,16 @@ module _
     ⦃ _ : VarSubAppCompositional ⦃ varSub₂ ⦄ ⦃ varSub₁ ⦄ ⦃ _ ⦄ ⦃ varSub₃ ⦄ ⦃ _ ⦄ ⦃ _ ⦄ ⦄ where
 
     qᵛ-distrib-∘ᵛ : ∀ (σ : VarSub₂ Ψ Δ) (τ : VarSub₃ Δ Γ) →
-                    qᵛ_ ⦃ varSub₁ ⦄ {A = A} (σ ∘ᵛ τ) ≈ᵛ₄ (VarSub₂ _ _ ∋ qᵛ_ ⦃ varSub₁ ⦄ σ) ∘ᵛ (VarSub₃ _ _ ∋ qᵛ_ ⦃ varSub₁ ⦄ τ)
+                    qᵛ_ {A = A} (σ ∘ᵛ τ) ≈ᵛ₄ qᵛ σ ∘ᵛ qᵛ τ
     qᵛ-distrib-∘ᵛ σ τ =
       begin qᵛ (σ ∘ᵛ τ)                              ≈⟨ ,ᵛ-congᵛˡ R-headᵛ (∘ᵛ-assocᵛ Wkᵛ σ τ) ⟩
             ((Wkᵛ ∘ᵛ σ) ∘ᵛ τ) ,ᵛ R-headᵛ             ≈˘⟨ ,ᵛ-congᵛˡ R-headᵛ (∘ᵛ-congᵛˡ τ (∘ᵛWkᵛ-cancel-,ᵛ (Wkᵛ ∘ᵛ σ) R-headᵛ₂)) ⟩
             ((qᵛ σ ∘ᵛ Wkᵛ) ∘ᵛ τ) ,ᵛ R-headᵛ          ≈˘⟨ ,ᵛ-congᵛˡ R-headᵛ (∘ᵛ-assocᵛ (qᵛ σ) Wkᵛ τ) ⟩
-            (qᵛ σ ∘ᵛ Wkᵛ ∘ᵛ τ) ,ᵛ R-headᵛ            ≈˘⟨ ,ᵛ-congᵛʳ (qᵛ σ ∘ᵛ Wkᵛ ∘ᵛ τ) (liftᵛ-preserves-R-headᵛ ⦃ varSub₂ ⦄ ⦃ varSub₄ ⦄) ⟩
+            (qᵛ σ ∘ᵛ Wkᵛ ∘ᵛ τ) ,ᵛ R-headᵛ            ≈˘⟨ ,ᵛ-congᵛʳ (qᵛ σ ∘ᵛ Wkᵛ ∘ᵛ τ) liftᵛ-preserves-R-headᵛ ⟩
             (qᵛ σ ∘ᵛ Wkᵛ ∘ᵛ τ) ,ᵛ liftᵛ R-headᵛ₂     ≈˘⟨ ,ᵛ-congᵛʳ (qᵛ σ ∘ᵛ Wkᵛ ∘ᵛ τ) (Appᵛ-R-headᵛ (qᵛ σ)) ⟩
             (qᵛ σ ∘ᵛ Wkᵛ ∘ᵛ τ) ,ᵛ ⟦ qᵛ σ ⟧ᵛ R-headᵛ₃ ≈˘⟨ ∘ᵛ-distrib-,ᵛ {σ = qᵛ σ} R-headᵛ₃ ⟩
             qᵛ σ ∘ᵛ qᵛ τ                             ∎
       where
-        Idᵛ₂ = Idᵛ ⦃ varSub₂ ⦄
         R-headᵛ₂ = R-headᵛ ⦃ varSub₂ ⦄
         R-headᵛ₃ = R-headᵛ ⦃ varSub₃ ⦄
         open VarSub-Reasoning ⦃ varSub₄ ⦄ _ _

@@ -3,6 +3,7 @@ open import Agda.Primitive using (Level; lsuc; _⊔_)
 open import Data.List as List
 open import Data.List.Relation.Unary.Any using (here; there)
 open import Data.List.Membership.Propositional as List
+open import Data.Nat using (ℕ)
 open import Data.Sum as ⊎
 open import Function using (id; _∘_)
 open import Relation.Binary using (REL; Rel)
@@ -25,7 +26,10 @@ private
     Ψ Ψ′ Ψ′₀ Ψ′₁ Ψ′₂ Ψ′₃ Ψ″ Ψ″₀ Ψ″₁ Ψ″₂ Ψ″₃ Ψ‴ Ψ‴₀ Ψ‴₁ Ψ‴₂ Ψ‴₃ Ψ₀ Ψ₁ Ψ₂ Ψ₃ : Ctx
     R R₁ R₂ R₃ : REL Ctx Tp ℓ₁
 
-record VarSubBase (R : REL Ctx Tp ℓ₁) : Set (ℓ₀ ⊔ lsuc ℓ₁) where
+record VarSubBase (R : REL Ctx Tp ℓ₁) : Set where
+  field
+    tag : ℕ
+
   VarSub : Rel Ctx _
   VarSub Δ Γ = (_∈ Γ) ⊆ R Δ
 
@@ -91,7 +95,7 @@ module _
 
   record RawVarSubApp : Set (ℓ₀ ⊔ ℓ₁ ⊔ ℓ₂ ⊔ ℓ₃) where
     field
-      Appᵛ : VarSub₁ Δ Γ → R₂ Γ A → R₃ Δ A
+      Appᵛ : VarSub₁ Δ Γ → ∀ {A} → R₂ Γ A → R₃ Δ A
 
     infixr 30 Appᵛ
     syntax Appᵛ σ M = ⟦ σ ⟧ᵛ M
@@ -102,11 +106,34 @@ module _
 
   open RawVarSubApp ⦃...⦄ public
 
-module _ ⦃ _ : VarSubBase R₁ ⦄ where
-  instance
-    RawVarSubLiftSelf : RawVarSubLift
-    RawVarSubLiftSelf .liftᵛ = id
-    {-# OVERLAPPABLE RawVarSubLiftSelf #-}
+instance
+  RawVarSubLiftSelf : ⦃ _ : VarSubBase R ⦄ → RawVarSubLift
+  RawVarSubLiftSelf .liftᵛ = id
+  {-# OVERLAPPABLE RawVarSubLiftSelf #-}
+
+  RawVarSubLiftId : ⦃ varSub₁ : VarSubBase R₁ ⦄
+                    ⦃ varSub₂ : VarSubBase R₂ ⦄
+                    ⦃ _ : RawVarSubId ⦃ varSub₁ ⦄ ⦄
+                    ⦃ _ : RawVarSubLift ⦃ varSub₁ ⦄ ⦃ varSub₂ ⦄ ⦄ →
+                    RawVarSubId ⦃ varSub₂ ⦄
+  RawVarSubLiftId ⦃ _ ⦄ ⦃ _ ⦄ ⦃ varSubId₁ ⦄ .Idᵛ = liftᵛ∘ (Idᵛ ⦃ _ ⦄ ⦃ varSubId₁ ⦄)
+  {-# OVERLAPPABLE RawVarSubLiftId #-}
+
+  RawVarSubLiftWk : ⦃ varSub₁ : VarSubBase R₁ ⦄ →
+                    ⦃ varSub₂ : VarSubBase R₂ ⦄ →
+                    ⦃ _ : RawVarSubWk ⦃ varSub₁ ⦄ ⦄ →
+                    ⦃ _ : RawVarSubLift ⦃ varSub₁ ⦄ ⦃ varSub₂ ⦄ ⦄ →
+                    RawVarSubWk ⦃ varSub₂ ⦄
+  RawVarSubLiftWk ⦃ _ ⦄ ⦃ _ ⦄ ⦃ varSubWk₁ ⦄ .Wkᵛ = liftᵛ∘ (Wkᵛ ⦃ _ ⦄ ⦃ varSubWk₁ ⦄)
+  {-# OVERLAPPABLE RawVarSubLiftWk #-}
+
+  RawVarSubLiftOutHead : ⦃ varSub₁ : VarSubBase R₁ ⦄ →
+                         ⦃ varSub₂ : VarSubBase R₂ ⦄ →
+                         ⦃ _ : RawVarSubOutHead ⦃ varSub₁ ⦄ ⦄ →
+                         ⦃ _ : RawVarSubLift ⦃ varSub₁ ⦄ ⦃ varSub₂ ⦄ ⦄ →
+                         RawVarSubOutHead ⦃ varSub₂ ⦄
+  RawVarSubLiftOutHead ⦃ _ ⦄ ⦃ _ ⦄ ⦃ varSubOutHead₁ ⦄ .R-headᵛ = liftᵛ (R-headᵛ ⦃ _ ⦄ ⦃ varSubOutHead₁ ⦄)
+  {-# OVERLAPPABLE RawVarSubLiftOutHead #-}
 
 module _
   ⦃ varSub₁ : VarSubBase R₁ ⦄
