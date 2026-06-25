@@ -7,7 +7,7 @@ open import Data.List
 open import Data.Nat
 open import Data.Product
 open import Data.Sum
-open import Data.Unit hiding (_≟_)
+open import Data.Unit hiding (_≡?_)
 open import Relation.Nullary
 open import Relation.Binary.PropositionalEquality
 
@@ -73,7 +73,7 @@ wk_ = wk[ 1 ↑ 0 ]_
 [ M //[ code ] x ] (return N)       = return ([ M //[ code ] x ] N)
 [ M //[ md   ] x ] (let-return N L) = let-return ([ M //[ md ] x ] N) ([ wk M //[ md ] suc x ] L)
 [ M //[ md   ] x ] (# y)
-  with x ≟ y
+  with x ≡? y
 ...  | yes _                        = M
 ...  | no  _
     with x <? y
@@ -142,8 +142,8 @@ data ⊢[_]_⦂ctx : Mode → Ctx → Set where
 
 infix 4 _⦂_∈_
 infix 4 _⦂[_]_∈_
-infix 4 _⦂ᶜ_∈_
-infix 4 _⦂ᵖ_∈_
+-- infix 4 _⦂ᶜ_∈_
+-- infix 4 _⦂ᵖ_∈_
 
 data _⦂_∈_ {ℓ : Level} {A : Set ℓ} : ℕ → A → List A → Set ℓ where
   here  : ∀ {a b : A} {cs : List A} →

@@ -1,4 +1,4 @@
-{-# OPTIONS --cubical-compatible --safe #-}
+{-# OPTIONS --safe #-}
 module ClLib.MemberAt.Biconditioned.Properties where
 
 open import Agda.Primitive using (Level; _⊔_)

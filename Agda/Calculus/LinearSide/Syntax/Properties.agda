@@ -187,12 +187,12 @@ module V where
 
 <⇒var/Var≡var : ∀ {n m m′} {x : Fin (n + m)} (ρ : Sub Fin m m′) →
              (x< : Fin.toℕ x < n) →
-             varₗ x /Var ρ V.↑⋆ n ≡ varₗ (Fin.fromℕ< (ℕ.<-transˡ x< (ℕ.m≤m+n _ _)))
+             varₗ x /Var ρ V.↑⋆ n ≡ varₗ (Fin.fromℕ< (ℕ.<-≤-trans x< (ℕ.m≤m+n _ _)))
 <⇒var/Var≡var {suc _} {_} {_} {zero}  ρ (s≤s z≤n)           = refl
 <⇒var/Var≡var {suc n} {_} {_} {suc x} ρ (s≤s x<)
   rewrite V.suc-/-↑ {ρ = ρ V.↑⋆ n} x                        = begin
     weaken (varₗ (x V./ ρ V.↑⋆ n))                            ≡⟨ ≡.cong weaken (<⇒var/Var≡var ρ x<) ⟩
-    weaken (varₗ (Fin.fromℕ< (ℕ.<-transˡ x< (ℕ.m≤m+n _ _))))  ≡⟨ ≡.cong weaken (≡.cong varₗ (Fin.fromℕ<-cong _ _ refl _ _)) ⟩
+    weaken (varₗ (Fin.fromℕ< (ℕ.<-≤-trans x< (ℕ.m≤m+n _ _))))  ≡⟨ ≡.cong weaken (≡.cong varₗ (Fin.fromℕ<-cong _ _ refl _ _)) ⟩
     weaken (varₗ (Fin.fromℕ< (ℕ.≤-trans x< (ℕ.m≤m+n _ _))))   ≡⟨ weaken-var ⟩
     varₗ (suc (Fin.fromℕ< (ℕ.≤-trans x< (ℕ.m≤m+n _ _))))      ∎
   where
@@ -200,12 +200,12 @@ module V where
 
 <⇒var/≡var : ∀ {n m m′} {x : Fin (n + m)} (σ : 𝕊 m m′) →
              (x< : Fin.toℕ x < n) →
-             varₗ x / σ ↑⋆ n ≡ varₗ (Fin.fromℕ< (ℕ.<-transˡ x< (ℕ.m≤m+n _ _)))
+             varₗ x / σ ↑⋆ n ≡ varₗ (Fin.fromℕ< (ℕ.<-≤-trans x< (ℕ.m≤m+n _ _)))
 <⇒var/≡var {suc _} {_} {_} {zero}  σ (s≤s z≤n)              = refl
 <⇒var/≡var {suc n} {_} {_} {suc x} σ (s≤s x<)
   rewrite suc-/-↑ {ρ = σ ↑⋆ n} x                            = begin
     varₗ x / σ ↑⋆ n / wk                                      ≡⟨ ≡.cong (_/ wk) (<⇒var/≡var σ x<) ⟩
-    varₗ (Fin.fromℕ< (ℕ.<-transˡ x< (ℕ.m≤m+n _ _))) / wk      ≡⟨ ≡.cong (_/ wk) (≡.cong varₗ (Fin.fromℕ<-cong _ _ refl _ _)) ⟩
+    varₗ (Fin.fromℕ< (ℕ.<-≤-trans x< (ℕ.m≤m+n _ _))) / wk      ≡⟨ ≡.cong (_/ wk) (≡.cong varₗ (Fin.fromℕ<-cong _ _ refl _ _)) ⟩
     varₗ (Fin.fromℕ< (ℕ.≤-trans x< (ℕ.m≤m+n _ _))) / wk       ≡⟨ /-wk ⟩
     weaken (varₗ (Fin.fromℕ< (ℕ.≤-trans x< (ℕ.m≤m+n _ _))))   ≡⟨ weaken-var ⟩
     varₗ (suc (Fin.fromℕ< (ℕ.≤-trans x< (ℕ.m≤m+n _ _))))      ∎
@@ -282,7 +282,7 @@ baseₗ      𝕋≟ baseₗ      = yes refl
 baseₗ      𝕋≟ (T₁ ⊸ₗ U₁) = no (λ ())
 baseₗ      𝕋≟ !ₗ T₁      = no (λ ())
 (T₀ ⊸ₗ U₀) 𝕋≟ baseₗ      = no (λ ())
-(T₀ ⊸ₗ U₀) 𝕋≟ (T₁ ⊸ₗ U₁) = Dec.map′ (uncurry (≡.cong₂ _⊸ₗ_)) ⊸ₗ-injective ((T₀ 𝕋≟ T₁) Dec.×-dec (U₀ 𝕋≟ U₁))
+(T₀ ⊸ₗ U₀) 𝕋≟ (T₁ ⊸ₗ U₁) = Dec.map′ (uncurry (≡.cong₂ _⊸ₗ_)) ⊸ₗ-injective ((T₀ 𝕋≟ T₁) Dec.×? (U₀ 𝕋≟ U₁))
 (T₀ ⊸ₗ U₀) 𝕋≟ !ₗ T₁      = no (λ ())
 !ₗ T₀      𝕋≟ baseₗ      = no (λ ())
 !ₗ T₀      𝕋≟ (T₁ ⊸ₗ U₁) = no (λ ())

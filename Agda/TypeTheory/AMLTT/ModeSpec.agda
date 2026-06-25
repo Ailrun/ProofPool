@@ -32,7 +32,7 @@ record ModeSpec ℓ₁ ℓ₂ : Set (lsuc (ℓ₁ ⊔ ℓ₂)) where
   preorderₘ = record
     { Carrier = `Mode
     ; _≈_ = _≡_
-    ; _∼_ = _≤ₘ_
+    ; _≲_ = _≤ₘ_
     ; isPreorder = isPreorderₘ
     }
 

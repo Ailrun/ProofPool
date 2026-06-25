@@ -1,7 +1,7 @@
 module Calculus.SystemF.Properties where
 
 open import Data.List using ([]; _∷_; _++_; length)
-open import Data.Nat using (_≟_; _≥?_)
+open import Data.Nat using (_≡?_; _≥?_)
 open import Data.Product using (_,_)
 open import Relation.Binary.PropositionalEquality using (refl)
 open import Relation.Nullary using (yes; no)
@@ -41,6 +41,6 @@ trivial = trivialWith 0
   with a ≥? length Γ₀
 ...  | no  a≱Γ₀ = # trivialWith (a≱Γ₀ , a∈)
 ...  | yes a≥Γ₀
-    with a ≟ length Γ₀
+    with a ≡? length Γ₀
 ...    | no  a≢Γ₀ = # trivialWith (a≢Γ₀ , a∈)
 ...    | yes refl = {!!}

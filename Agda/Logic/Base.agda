@@ -4,12 +4,12 @@ open import Data.Empty public
 open import Data.List hiding ([_]; map; zip) public
 open import Data.List.Properties public
 open import Data.List.Relation.Unary.Any using (here; there) public
-open import Data.List.Membership.Propositional hiding (_─_) public
+open import Data.List.Membership.Propositional hiding (_─_; find) public
 open import Data.List.Membership.Propositional.Properties public
 open import Data.Nat public
 open import Data.Nat.Induction public
 open import Data.Nat.Properties public
-open import Data.Product hiding (assocʳ; assocˡ; map; map₁; map₂; swap; zip) public
+open import Data.Product hiding (assocʳ; assocˡ; map; map₁; map₂; swap; zip; zipWith) public
 open import Data.Product.Relation.Binary.Lex.Strict
 open import Data.Sum hiding (assocʳ; assocˡ; map; map₁; map₂; swap) public
 open import Function.Base public

@@ -277,8 +277,8 @@ instance
 _`⟦|_⟧ : `Term → `Term → `Term
 s `⟦| t ⟧ = s `⟦ `id `, t ⟧
 
-_`⟦|Ø⟧ : `Term → `Term
-s `⟦|Ø⟧ = s `⟦ `id `,Ø ⟧
+-- _`⟦|Ø⟧ : `Term → `Term
+-- s `⟦|Ø⟧ = s `⟦ `id `, `Ø ⟧
 
 -- Projection of substitution
 --

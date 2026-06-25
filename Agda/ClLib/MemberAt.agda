@@ -1,6 +1,6 @@
-module Core.MemberAt where
+module ClLib.MemberAt where
 
 open import Relation.Unary using (Pred)
 
-module Conditioned (Pre : Pred A)
-data _⟦_⟧↘_ :
+-- module Conditioned (Pre : Pred A)
+-- data _⟦_⟧↘_ :

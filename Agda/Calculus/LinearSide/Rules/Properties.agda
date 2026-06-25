@@ -42,7 +42,7 @@ open import Calculus.LinearSide.Rules
           with lifty≥ ← ≥⇒lift≥ {f = Vec.lookup ρ} y≥               = varₗ
                                                                         λ liftx≡lifty →
                                                                           ℕ.<⇒≢
-                                                                            (ℕ.<-transʳ (ℕ.≤-reflexive liftx≡x) (ℕ.<-transˡ x< lifty≥))
+                                                                            (ℕ.≤-<-trans (ℕ.≤-reflexive liftx≡x) (ℕ.<-≤-trans x< lifty≥))
                                                                             (≡.cong Fin.toℕ liftx≡lifty)
 <⇒unused-in⇒unused-inVar↑⋆                 (λₗ*∘ₗ M∅)            x< = λₗ*∘ₗ <⇒unused-in⇒unused-inVar↑⋆ M∅ (s≤s x<)
 <⇒unused-in⇒unused-inVar↑⋆                 (M∅ $∘ₗ N∅)           x< = <⇒unused-in⇒unused-inVar↑⋆ M∅ x< $∘ₗ <⇒unused-in⇒unused-inVar↑⋆ N∅ x<
@@ -58,7 +58,7 @@ open import Calculus.LinearSide.Rules
     rewrite <⇒var/Var≡var (V.wk⋆ n) y<                                  = varₗ
                                                                             λ m↑x≡ →
                                                                               ℕ.<⇒≢
-                                                                                (ℕ.<-transˡ y< (ℕ.m≤m+n _ _))
+                                                                                (ℕ.<-≤-trans y< (ℕ.m≤m+n _ _))
                                                                                 (≡.trans (≡.sym (Fin.toℕ-fromℕ< _)) (≡.trans (≡.cong Fin.toℕ (≡.sym m↑x≡)) (Fin.toℕ-↑ʳ m x)))
 ...  | no  y≮
     with y≥ ← ℕ.≮⇒≥ y≮
@@ -67,7 +67,7 @@ open import Calculus.LinearSide.Rules
                                                                             λ m↑x≡ →
                                                                               let y′ = Fin.reduce≥ _ y≥ in
                                                                               ℕ.<⇒≢
-                                                                                (ℕ.+-monoʳ-< m (ℕ.<-transˡ x< (ℕ.m≤m+n _ _)))
+                                                                                (ℕ.+-monoʳ-< m (ℕ.<-≤-trans x< (ℕ.m≤m+n _ _)))
                                                                                 (begin
     m + Fin.toℕ x                                                                ≡˘⟨ Fin.toℕ-↑ʳ m x ⟩
     Fin.toℕ (m Fin.↑ʳ x)                                                         ≡⟨ ≡.cong
@@ -99,7 +99,7 @@ open import Calculus.LinearSide.Rules
 <⇒unused-in⇒unused-in↑⋆ : ∀ {n m m′} {x} {M : 𝕄 (n + m)} (σ : 𝕊 m m′) →
                           x unused-in M →
                           (x< : Fin.toℕ x < n) →
-                          Fin.fromℕ< (ℕ.<-transˡ x< (ℕ.m≤m+n _ _)) unused-in (M / σ ↑⋆ n)
+                          Fin.fromℕ< (ℕ.<-≤-trans x< (ℕ.m≤m+n _ _)) unused-in (M / σ ↑⋆ n)
 <⇒unused-in⇒unused-in↑⋆ {n = n} {m} {m′} σ (varₗ {x = x} {y = y} x≢) x<
   with Fin.toℕ y <? n
 ...  | yes y<
@@ -107,14 +107,14 @@ open import Calculus.LinearSide.Rules
 ...  | no  y≮
     with y≥ ← ℕ.≮⇒≥ y≮
       rewrite ↑ʳreduce≥≡id y≥
-            | var/σ↑⋆≡var/σ/wk⋆ n (Fin.reduce≥ _ y≥) σ                                            = <⇒unused-in⇒unused-inwk⋆↑⋆ {m = 0} (varₗ (Fin.reduce≥ y y≥) / σ) (ℕ.≤-trans (ℕ.≤-reflexive (≡.cong suc (Fin.toℕ-fromℕ< (ℕ.<-transˡ x< (ℕ.m≤m+n _ _))))) x<)
+            | var/σ↑⋆≡var/σ/wk⋆ n (Fin.reduce≥ _ y≥) σ                                            = <⇒unused-in⇒unused-inwk⋆↑⋆ {m = 0} (varₗ (Fin.reduce≥ y y≥) / σ) (ℕ.≤-trans (ℕ.≤-reflexive (≡.cong suc (Fin.toℕ-fromℕ< (ℕ.<-≤-trans x< (ℕ.m≤m+n _ _))))) x<)
 <⇒unused-in⇒unused-in↑⋆ {n = n} {m} {m′} σ (λₗ*∘ₗ M∅)                x<
-  rewrite Fin.fromℕ<-cong _ _ refl (ℕ.<-transˡ x< (ℕ.m≤m+n n m′)) (ℕ.≤-trans x< (ℕ.m≤m+n n m′))   = λₗ*∘ₗ <⇒unused-in⇒unused-in↑⋆ σ M∅ (s≤s x<)
+  rewrite Fin.fromℕ<-cong _ _ refl (ℕ.<-≤-trans x< (ℕ.m≤m+n n m′)) (ℕ.≤-trans x< (ℕ.m≤m+n n m′))   = λₗ*∘ₗ <⇒unused-in⇒unused-in↑⋆ σ M∅ (s≤s x<)
 <⇒unused-in⇒unused-in↑⋆ {n = n}          σ (M∅ $∘ₗ N∅)               x<                           = <⇒unused-in⇒unused-in↑⋆ σ M∅ x< $∘ₗ <⇒unused-in⇒unused-in↑⋆ σ N∅ x<
 <⇒unused-in⇒unused-in↑⋆ {n = n} {m} {m′} σ (bangₗ M∅)                x<                           = bangₗ (<⇒unused-in⇒unused-in↑⋆ σ M∅ x<)
 <⇒unused-in⇒unused-in↑⋆ {n = n} {m} {m′} σ (let-bangₗ M∅ inₗ N∅)     x<
   with M∅′ ← <⇒unused-in⇒unused-in↑⋆ σ M∅ x<
-    rewrite Fin.fromℕ<-cong _ _ refl (ℕ.<-transˡ x< (ℕ.m≤m+n n m′)) (ℕ.≤-trans x< (ℕ.m≤m+n n m′)) = let-bangₗ M∅′ inₗ <⇒unused-in⇒unused-in↑⋆ σ N∅ (s≤s x<)
+    rewrite Fin.fromℕ<-cong _ _ refl (ℕ.<-≤-trans x< (ℕ.m≤m+n n m′)) (ℕ.≤-trans x< (ℕ.m≤m+n n m′)) = let-bangₗ M∅′ inₗ <⇒unused-in⇒unused-in↑⋆ σ N∅ (s≤s x<)
 
 <⇒linear-in⇒linear-inVar↑⋆ : ∀ {n m m′} {x} {M : 𝕄 (n + m)} {ρ : Sub Fin m m′} →
                              x linear-in M →
@@ -131,19 +131,19 @@ open import Calculus.LinearSide.Rules
 <⇒linear-in⇒linear-in↑⋆ : ∀ {n m m′} {x} {M : 𝕄 (n + m)} (σ : 𝕊 m m′) →
                           x linear-in M →
                           (x< : Fin.toℕ x < n) →
-                          Fin.fromℕ< (ℕ.<-transˡ x< (ℕ.m≤m+n _ _)) linear-in (M / σ ↑⋆ n)
+                          Fin.fromℕ< (ℕ.<-≤-trans x< (ℕ.m≤m+n _ _)) linear-in (M / σ ↑⋆ n)
 <⇒linear-in⇒linear-in↑⋆              σ (varₗ refl)            x<
   rewrite <⇒var/≡var σ x<                                                                        = varₗ refl
 <⇒linear-in⇒linear-in↑⋆ {n} {m} {m′} σ (λₗ*∘ₗ Mₗ)             x<
-  rewrite Fin.fromℕ<-cong _ _ refl (ℕ.<-transˡ x< (ℕ.m≤m+n n m′)) (ℕ.≤-trans x< (ℕ.m≤m+n _ _))   = λₗ*∘ₗ <⇒linear-in⇒linear-in↑⋆ σ Mₗ (s≤s x<)
+  rewrite Fin.fromℕ<-cong _ _ refl (ℕ.<-≤-trans x< (ℕ.m≤m+n n m′)) (ℕ.≤-trans x< (ℕ.m≤m+n _ _))   = λₗ*∘ₗ <⇒linear-in⇒linear-in↑⋆ σ Mₗ (s≤s x<)
 <⇒linear-in⇒linear-in↑⋆              σ (Mₗ $∘ₗ∅ N∅)           x<                                 = <⇒linear-in⇒linear-in↑⋆ σ Mₗ x< $∘ₗ∅ <⇒unused-in⇒unused-in↑⋆ σ N∅ x<
 <⇒linear-in⇒linear-in↑⋆              σ (∅ M∅ $∘ₗ Nₗ)          x<                                 = ∅ <⇒unused-in⇒unused-in↑⋆ σ M∅ x< $∘ₗ <⇒linear-in⇒linear-in↑⋆ σ Nₗ x<
 <⇒linear-in⇒linear-in↑⋆ {n} {m} {m′} σ (let-bangₗ Mₗ inₗ∅ N∅) x<
   with Mₗ′ ← <⇒linear-in⇒linear-in↑⋆ σ Mₗ x<
-    rewrite Fin.fromℕ<-cong _ _ refl (ℕ.<-transˡ x< (ℕ.m≤m+n n m′)) (ℕ.≤-trans x< (ℕ.m≤m+n _ _)) = let-bangₗ Mₗ′ inₗ∅ <⇒unused-in⇒unused-in↑⋆ σ N∅ (s≤s x<)
+    rewrite Fin.fromℕ<-cong _ _ refl (ℕ.<-≤-trans x< (ℕ.m≤m+n n m′)) (ℕ.≤-trans x< (ℕ.m≤m+n _ _)) = let-bangₗ Mₗ′ inₗ∅ <⇒unused-in⇒unused-in↑⋆ σ N∅ (s≤s x<)
 <⇒linear-in⇒linear-in↑⋆ {n} {m} {m′} σ (let-bangₗ∅ M∅ inₗ Nₗ) x<
   with M∅′ ← <⇒unused-in⇒unused-in↑⋆ σ M∅ x<
-    rewrite Fin.fromℕ<-cong _ _ refl (ℕ.<-transˡ x< (ℕ.m≤m+n n m′)) (ℕ.≤-trans x< (ℕ.m≤m+n _ _)) = let-bangₗ∅ M∅′ inₗ <⇒linear-in⇒linear-in↑⋆ σ Nₗ (s≤s x<)
+    rewrite Fin.fromℕ<-cong _ _ refl (ℕ.<-≤-trans x< (ℕ.m≤m+n n m′)) (ℕ.≤-trans x< (ℕ.m≤m+n _ _)) = let-bangₗ∅ M∅′ inₗ <⇒linear-in⇒linear-in↑⋆ σ Nₗ (s≤s x<)
 
 ⊢ₗ⇒⊢ₗ/Var : Vec.map (Vec.lookup Γ) ρ ⊢ₗ M ⦂ T →
             --------------------------------------------------
@@ -177,7 +177,7 @@ s⊢ₗ⇒s⊢ₗ↑ : Γ s⊢ₗ σ ⦂ Δ →
            T ∷ Γ s⊢ₗ σ ↑ ⦂ T ∷ Δ
 s⊢ₗ⇒s⊢ₗ↑ ⊢σ = varₗ refl ∷ s⊢ₗ⇒s⊢ₗweaken ⊢σ
 
-s⊢ₗwk⋆ : ∀ {Γ : ℂ n} {Δ : ℂ n′} → Γ ++ Δ s⊢ₗ wk⋆ (len Γ) {len Δ} ⦂ Δ
+s⊢ₗwk⋆ : ∀ {Γ : ℂ n} {Δ : ℂ n′} → Γ ++ Δ s⊢ₗ wk⋆ (len Γ) ⦂ Δ
 s⊢ₗwk⋆ {Γ = []}    {Δ = []}    = []
 s⊢ₗwk⋆ {Γ = []}    {Δ = _ ∷ Δ} = varₗ refl ∷ s⊢ₗwk⋆
 s⊢ₗwk⋆ {Γ = T ∷ Γ} {Δ = Δ}     = s⊢ₗ⇒s⊢ₗweaken s⊢ₗwk⋆

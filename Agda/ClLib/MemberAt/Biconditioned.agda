@@ -1,4 +1,4 @@
-{-# OPTIONS --cubical-compatible --safe #-}
+{-# OPTIONS --safe #-}
 open import Agda.Primitive using (_⊔_)
 open import Data.List as List using (List; []; _∷_; _++_)
 open import Data.List.Relation.Unary.All using (All; []; _∷_)

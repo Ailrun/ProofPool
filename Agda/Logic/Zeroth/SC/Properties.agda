@@ -178,6 +178,6 @@ module _ where
 
   -- cut elimination theorem
   cut₀₋ : Γ ⟶₀₋ A → A ∷ Γ ⟶₀₋ E → Γ ⟶₀₋ E
-  cut₀₋ {Γ} {A} {E} ⟶A A⟶ = wfRec cut₀₋-goal cut₀₋-gen (A , size-⟶₀₋ ⟶A , size-⟶₀₋ A⟶) ⟶A A⟶ refl refl
+  cut₀₋ {Γ} {A} {E} ⟶A A⟶ = wfRec cut₀₋-goal ((λ _ rec → cut₀₋-gen _ λ _ → rec)) (A , size-⟶₀₋ ⟶A , size-⟶₀₋ A⟶) ⟶A A⟶ refl refl
     where
       open Wf.All <ₗₑₓ-wellFounded 0ℓ

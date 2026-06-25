@@ -5,7 +5,7 @@ open import Data.Empty
 open import Data.List
 open import Data.Nat
 open import Data.Product
-open import Data.Unit hiding (_≟_)
+open import Data.Unit hiding (_≡?_)
 open import Relation.Nullary
 
 infix  23 ↑_
