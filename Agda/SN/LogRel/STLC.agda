@@ -85,7 +85,7 @@ module OpSem where
     ⟦ δ ⟧ᵉ⟶ (M⟶ `$?)          = (⟦ δ ⟧ᵉ⟶ M⟶) `$?
     ⟦ δ ⟧ᵉ⟶ (?`$ M⟶)          = ?`$ (⟦ δ ⟧ᵉ⟶ M⟶)
     ⟦ δ ⟧ᵉ⟶ (`→β {M = M} {N})
-      rewrite sym (⟦!ˢ⟦-⟧ᵛ-⟧ᵛ⟦qᵉᵉ-⟧ᵛ≡⟦-⟧ᵛ⟦!ˢ-⟧ᵛ δ N M) = `→β
+      rewrite sym (⟦!ᵛ⟦-⟧ᵛ-⟧ᵛ⟦qᵛ-⟧ᵛ≡⟦-⟧ᵛ⟦!ᵛ-⟧ᵛ ⦃ ExtVarSub ⦄ ⦃ _ ⦄ ⦃ _ ⦄ ⦃ SubVarSub ⦄ δ N M) = `→β
 
     infixr 50 ⟦_⟧ᵉ⟶*_
     ⟦_⟧ᵉ⟶*_ : ∀ {M M′ : Tm Δ A} (δ : Ext Γ Δ) → M ⟶* M′ → ⟦ δ ⟧ᵛ M ⟶* ⟦ δ ⟧ᵛ M′
@@ -97,7 +97,7 @@ module OpSem where
     ⟦ σ ⟧ˢ⟶ (M⟶ `$?)          = (⟦ σ ⟧ˢ⟶ M⟶) `$?
     ⟦ σ ⟧ˢ⟶ (?`$ M⟶)          = ?`$ (⟦ σ ⟧ˢ⟶ M⟶)
     ⟦ σ ⟧ˢ⟶ (`→β {M = M} {N})
-      rewrite sym (⟦!ˢ⟦-⟧ᵛ-⟧ᵛ⟦qᵉˢ-⟧ᵛ≡⟦-⟧ᵛ⟦!ˢ-⟧ᵛ σ N M) = `→β
+      rewrite sym (⟦!ᵛ⟦-⟧ᵛ-⟧ᵛ⟦qᵛ-⟧ᵛ≡⟦-⟧ᵛ⟦!ᵛ-⟧ᵛ ⦃ ExtVarSub ⦄ ⦃ _ ⦄ ⦃ _ ⦄ ⦃ SubVarSub ⦄ σ N M) = `→β
 
     infixr 50 ⟦_⟧ˢ⟶*_
     ⟦_⟧ˢ⟶*_ : ∀ {M M′ : Tm Δ A} (σ : Sub Γ Δ) → M ⟶* M′ → ⟦ σ ⟧ᵛ M ⟶* ⟦ σ ⟧ᵛ M′
@@ -312,7 +312,7 @@ module InductiveSN where
 
     ⟦ δ ⟧ᵉ⟶SN (M⟶SN `$-)              = (⟦ δ ⟧ᵉ⟶SN M⟶SN) `$-
     ⟦ δ ⟧ᵉ⟶SN `→β {M = M} {N = N} NSN
-      rewrite sym (⟦!ˢ⟦-⟧ᵛ-⟧ᵛ⟦qᵉᵉ-⟧ᵛ≡⟦-⟧ᵛ⟦!ˢ-⟧ᵛ δ N M) = `→β (⟦ δ ⟧ᵉ∈SN NSN)
+      rewrite sym (⟦!ᵛ⟦-⟧ᵛ-⟧ᵛ⟦qᵛ-⟧ᵛ≡⟦-⟧ᵛ⟦!ᵛ-⟧ᵛ ⦃ ExtVarSub ⦄ ⦃ _ ⦄ ⦃ _ ⦄ ⦃ SubVarSub ⦄ δ N M) = `→β (⟦ δ ⟧ᵉ∈SN NSN)
 
     infixr 50 ⟦_⟧ᵉ⁻¹∈SN_of_by_
     infixr 50 ⟦_⟧ᵉ⁻¹∈SNe_of_by_
@@ -331,7 +331,7 @@ module InductiveSN where
 
     ⟦ δ ⟧ᵉ⁻¹⟶SN M₀⟶SN `$- of M `$ N      by refl
       with _ , M⟶SN , refl ← ⟦ δ ⟧ᵉ⁻¹⟶SN M₀⟶SN of M by refl = _ , M⟶SN `$- , refl
-    ⟦ δ ⟧ᵉ⁻¹⟶SN `→β N₀SN  of (`λ M) `$ N by refl = _ , `→β (⟦ δ ⟧ᵉ⁻¹∈SN N₀SN of N by refl) , sym (⟦!ˢ⟦-⟧ᵛ-⟧ᵛ⟦qᵉᵉ-⟧ᵛ≡⟦-⟧ᵛ⟦!ˢ-⟧ᵛ δ N M)
+    ⟦ δ ⟧ᵉ⁻¹⟶SN `→β N₀SN  of (`λ M) `$ N by refl = _ , `→β (⟦ δ ⟧ᵉ⁻¹∈SN N₀SN of N by refl) , sym (⟦!ᵛ⟦-⟧ᵛ-⟧ᵛ⟦qᵛ-⟧ᵛ≡⟦-⟧ᵛ⟦!ᵛ-⟧ᵛ ⦃ ExtVarSub ⦄ ⦃ _ ⦄ ⦃ _ ⦄ ⦃ SubVarSub ⦄ δ N M)
 
     infixr 50 ⟦_⟧ᵉ⁻¹∈SN_
     ⟦_⟧ᵉ⁻¹∈SN_ : ∀ {M : Tm Γ A} (δ : Ext Δ Γ) → ⟦ δ ⟧ᵛ M ∈SN → M ∈SN
@@ -397,17 +397,17 @@ module LogicalRelation where
 
   module Properties where
     reify   : M ∈ℜ[ A ] → M ∈SN
-    bclosed : M ⟶SN M′ → M′ ∈ℜ[ A ] → M ∈ℜ[ A ]
     reflect : M ∈SNe → M ∈ℜ[ A ]
 
     reify {A = `base}  Mℜ = Mℜ
     reify {A = _ `→ _} Mℜ = ⟦ Wkᵛ ⟧ᵉ⁻¹∈SN ∈SN-extensionality (reify (Mℜ Wkᵛ (reflect (`# `!! 0))))
 
-    bclosed {A = `base}  M⟶SN M′ℜ      = `bclo M⟶SN M′ℜ
-    bclosed {A = _ `→ _} M⟶SN M′ℜ δ Nℜ = bclosed ((⟦ δ ⟧ᵉ⟶SN M⟶SN) `$-) (M′ℜ δ Nℜ)
-
     reflect {A = `base}  MSNe      = `Ne MSNe
     reflect {A = _ `→ _} MSNe δ Nℜ = reflect ((⟦ δ ⟧ᵉ∈SNe MSNe) `$ (reify Nℜ))
+
+    bclosed : M ⟶SN M′ → M′ ∈ℜ[ A ] → M ∈ℜ[ A ]
+    bclosed {A = `base}  M⟶SN M′ℜ      = `bclo M⟶SN M′ℜ
+    bclosed {A = _ `→ _} M⟶SN M′ℜ δ Nℜ = bclosed ((⟦ δ ⟧ᵉ⟶SN M⟶SN) `$-) (M′ℜ δ Nℜ)
 
     liftᵛ∈ℜs : ∀ Δ (δ : Ext Γ Δ) → liftᵛ∘ δ ∈ℜs[ Δ ]
     liftᵛ∈ℜs []      δ = tt

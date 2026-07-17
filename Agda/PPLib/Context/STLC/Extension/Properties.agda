@@ -43,7 +43,7 @@ instance
   AppExtExtensional .⟦-⟧ᵛ-extensional M equiv = equiv M
 
   AppExtCompositionalExt : ∀ {R} ⦃ varSub : VarSubBase {ℓ₀} R ⦄ →
-                           VarSubAppCompositional ⦃ varSub ⦄ ⦃ ExtVarSub ⦄ ⦃ varSub ⦄ ⦃ ExtVarSub ⦄ ⦃ ExtVarSub ⦄ ⦃ varSub ⦄
+                           VarSubAppCompositional ⦃ varSub ⦄ ⦃ ExtVarSub ⦄ ⦃ ExtVarSub ⦄
   AppExtCompositionalExt .⟦-⟧ᵛ-compositional _ _ M = refl
 
 qᵉ-distrib-∘ᵛ = qᵛ-distrib-∘ᵛ ⦃ ExtVarSub ⦄ ⦃ ExtVarSub ⦄ ⦃ ExtVarSub ⦄ ⦃ ExtVarSub ⦄

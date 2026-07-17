@@ -5,13 +5,15 @@ open import Agda.Primitive                        using (lzero)
 open import Data.List                             using (_∷_)
 open import Data.List.Membership.Propositional    using (_∈_)
 open import Data.List.Relation.Unary.Any          using (here; there)
-open import Function                              using (_∘_)
+open import Function                              using (it; _∘_; _∋_)
 open import Relation.Binary                       using ( IsEquivalence; Reflexive
                                                         ; REL; Rel; Setoid
                                                         ; Symmetric; Transitive
                                                         ; _Preserves_⟶_; _Preserves₂_⟶_⟶_
                                                         )
-open import Relation.Binary.PropositionalEquality hiding (J)
+open import Relation.Binary.PropositionalEquality using ( _≡_; refl
+                                                        ; cong; cong₂; sym; trans
+                                                        ; module ≡-Reasoning)
 
 open import PPLib.Base
 open import PPLib.Membership.Nth
@@ -19,6 +21,26 @@ open import Syntax.Church.STLC.WithSum.Alt.Base              hiding (module Vari
 open import Syntax.Church.STLC.WithSum.Alt.Substitution.Base
 
 open Variables
+
+`∷-⟦-⟧ᵛ*-commute : ∀ {R}
+                     ⦃ varSub : VarSubBase {lzero} R ⦄
+                     ⦃ _ : RawVarSubOutHead ⦃ varSub ⦄ ⦄
+                     ⦃ _ : RawVarSubLift ⦃ varSub ⦄ ⦃ SubVarSub ⦄ ⦄
+                     ⦃ _ : RawVarSubApp ⦃ ExtVarSub ⦄ ⦃ varSub ⦄ ⦃ varSub ⦄ ⦄
+                     (δ : VarSub ⦃ varSub ⦄ Δ Γ) (ee : ExE Γ A B) (es : ExEs Γ B C) →
+                   ⟦ δ ⟧ᵛ* (ee `∷ es) ≡ RawAppSub.forExE δ ee `∷ ⟦ δ ⟧ᵛ* es
+`∷-⟦-⟧ᵛ*-commute δ ee `[]        = refl
+`∷-⟦-⟧ᵛ*-commute δ ee (es `∷ˢ _) = cong (_`∷ˢ _) (`∷-⟦-⟧ᵛ*-commute δ ee es)
+
+`++ˢ-⟦-⟧ᵛ-commute : ∀ {R}
+                      ⦃ varSub : VarSubBase {lzero} R ⦄
+                      ⦃ _ : RawVarSubOutHead ⦃ varSub ⦄ ⦄
+                      ⦃ _ : RawVarSubLift ⦃ varSub ⦄ ⦃ SubVarSub ⦄ ⦄
+                      ⦃ _ : RawVarSubApp ⦃ ExtVarSub ⦄ ⦃ varSub ⦄ ⦃ varSub ⦄ ⦄
+                      (δ : VarSub ⦃ varSub ⦄ Δ Γ) (e : Ex Γ A) (es : ExEs Γ A B) →
+                    ⟦ δ ⟧ᵛ (e `++ˢ es) ≡ ⟦ δ ⟧ᵛ e `++ˢ ⟦ δ ⟧ᵛ* es
+`++ˢ-⟦-⟧ᵛ-commute δ e `[]        = refl
+`++ˢ-⟦-⟧ᵛ-commute δ e (es `∷ˢ _) = cong (_`∷ˢ _) (`++ˢ-⟦-⟧ᵛ-commute δ e es)
 
 ----------------------------------------------------------
 -- Useful Properties for Substitutions
@@ -66,7 +88,7 @@ instance
                              ⦃ _ : RawVarSubOutHead ⦃ varSub ⦄ ⦄
                              ⦃ _ : RawVarSubLift ⦃ varSub ⦄ ⦃ SubVarSub ⦄ ⦄
                              ⦃ _ : RawVarSubApp ⦃ ExtVarSub ⦄ ⦃ varSub ⦄ ⦃ varSub ⦄ ⦄ →
-                           VarSubAppCompositional ⦃ varSub ⦄ ⦃ SubVarSub ⦄ ⦃ SubVarSub ⦄ ⦃ ExtVarSub ⦄ ⦃ SubVarSub ⦄ ⦃ SubVarSub ⦄
+                           VarSubAppCompositional ⦃ varSub ⦄ ⦃ SubVarSub ⦄ ⦃ ExtVarSub ⦄
   AppSubCompositionalExt .⟦-⟧ᵛ-compositional σ τ x = refl
 
   ExtLiftSubApp : VarSubLiftApp ⦃ ExtVarSub ⦄ ⦃ SubVarSub ⦄ ⦃ SubVarSub ⦄ ⦃ SubVarSub ⦄
@@ -121,7 +143,7 @@ instance
   IdNoOpSubʳ .Idᵛ-idʳ σ x = refl
 
 instance
-  ExtAppExtCompositionalSub : VarSubAppCompositional ⦃ ExtVarSub ⦄ ⦃ ExtVarSub ⦄ ⦃ ExtVarSub ⦄ ⦃ SubVarSub ⦄ ⦃ SubVarSub ⦄ ⦃ SubVarSub ⦄
+  ExtAppExtCompositionalSub : VarSubAppCompositional ⦃ ExtVarSub ⦄ ⦃ ExtVarSub ⦄ ⦃ SubVarSub ⦄
   ExtAppExtCompositionalSub = record { ⟦-⟧ᵛ-compositional = forEx }
     module ExtAppExtCompositionalSub where
       forEx  : ∀ (δ : Ext Ψ Δ) (γ : Ext Δ Γ) (e : Ex Γ A) →
@@ -141,7 +163,7 @@ instance
 qᵉ-distrib-∘ˢᵉ = qᵛ-distrib-∘ᵛ ⦃ ExtVarSub ⦄ ⦃ SubVarSub ⦄ ⦃ ExtVarSub ⦄ ⦃ SubVarSub ⦄
 
 instance
-  SubAppExtCompositionalSub : VarSubAppCompositional ⦃ SubVarSub ⦄ ⦃ ExtVarSub ⦄ ⦃ SubVarSub ⦄ ⦃ SubVarSub ⦄ ⦃ SubVarSub ⦄ ⦃ SubVarSub ⦄
+  SubAppExtCompositionalSub : VarSubAppCompositional ⦃ SubVarSub ⦄ ⦃ ExtVarSub ⦄ ⦃ SubVarSub ⦄
   SubAppExtCompositionalSub = record { ⟦-⟧ᵛ-compositional = forEx }
     module SubAppExtCompositionalSub where
       forEx  : ∀ (σ : Sub Ψ Δ) (δ : Ext Δ Γ) (e : Ex Γ A) →
@@ -161,7 +183,7 @@ instance
 qᵉ-distrib-∘ᵉˢ = qᵛ-distrib-∘ᵛ ⦃ ExtVarSub ⦄ ⦃ ExtVarSub ⦄ ⦃ SubVarSub ⦄ ⦃ SubVarSub ⦄
 
 instance
-  ExtAppSubCompositionalSub : VarSubAppCompositional ⦃ ExtVarSub ⦄ ⦃ SubVarSub ⦄ ⦃ SubVarSub ⦄ ⦃ SubVarSub ⦄ ⦃ SubVarSub ⦄ ⦃ SubVarSub ⦄
+  ExtAppSubCompositionalSub : VarSubAppCompositional ⦃ ExtVarSub ⦄ ⦃ SubVarSub ⦄ ⦃ SubVarSub ⦄
   ExtAppSubCompositionalSub = record { ⟦-⟧ᵛ-compositional = forEx }
     module ExtAppSubCompositionalSub where
       forEx  : ∀ (δ : Ext Ψ Δ) (σ : Sub Δ Γ) (e : Ex Γ A) →
@@ -181,7 +203,7 @@ instance
 qᵉ-distrib-∘ˢ = qᵛ-distrib-∘ᵛ ⦃ ExtVarSub ⦄ ⦃ SubVarSub ⦄ ⦃ SubVarSub ⦄ ⦃ SubVarSub ⦄
 
 instance
-  SubAppSubCompositionalSub : VarSubAppCompositional ⦃ SubVarSub ⦄ ⦃ SubVarSub ⦄ ⦃ SubVarSub ⦄ ⦃ SubVarSub ⦄ ⦃ SubVarSub ⦄ ⦃ SubVarSub ⦄
+  SubAppSubCompositionalSub : VarSubAppCompositional ⦃ SubVarSub ⦄ ⦃ SubVarSub ⦄ ⦃ SubVarSub ⦄
   SubAppSubCompositionalSub = record { ⟦-⟧ᵛ-compositional = forEx }
     module SubAppSubCompositionalSub where
       forEx  : ∀ (σ : Sub Ψ Δ) (τ : Sub Δ Γ) (e : Ex Γ A) →
@@ -201,26 +223,6 @@ instance
 ----------------------------------------------------------
 -- Other Useful Properties for Extensions/Substitutions
 ----------------------------------------------------------
-
-⟦!ˢ⟦-⟧ᵛ-⟧ᵛ⟦qᵉᵉ-⟧ᵛ≡⟦-⟧ᵛ⟦!ˢ-⟧ᵛ : ∀ (δ : Ext Γ Δ) (f : Ex Δ A) (e : Ex (A ∷ Δ) B) →
-                               ⟦ !ˢ (⟦ δ ⟧ᵛ f) ⟧ᵛ ⟦ qᵉ δ ⟧ᵛ e ≡ ⟦ δ ⟧ᵛ ⟦ !ˢ f ⟧ᵛ e
-⟦!ˢ⟦-⟧ᵛ-⟧ᵛ⟦qᵉᵉ-⟧ᵛ≡⟦-⟧ᵛ⟦!ˢ-⟧ᵛ δ f e =
-  begin _ ≡⟨ ⟦-⟧ᵛ-compositional _ (qᵉ δ) e ⟩
-        _ ≡⟨ ⟦-⟧ᵛ-extensional e (!ᵛ⟦-⟧-∘ᵛ-qᵛ ⦃ _ ⦄ ⦃ _ ⦄ ⦃ _ ⦄ ⦃ SubVarSub ⦄ _ f) ⟩
-        _ ≡˘⟨ ⟦-⟧ᵛ-compositional _ (!ᵛ f) e ⟩
-        _ ∎
-  where
-    open ≡-Reasoning
-
-⟦!ˢ⟦-⟧ᵛ-⟧ᵛ⟦qᵉˢ-⟧ᵛ≡⟦-⟧ᵛ⟦!ˢ-⟧ᵛ : ∀ (σ : Sub Γ Δ) (f : Ex Δ A) (e : Ex (A ∷ Δ) B) →
-                               ⟦ !ˢ (⟦ σ ⟧ᵛ f) ⟧ᵛ ⟦ qᵉ σ ⟧ᵛ e ≡ ⟦ σ ⟧ᵛ ⟦ !ˢ f ⟧ᵛ e
-⟦!ˢ⟦-⟧ᵛ-⟧ᵛ⟦qᵉˢ-⟧ᵛ≡⟦-⟧ᵛ⟦!ˢ-⟧ᵛ σ f e =
-  begin _ ≡⟨ ⟦-⟧ᵛ-compositional _ (qᵉ σ) e ⟩
-        _ ≡⟨ ⟦-⟧ᵛ-extensional e (!ᵛ⟦-⟧-∘ᵛ-qᵛ ⦃ _ ⦄ ⦃ SubVarSub ⦄ ⦃ _ ⦄ ⦃ SubVarSub ⦄ _ f) ⟩
-        _ ≡˘⟨ ⟦-⟧ᵛ-compositional _ (!ᵛ f) e ⟩
-        _ ∎
-  where
-    open ≡-Reasoning
 
 ⟦qᵉᵉ-⟧ˢ⟦Wkᵛ⟧ˢ≡⟦Wkᵛ⟧ˢ⟦-⟧ˢ : ∀ (δ : Ext Γ Δ) (e : Ex Δ B) →
                            ⟦ qᵉ δ ⟧ᵛ ⟦ Wkᵛ {A = A} ⟧ᵛ e ≡ ⟦ Wkᵛ ⟧ᵛ ⟦ δ ⟧ᵛ e
@@ -247,6 +249,11 @@ forExE-qᵉᵉ-forExE-Wkᵛ≡forExE-Wkᵛ-forExE : ∀ (δ : Ext Γ Δ) (ee : E
 forExE-qᵉᵉ-forExE-Wkᵛ≡forExE-Wkᵛ-forExE δ (-`$ e)              = cong -`$_ (⟦qᵉᵉ-⟧ˢ⟦Wkᵛ⟧ˢ≡⟦Wkᵛ⟧ˢ⟦-⟧ˢ δ e)
 forExE-qᵉᵉ-forExE-Wkᵛ≡forExE-Wkᵛ-forExE δ (`case-`of eₗ `/ eᵣ) = cong₂ `case-`of_`/_ (⟦qᵉᵉqᵉᵉ-⟧ˢ⟦qᵉWkᵛ⟧ˢ≡⟦qᵉWkᵛ⟧ˢ⟦qᵉᵉ-⟧ˢ δ eₗ) (⟦qᵉᵉqᵉᵉ-⟧ˢ⟦qᵉWkᵛ⟧ˢ≡⟦qᵉWkᵛ⟧ˢ⟦qᵉᵉ-⟧ˢ δ eᵣ)
 
+⟦qᵉᵉ-⟧ᵛ*⟦Wkᵛ⟧ᵛ*≡⟦Wkᵛ⟧ᵛ*⟦-⟧ᵛ* : ∀ (δ : Ext Γ Δ) (es : ExEs Δ B C) →
+                               ⟦ qᵉ δ ⟧ᵛ* ⟦ Wkᵛ {A = A} ⟧ᵛ* es ≡ ⟦ Wkᵛ ⟧ᵛ* ⟦ δ ⟧ᵛ* es
+⟦qᵉᵉ-⟧ᵛ*⟦Wkᵛ⟧ᵛ*≡⟦Wkᵛ⟧ᵛ*⟦-⟧ᵛ* δ `[]         = refl
+⟦qᵉᵉ-⟧ᵛ*⟦Wkᵛ⟧ᵛ*≡⟦Wkᵛ⟧ᵛ*⟦-⟧ᵛ* δ (es `∷ˢ ee) = cong₂ _`∷ˢ_ (⟦qᵉᵉ-⟧ᵛ*⟦Wkᵛ⟧ᵛ*≡⟦Wkᵛ⟧ᵛ*⟦-⟧ᵛ* δ es) (forExE-qᵉᵉ-forExE-Wkᵛ≡forExE-Wkᵛ-forExE δ ee)
+
 ⟦qᵉˢ-⟧ᵛ⟦Wkᵛ⟧ᵛ≡⟦Wkᵛ⟧ᵛ⟦-⟧ᵛ : ∀ (σ : Sub Γ Δ) (e : Ex Δ B) →
                            ⟦ qᵉ σ ⟧ᵛ ⟦ Wkᵛ {A = A} ⟧ᵛ e ≡ ⟦ Wkᵛ ⟧ᵛ ⟦ σ ⟧ᵛ e
 ⟦qᵉˢ-⟧ᵛ⟦Wkᵛ⟧ᵛ≡⟦Wkᵛ⟧ᵛ⟦-⟧ᵛ σ e =
@@ -271,3 +278,8 @@ forExE-qᵉˢ-forExE-Wkᵛ≡forExE-Wkᵛ-forExE : ∀ (σ : Sub Γ Δ) (ee : Ex
                                           RawAppSub.forExE (qᵉˢ σ) (RawAppSub.forExE (Wkᵛ {A = A}) ee) ≡ RawAppSub.forExE Wkᵛ (RawAppSub.forExE σ ee)
 forExE-qᵉˢ-forExE-Wkᵛ≡forExE-Wkᵛ-forExE σ (-`$ e)              = cong -`$_ (⟦qᵉˢ-⟧ᵛ⟦Wkᵛ⟧ᵛ≡⟦Wkᵛ⟧ᵛ⟦-⟧ᵛ σ e)
 forExE-qᵉˢ-forExE-Wkᵛ≡forExE-Wkᵛ-forExE σ (`case-`of eₗ `/ eᵣ) = cong₂ `case-`of_`/_ (⟦qᵉˢqᵉˢ-⟧ᵛ⟦qᵉWkᵛ⟧ᵛ≡⟦qᵉWkᵛ⟧ᵛ⟦qᵉˢ-⟧ᵛ σ eₗ) (⟦qᵉˢqᵉˢ-⟧ᵛ⟦qᵉWkᵛ⟧ᵛ≡⟦qᵉWkᵛ⟧ᵛ⟦qᵉˢ-⟧ᵛ σ eᵣ)
+
+⟦qᵉˢ-⟧ᵛ*⟦Wkᵛ⟧ᵛ*≡⟦Wkᵛ⟧ᵛ*⟦-⟧ᵛ* : ∀ (σ : Sub Γ Δ) (es : ExEs Δ B C) →
+                               ⟦ qᵉˢ σ ⟧ᵛ* ⟦ Wkᵛ {A = A} ⟧ᵛ* es ≡ ⟦ Wkᵛ ⟧ᵛ* ⟦ σ ⟧ᵛ* es
+⟦qᵉˢ-⟧ᵛ*⟦Wkᵛ⟧ᵛ*≡⟦Wkᵛ⟧ᵛ*⟦-⟧ᵛ* δ `[]         = refl
+⟦qᵉˢ-⟧ᵛ*⟦Wkᵛ⟧ᵛ*≡⟦Wkᵛ⟧ᵛ*⟦-⟧ᵛ* δ (es `∷ˢ ee) = cong₂ _`∷ˢ_ (⟦qᵉˢ-⟧ᵛ*⟦Wkᵛ⟧ᵛ*≡⟦Wkᵛ⟧ᵛ*⟦-⟧ᵛ* δ es) (forExE-qᵉˢ-forExE-Wkᵛ≡forExE-Wkᵛ-forExE δ ee)

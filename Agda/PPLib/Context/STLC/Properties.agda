@@ -11,7 +11,7 @@ open import Relation.Binary                       using ( IsEquivalence; Reflexi
                                                         ; Symmetric; Transitive
                                                         ; _Preserves_⟶_; _Preserves₂_⟶_⟶_
                                                         )
-open import Relation.Binary.PropositionalEquality using (_≡_; refl; cong; sym; trans)
+open import Relation.Binary.PropositionalEquality using (_≡_; refl; cong; sym; trans; module ≡-Reasoning)
 import Relation.Binary.Reasoning.Setoid           as SetoidReasoning
 
 open import PPLib.Context.STLC.Base Tp
@@ -109,37 +109,36 @@ module _
   open VarSubLiftId ⦃...⦄ public
 
 instance
-  opaque
-    VarSubLiftIdLiftId : ∀ ⦃ varSub₁ : VarSubBase R₁ ⦄
-                           ⦃ varSub₂ : VarSubBase R₂ ⦄
-                           ⦃ _ : RawVarSubId ⦃ varSub₁ ⦄ ⦄
-                           ⦃ _ : RawVarSubLift ⦃ varSub₁ ⦄ ⦃ varSub₂ ⦄ ⦄ →
-                         ----------------------------------------------------------
-                         VarSubLiftId ⦃ _ ⦄ ⦃ varSub₂ ⦄ ⦃ it ⦄ ⦃ RawVarSubLiftId ⦄
-    VarSubLiftIdLiftId .liftᵛ-preserves-Idᵛ = reflexiveᵛ (liftᵛ∘ Idᵛ)
-    {-# OVERLAPPABLE VarSubLiftIdLiftId #-}
+  VarSubLiftIdLiftId : ∀ ⦃ varSub₁ : VarSubBase R₁ ⦄
+                         ⦃ varSub₂ : VarSubBase R₂ ⦄
+                         ⦃ _ : RawVarSubId ⦃ varSub₁ ⦄ ⦄
+                         ⦃ _ : RawVarSubLift ⦃ varSub₁ ⦄ ⦃ varSub₂ ⦄ ⦄ →
+                       ----------------------------------------------------------
+                       VarSubLiftId ⦃ _ ⦄ ⦃ varSub₂ ⦄ ⦃ it ⦄ ⦃ RawVarSubLiftId ⦄
+  VarSubLiftIdLiftId .liftᵛ-preserves-Idᵛ = reflexiveᵛ (liftᵛ∘ Idᵛ)
+  {-# OVERLAPPABLE VarSubLiftIdLiftId #-}
 
-    VarSubWkSpecLiftId : ∀ ⦃ varSub₁ : VarSubBase R₁ ⦄
-                           ⦃ varSub₂ : VarSubBase R₂ ⦄
-                           ⦃ _ : RawVarSubId ⦃ varSub₁ ⦄ ⦄
-                           ⦃ _ : RawVarSubWk ⦃ varSub₁ ⦄ ⦄
-                           ⦃ _ : RawVarSubLift ⦃ varSub₁ ⦄ ⦃ varSub₂ ⦄ ⦄
-                           ⦃ varSubWkSpec₁ : VarSubWkSpec ⦃ varSub₁ ⦄ ⦄ →
-                         -----------------------------------------------------------------
-                         VarSubWkSpec ⦃ varSub₂ ⦄ ⦃ RawVarSubLiftId ⦄ ⦃ RawVarSubLiftWk ⦄
-    VarSubWkSpecLiftId ⦃ varSubWkSpec₁ = varSubWkSpec₁ ⦄ .Wkᵛ-spec x = cong liftᵛ (Wkᵛ-spec ⦃ _ ⦄ ⦃ _ ⦄ ⦃ _ ⦄ ⦃ varSubWkSpec₁ ⦄ x)
-    {-# OVERLAPPABLE VarSubWkSpecLiftId #-}
+  VarSubWkSpecLiftId : ∀ ⦃ varSub₁ : VarSubBase R₁ ⦄
+                         ⦃ varSub₂ : VarSubBase R₂ ⦄
+                         ⦃ _ : RawVarSubId ⦃ varSub₁ ⦄ ⦄
+                         ⦃ _ : RawVarSubWk ⦃ varSub₁ ⦄ ⦄
+                         ⦃ _ : RawVarSubLift ⦃ varSub₁ ⦄ ⦃ varSub₂ ⦄ ⦄
+                         ⦃ varSubWkSpec₁ : VarSubWkSpec ⦃ varSub₁ ⦄ ⦄ →
+                       -----------------------------------------------------------------
+                       VarSubWkSpec ⦃ varSub₂ ⦄ ⦃ RawVarSubLiftId ⦄ ⦃ RawVarSubLiftWk ⦄
+  VarSubWkSpecLiftId ⦃ varSubWkSpec₁ = varSubWkSpec₁ ⦄ .Wkᵛ-spec x = cong liftᵛ (Wkᵛ-spec ⦃ _ ⦄ ⦃ _ ⦄ ⦃ _ ⦄ ⦃ varSubWkSpec₁ ⦄ x)
+  {-# OVERLAPPABLE VarSubWkSpecLiftId #-}
 
-    VarSubOutHeadSpecLiftId : ∀ ⦃ varSub₁ : VarSubBase R₁ ⦄
-                                ⦃ varSub₂ : VarSubBase R₂ ⦄
-                                ⦃ _ : RawVarSubId ⦃ varSub₁ ⦄ ⦄
-                                ⦃ _ : RawVarSubOutHead ⦃ varSub₁ ⦄ ⦄
-                                ⦃ _ : RawVarSubLift ⦃ varSub₁ ⦄ ⦃ varSub₂ ⦄ ⦄
-                                ⦃ varSubOutHeadSpec₁ : VarSubOutHeadSpec ⦃ varSub₁ ⦄ ⦄ →
-                              ---------------------------------------------------------------------------
-                              VarSubOutHeadSpec ⦃ varSub₂ ⦄ ⦃ RawVarSubLiftId ⦄ ⦃ RawVarSubLiftOutHead ⦄
-    VarSubOutHeadSpecLiftId ⦃ varSubOutHeadSpec₁ = varSubOutHeadSpec₁ ⦄ .R-headᵛ-spec = cong liftᵛ (R-headᵛ-spec ⦃ _ ⦄ ⦃ _ ⦄ ⦃ _ ⦄ ⦃ varSubOutHeadSpec₁ ⦄)
-    {-# OVERLAPPABLE VarSubOutHeadSpecLiftId #-}
+  VarSubOutHeadSpecLiftId : ∀ ⦃ varSub₁ : VarSubBase R₁ ⦄
+                              ⦃ varSub₂ : VarSubBase R₂ ⦄
+                              ⦃ _ : RawVarSubId ⦃ varSub₁ ⦄ ⦄
+                              ⦃ _ : RawVarSubOutHead ⦃ varSub₁ ⦄ ⦄
+                              ⦃ _ : RawVarSubLift ⦃ varSub₁ ⦄ ⦃ varSub₂ ⦄ ⦄
+                              ⦃ varSubOutHeadSpec₁ : VarSubOutHeadSpec ⦃ varSub₁ ⦄ ⦄ →
+                            ---------------------------------------------------------------------------
+                            VarSubOutHeadSpec ⦃ varSub₂ ⦄ ⦃ RawVarSubLiftId ⦄ ⦃ RawVarSubLiftOutHead ⦄
+  VarSubOutHeadSpecLiftId ⦃ varSubOutHeadSpec₁ = varSubOutHeadSpec₁ ⦄ .R-headᵛ-spec = cong liftᵛ (R-headᵛ-spec ⦃ _ ⦄ ⦃ _ ⦄ ⦃ _ ⦄ ⦃ varSubOutHeadSpec₁ ⦄)
+  {-# OVERLAPPABLE VarSubOutHeadSpecLiftId #-}
 
 module _
   ⦃ varSub₁ : VarSubBase {ℓ₁} R₁ ⦄
@@ -147,7 +146,8 @@ module _
   ⦃ varSub₃ : VarSubBase {ℓ₃} R₃ ⦄ where
   open VarSubBase varSub₁ using () renaming (VarSub to VarSub₁; _≈ᵛ_ to _≈ᵛ₁_)
   open VarSubBase varSub₂ using () renaming (VarSub to VarSub₂; _≈ᵛ_ to _≈ᵛ₂_)
-  open VarSubBase varSub₃ using () renaming (VarSub to VarSub₃; _≈ᵛ_ to _≈ᵛ₃_)
+  open VarSubBase varSub₃ using () renaming (_≈ᵛ_ to _≈ᵛ₃_)
+
   record VarSubIdNoOpˡ
     ⦃ _ : RawVarSubId ⦃ varSub₁ ⦄ ⦄
     ⦃ _ : RawVarSubLift ⦃ varSub₂ ⦄ ⦃ varSub₃ ⦄ ⦄
@@ -205,7 +205,6 @@ module _
   ⦃ varSub₃ : VarSubBase {ℓ₃} R₃ ⦄
   ⦃ varSub₄ : VarSubBase {ℓ₄} R₄ ⦄ where
   open VarSubBase varSub₁ using () renaming (VarSub to VarSub₁)
-  open VarSubBase varSub₂ using () renaming (VarSub to VarSub₂)
 
   record VarSubLiftApp
     ⦃ _ : RawVarSubLift ⦃ varSub₁ ⦄ ⦃ varSub₂ ⦄ ⦄
@@ -229,22 +228,20 @@ module _
   open VarSubBase varSub₁ using () renaming (VarSub to VarSub₁)
   open VarSubBase varSub₂ using () renaming (VarSub to VarSub₂)
   open VarSubBase varSub₃ using () renaming (VarSub to VarSub₃)
-  open VarSubBase varSub₄ using () renaming (VarSub to VarSub₄)
-  open VarSubBase varSub₅ using () renaming (VarSub to VarSub₅)
 
   record VarSubAppCompositional
-    ⦃ _ : RawVarSubApp ⦃ varSub₁ ⦄ ⦃ varSub₂ ⦄ ⦃ varSub₃ ⦄ ⦄
+    ⦃ _ : RawVarSubApp ⦃ varSub₁ ⦄ ⦃ varSub₂ ⦄ ⦃ varSub₄ ⦄ ⦄
     ⦃ _ : RawVarSubApp ⦃ varSub₁ ⦄ ⦃ varSub₅ ⦄ ⦃ varSub₆ ⦄ ⦄
-    ⦃ _ : RawVarSubApp ⦃ varSub₂ ⦄ ⦃ varSub₄ ⦄ ⦃ varSub₅ ⦄ ⦄
-    ⦃ _ : RawVarSubApp ⦃ varSub₃ ⦄ ⦃ varSub₄ ⦄ ⦃ varSub₆ ⦄ ⦄
-    : Set (ℓ₀ ⊔ ℓ₁ ⊔ ℓ₂ ⊔ ℓ₃ ⊔ ℓ₄ ⊔ ℓ₆) where
+    ⦃ _ : RawVarSubApp ⦃ varSub₂ ⦄ ⦃ varSub₃ ⦄ ⦃ varSub₅ ⦄ ⦄
+    ⦃ _ : RawVarSubApp ⦃ varSub₄ ⦄ ⦃ varSub₃ ⦄ ⦃ varSub₆ ⦄ ⦄
+    : Set (ℓ₀ ⊔ ℓ₁ ⊔ ℓ₂ ⊔ ℓ₃ ⊔ ℓ₆) where
     field
-      ⟦-⟧ᵛ-compositional : ∀ (σ : VarSub₁ Ψ Δ) (τ : VarSub₂ Δ Γ) (M : R₄ Γ A) →
+      ⟦-⟧ᵛ-compositional : ∀ (σ : VarSub₁ Ψ Δ) (τ : VarSub₂ Δ Γ) (M : R₃ Γ A) →
                            -----------------------------------------------------
                            ⟦ σ ⟧ᵛ ⟦ τ ⟧ᵛ M ≡ ⟦ σ ∘ᵛ τ ⟧ᵛ M
 
     opaque
-      ∘ᵛ-assocᵛ : ∀ (σ : VarSub₁ Φ Ψ) (τ : VarSub₂ Ψ Δ) (υ : VarSub₄ Δ Γ) →
+      ∘ᵛ-assocᵛ : ∀ (σ : VarSub₁ Φ Ψ) (τ : VarSub₂ Ψ Δ) (υ : VarSub₃ Δ Γ) →
                   ----------------------------------------------------------
                   σ ∘ᵛ (τ ∘ᵛ υ) ≈ᵛ (σ ∘ᵛ τ) ∘ᵛ υ
       ∘ᵛ-assocᵛ _ _ υ x = ⟦-⟧ᵛ-compositional _ _ (υ x)
@@ -255,7 +252,7 @@ module _
   ⦃ varSub₁ : VarSubBase {ℓ₁} R₁ ⦄
   ⦃ varSub₂ : VarSubBase {ℓ₂} R₂ ⦄ where
   open VarSubBase varSub₁ using () renaming (VarSub to VarSub₁)
-  open VarSubBase varSub₂ using () renaming (VarSub to VarSub₂; _≈ᵛ_ to _≈ᵛ₂_)
+  open VarSubBase varSub₂ using () renaming (_≈ᵛ_ to _≈ᵛ₂_)
 
   module _ ⦃ _ : RawVarSubLift ⦃ varSub₁ ⦄ ⦃ varSub₂ ⦄ ⦄ where
     opaque
@@ -341,8 +338,7 @@ module _
 module _
   ⦃ varSub₁ : VarSubBase {ℓ₁} R₁ ⦄
   ⦃ varSub₂ : VarSubBase {ℓ₂} R₂ ⦄ where
-  open VarSubBase varSub₁ using () renaming (VarSub to VarSub₁)
-  open VarSubBase varSub₂ using () renaming (VarSub to VarSub₂; _≈ᵛ_ to _≈ᵛ₂_)
+  open VarSubBase varSub₂ using () renaming (_≈ᵛ_ to _≈ᵛ₂_)
 
   module _
     ⦃ _ : RawVarSubWk ⦃ varSub₁ ⦄ ⦄
@@ -374,8 +370,8 @@ module _
   ⦃ varSub₂ : VarSubBase R₂ ⦄
   ⦃ varSub₃ : VarSubBase R₃ ⦄ where
   open VarSubBase varSub₁ using () renaming (VarSub to VarSub₁)
-  open VarSubBase varSub₂ using () renaming (VarSub to VarSub₂; _≈ᵛ_ to _≈ᵛ₂_)
-  open VarSubBase varSub₃ using () renaming (VarSub to VarSub₃; _≈ᵛ_ to _≈ᵛ₃_)
+  open VarSubBase varSub₂ using () renaming (VarSub to VarSub₂)
+  open VarSubBase varSub₃ using () renaming (_≈ᵛ_ to _≈ᵛ₃_)
 
   module _ ⦃ _ : RawVarSubApp ⦃ varSub₁ ⦄ ⦃ varSub₂ ⦄ ⦃ varSub₃ ⦄ ⦄ where
     opaque
@@ -389,9 +385,8 @@ module _
   ⦃ varSub₁ : VarSubBase R₁ ⦄
   ⦃ varSub₂ : VarSubBase R₂ ⦄
   ⦃ varSub₃ : VarSubBase R₃ ⦄ where
-  open VarSubBase varSub₁ using () renaming (VarSub to VarSub₁)
-  open VarSubBase varSub₂ using () renaming (VarSub to VarSub₂; _≈ᵛ_ to _≈ᵛ₂_)
-  open VarSubBase varSub₃ using () renaming (VarSub to VarSub₃; _≈ᵛ_ to _≈ᵛ₃_)
+  open VarSubBase varSub₂ using () renaming (VarSub to VarSub₂)
+  open VarSubBase varSub₃ using () renaming (_≈ᵛ_ to _≈ᵛ₃_)
 
   module _
     ⦃ _ : RawVarSubId ⦃ varSub₁ ⦄ ⦄
@@ -409,7 +404,7 @@ module _
     ⦃ _ : VarSubIdNoOpʳ ⦃ varSub₃ ⦄ ⦃ varSub₁ ⦄ ⦃ varSub₃ ⦄ ⦄
     ⦃ _ : VarSubIdNoOpʳ ⦃ varSub₃ ⦄ ⦃ varSub₂ ⦄ ⦃ varSub₃ ⦄ ⦄
     ⦃ _ : VarSubAppExtensional ⦃ varSub₃ ⦄ ⦃ varSub₂ ⦄ ⦃ varSub₃ ⦄ ⦄
-    ⦃ _ : VarSubAppCompositional ⦃ varSub₃ ⦄ ⦃ varSub₁ ⦄ ⦃ varSub₃ ⦄ ⦃ varSub₂ ⦄ ⦄ where
+    ⦃ _ : VarSubAppCompositional ⦃ varSub₃ ⦄ ⦃ varSub₁ ⦄ ⦃ varSub₂ ⦄ ⦄ where
     opaque
       !ᵛ-∘ᵛ-qᵛ : ∀ (σ : VarSub₂ Γ Δ) (M : R₃ Γ A) →
                  !ᵛ M ∘ᵛ qᵛ σ ≈ᵛ₃ liftᵛ∘ σ ,ᵛ M
@@ -427,10 +422,9 @@ module _
   ⦃ varSub₂ : VarSubBase R₂ ⦄
   ⦃ varSub₃ : VarSubBase R₃ ⦄
   ⦃ varSub₄ : VarSubBase R₄ ⦄ where
-  open VarSubBase varSub₁ using () renaming (VarSub to VarSub₁)
   open VarSubBase varSub₂ using () renaming (VarSub to VarSub₂)
   open VarSubBase varSub₃ using () renaming (VarSub to VarSub₃)
-  open VarSubBase varSub₄ using () renaming (VarSub to VarSub₄; _≈ᵛ_ to _≈ᵛ₄_)
+  open VarSubBase varSub₄ using () renaming (_≈ᵛ_ to _≈ᵛ₄_)
 
   module _
     ⦃ _ : RawVarSubId ⦃ varSub₁ ⦄ ⦄
@@ -455,8 +449,8 @@ module _
     ⦃ _ : VarSubIdNoOpʳ ⦃ varSub₂ ⦄ ⦃ varSub₁ ⦄ ⦃ varSub₂ ⦄ ⦄
     ⦃ _ : VarSubIdNoOpʳ ⦃ varSub₂ ⦄ ⦃ varSub₃ ⦄ ⦃ varSub₄ ⦄ ⦄
     ⦃ _ : VarSubAppExtensional ⦃ varSub₂ ⦄ ⦃ varSub₃ ⦄ ⦃ varSub₄ ⦄ ⦄
-    ⦃ _ : VarSubAppCompositional ⦃ varSub₁ ⦄ ⦃ varSub₂ ⦄ ⦃ _ ⦄ ⦃ varSub₃ ⦄ ⦄
-    ⦃ _ : VarSubAppCompositional ⦃ varSub₂ ⦄ ⦃ varSub₁ ⦄ ⦃ _ ⦄ ⦃ varSub₃ ⦄ ⦄ where
+    ⦃ _ : VarSubAppCompositional ⦃ varSub₁ ⦄ ⦃ varSub₂ ⦄ ⦃ varSub₃ ⦄ ⦄
+    ⦃ _ : VarSubAppCompositional ⦃ varSub₂ ⦄ ⦃ varSub₁ ⦄ ⦃ varSub₃ ⦄ ⦄ where
 
     opaque
       qᵛ-distrib-∘ᵛ : ∀ (σ : VarSub₂ Ψ Δ) (τ : VarSub₃ Δ Γ) →
@@ -495,7 +489,7 @@ module _
     ⦃ _ : VarSubIdNoOpʳ ⦃ varSub₄ ⦄ ⦃ varSub₁ ⦄ ⦃ varSub₄ ⦄ ⦄
     ⦃ _ : VarSubIdNoOpʳ ⦃ varSub₄ ⦄ ⦃ varSub₂ ⦄ ⦃ varSub₄ ⦄ ⦄
     ⦃ _ : VarSubAppExtensional ⦃ varSub₄ ⦄ ⦃ varSub₂ ⦄ ⦃ varSub₄ ⦄ ⦄
-    ⦃ _ : VarSubAppCompositional ⦃ varSub₄ ⦄ ⦃ varSub₁ ⦄ ⦃ varSub₄ ⦄ ⦃ varSub₂ ⦄ ⦄ where
+    ⦃ _ : VarSubAppCompositional ⦃ varSub₄ ⦄ ⦃ varSub₁ ⦄ ⦃ varSub₂ ⦄ ⦄ where
     opaque
       !ᵛ⟦-⟧-∘ᵛ-qᵛ : ∀ (σ : VarSub₂ Γ Δ) (M : R₃ Δ A) →
                     !ᵛ ⟦ σ ⟧ᵛ M ∘ᵛ qᵛ σ ≈ᵛ₄ σ ∘ᵛ !ᵛ M
@@ -506,3 +500,40 @@ module _
               σ ∘ᵛ !ᵛ M              ∎
         where
           open VarSub-Reasoning ⦃ varSub₄ ⦄ _ _
+
+  module _
+    ⦃ _ : RawVarSubId ⦃ varSub₁ ⦄ ⦄
+    ⦃ _ : RawVarSubId ⦃ varSub₂ ⦄ ⦄
+    ⦃ _ : RawVarSubId ⦃ varSub₃ ⦄ ⦄
+    ⦃ _ : RawVarSubId ⦃ varSub₄ ⦄ ⦄
+    ⦃ _ : RawVarSubWk ⦃ varSub₁ ⦄ ⦄
+    ⦃ _ : RawVarSubOutHead ⦃ varSub₂ ⦄ ⦄
+    ⦃ _ : RawVarSubLift ⦃ varSub₂ ⦄ ⦃ varSub₄ ⦄ ⦄
+    ⦃ _ : RawVarSubApp ⦃ varSub₁ ⦄ ⦃ varSub₂ ⦄ ⦃ varSub₂ ⦄ ⦄
+    ⦃ _ : RawVarSubApp ⦃ varSub₂ ⦄ ⦃ varSub₃ ⦄ ⦃ varSub₄ ⦄ ⦄
+    ⦃ _ : RawVarSubApp ⦃ varSub₃ ⦄ ⦃ varSub₃ ⦄ ⦃ varSub₃ ⦄ ⦄
+    ⦃ _ : RawVarSubApp ⦃ varSub₄ ⦄ ⦃ varSub₁ ⦄ ⦃ varSub₄ ⦄ ⦄
+    ⦃ _ : RawVarSubApp ⦃ varSub₄ ⦄ ⦃ varSub₂ ⦄ ⦃ varSub₄ ⦄ ⦄
+    ⦃ _ : RawVarSubApp ⦃ varSub₄ ⦄ ⦃ varSub₃ ⦄ ⦃ varSub₄ ⦄ ⦄
+    ⦃ _ : RawVarSubApp ⦃ varSub₄ ⦄ ⦃ varSub₄ ⦄ ⦃ varSub₄ ⦄ ⦄
+    ⦃ _ : VarSubWkSpec ⦃ varSub₁ ⦄ ⦄
+    ⦃ _ : VarSubOutHeadSpec ⦃ varSub₂ ⦄ ⦄
+    ⦃ _ : VarSubIdNoOpˡ ⦃ varSub₄ ⦄ ⦃ varSub₂ ⦄ ⦃ varSub₄ ⦄ ⦄
+    ⦃ _ : VarSubIdNoOpʳ ⦃ varSub₂ ⦄ ⦃ varSub₃ ⦄ ⦃ varSub₄ ⦄ ⦄
+    ⦃ _ : VarSubIdNoOpʳ ⦃ varSub₄ ⦄ ⦃ varSub₁ ⦄ ⦃ varSub₄ ⦄ ⦄
+    ⦃ _ : VarSubIdNoOpʳ ⦃ varSub₄ ⦄ ⦃ varSub₂ ⦄ ⦃ varSub₄ ⦄ ⦄
+    ⦃ _ : VarSubAppExtensional ⦃ varSub₄ ⦄ ⦃ varSub₂ ⦄ ⦃ varSub₄ ⦄ ⦄
+    ⦃ _ : VarSubAppExtensional ⦃ varSub₄ ⦄ ⦃ varSub₃ ⦄ ⦃ varSub₄ ⦄ ⦄
+    ⦃ _ : VarSubAppCompositional ⦃ varSub₂ ⦄ ⦃ varSub₃ ⦄ ⦃ varSub₃ ⦄ ⦄
+    ⦃ _ : VarSubAppCompositional ⦃ varSub₄ ⦄ ⦃ varSub₁ ⦄ ⦃ varSub₂ ⦄ ⦄
+    ⦃ _ : VarSubAppCompositional ⦃ varSub₄ ⦄ ⦃ varSub₂ ⦄ ⦃ varSub₃ ⦄ ⦄ where
+    opaque
+      ⟦!ᵛ⟦-⟧ᵛ-⟧ᵛ⟦qᵛ-⟧ᵛ≡⟦-⟧ᵛ⟦!ᵛ-⟧ᵛ : ∀ (δ : VarSub₂ Γ Δ) (N : R₃ Δ A) (M : R₃ (A ∷ Δ) B) →
+                                    ⟦ !ᵛ ⟦ δ ⟧ᵛ N ⟧ᵛ ⟦ qᵛ δ ⟧ᵛ M ≡ ⟦ δ ⟧ᵛ ⟦ !ᵛ N ⟧ᵛ M
+      ⟦!ᵛ⟦-⟧ᵛ-⟧ᵛ⟦qᵛ-⟧ᵛ≡⟦-⟧ᵛ⟦!ᵛ-⟧ᵛ δ f e =
+        begin _ ≡⟨ ⟦-⟧ᵛ-compositional (!ᵛ ⟦ δ ⟧ᵛ f) (qᵛ δ) e ⟩
+              _ ≡⟨ ⟦-⟧ᵛ-extensional e (!ᵛ⟦-⟧-∘ᵛ-qᵛ δ f) ⟩
+              _ ≡˘⟨ ⟦-⟧ᵛ-compositional _ (!ᵛ f) e ⟩
+              _ ∎
+        where
+          open ≡-Reasoning

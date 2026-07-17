@@ -24,6 +24,12 @@ instance
   RawExtLiftSub : RawVarSubLift ⦃ ExtVarSub ⦄ ⦃ SubVarSub ⦄
   RawExtLiftSub .liftᵛ = `#_
 
+  RawSubId : RawVarSubId ⦃ SubVarSub ⦄
+  RawSubId = RawVarSubLiftId ⦃ ExtVarSub ⦄
+
+  RawSubOutHead : RawVarSubOutHead ⦃ SubVarSub ⦄
+  RawSubOutHead = RawVarSubLiftOutHead ⦃ ExtVarSub ⦄
+
 infixr 30 !ˢ_
 !ˢ_ = !ᵛ_ ⦃ SubVarSub ⦄
 
@@ -48,10 +54,10 @@ instance
                 ⦃ _ : RawVarSubLift ⦃ varSub ⦄ ⦃ SubVarSub ⦄ ⦄
                 ⦃ _ : RawVarSubApp ⦃ ExtVarSub ⦄ ⦃ varSub ⦄ ⦃ varSub ⦄ ⦄ →
               RawVarSubApp ⦃ varSub ⦄ ⦃ SubVarSub ⦄ ⦃ SubVarSub ⦄
-  RawAppSub = record { Appᵛ = forEx }
+  RawAppSub ⦃ varSub = varSub ⦄ = record { Appᵛ = forEx }
     module RawAppSub where
-      forEx  : VarSub Δ Γ → ∀ {A} → Ex Γ A → Ex Δ A
-      forExE : VarSub Δ Γ → ∀ {A B} → ExE Γ A B → ExE Δ A B
+      forEx  : VarSub ⦃ varSub ⦄ Δ Γ → ∀ {A} → Ex Γ A → Ex Δ A
+      forExE : VarSub ⦃ varSub ⦄ Δ Γ → ∀ {A B} → ExE Γ A B → ExE Δ A B
 
       forEx δ (`# x)     = liftᵛ (δ x)
       forEx δ (`λ e)     = `λ (forEx (qᵉ δ) e)

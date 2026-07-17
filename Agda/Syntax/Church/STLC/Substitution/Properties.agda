@@ -48,7 +48,7 @@ instance
                              ⦃ _ : RawVarSubOutHead ⦃ varSub ⦄ ⦄
                              ⦃ _ : RawVarSubLift ⦃ varSub ⦄ ⦃ SubVarSub ⦄ ⦄
                              ⦃ _ : RawVarSubApp ⦃ ExtVarSub ⦄ ⦃ varSub ⦄ ⦃ varSub ⦄ ⦄ →
-                           VarSubAppCompositional ⦃ varSub ⦄ ⦃ SubVarSub ⦄ ⦃ SubVarSub ⦄ ⦃ ExtVarSub ⦄ ⦃ SubVarSub ⦄ ⦃ SubVarSub ⦄
+                           VarSubAppCompositional ⦃ varSub ⦄ ⦃ SubVarSub ⦄ ⦃ ExtVarSub ⦄
   AppSubCompositionalExt .⟦-⟧ᵛ-compositional σ τ x = refl
 
   ExtLiftSubApp : VarSubLiftApp ⦃ ExtVarSub ⦄ ⦃ SubVarSub ⦄ ⦃ SubVarSub ⦄ ⦃ SubVarSub ⦄
@@ -82,7 +82,7 @@ instance
   IdNoOpSubʳ .Idᵛ-idʳ σ x = refl
 
 instance
-  ExtAppExtCompositionalSub : VarSubAppCompositional ⦃ ExtVarSub ⦄ ⦃ ExtVarSub ⦄ ⦃ ExtVarSub ⦄ ⦃ SubVarSub ⦄ ⦃ SubVarSub ⦄ ⦃ SubVarSub ⦄
+  ExtAppExtCompositionalSub : VarSubAppCompositional ⦃ ExtVarSub ⦄ ⦃ ExtVarSub ⦄ ⦃ SubVarSub ⦄
   ExtAppExtCompositionalSub .⟦-⟧ᵛ-compositional δ γ (`# x)   = refl
   ExtAppExtCompositionalSub .⟦-⟧ᵛ-compositional δ γ (`λ M)   = cong `λ_ (trans (⟦-⟧ᵛ-compositional (qᵉ δ) (qᵉ γ) M) (sym (⟦-⟧ᵛ-extensional M (qᵉ-distrib-∘ᵛ δ _))))
   ExtAppExtCompositionalSub .⟦-⟧ᵛ-compositional δ γ (M `$ N) = cong₂ _`$_ (⟦-⟧ᵛ-compositional δ γ M) (⟦-⟧ᵛ-compositional δ γ N)
@@ -90,7 +90,7 @@ instance
 qᵉ-distrib-∘ˢᵉ = qᵛ-distrib-∘ᵛ ⦃ ExtVarSub ⦄ ⦃ SubVarSub ⦄ ⦃ ExtVarSub ⦄ ⦃ SubVarSub ⦄
 
 instance
-  SubAppExtCompositionalSub : VarSubAppCompositional ⦃ SubVarSub ⦄ ⦃ ExtVarSub ⦄ ⦃ SubVarSub ⦄ ⦃ SubVarSub ⦄ ⦃ SubVarSub ⦄ ⦃ SubVarSub ⦄
+  SubAppExtCompositionalSub : VarSubAppCompositional ⦃ SubVarSub ⦄ ⦃ ExtVarSub ⦄ ⦃ SubVarSub ⦄
   SubAppExtCompositionalSub .⟦-⟧ᵛ-compositional σ δ (`# x)   = refl
   SubAppExtCompositionalSub .⟦-⟧ᵛ-compositional σ δ (`λ M)   = cong `λ_ (trans (⟦-⟧ᵛ-compositional (qᵉ σ) (qᵉ δ) M) (sym (⟦-⟧ᵛ-extensional M (qᵉ-distrib-∘ˢᵉ σ _))))
   SubAppExtCompositionalSub .⟦-⟧ᵛ-compositional σ δ (M `$ N) = cong₂ _`$_ (⟦-⟧ᵛ-compositional σ δ M) (⟦-⟧ᵛ-compositional σ δ N)
@@ -98,7 +98,7 @@ instance
 qᵉ-distrib-∘ᵉˢ = qᵛ-distrib-∘ᵛ ⦃ ExtVarSub ⦄ ⦃ ExtVarSub ⦄ ⦃ SubVarSub ⦄ ⦃ SubVarSub ⦄
 
 instance
-  ExtAppSubCompositionalSub : VarSubAppCompositional ⦃ ExtVarSub ⦄ ⦃ SubVarSub ⦄ ⦃ SubVarSub ⦄ ⦃ SubVarSub ⦄ ⦃ SubVarSub ⦄ ⦃ SubVarSub ⦄
+  ExtAppSubCompositionalSub : VarSubAppCompositional ⦃ ExtVarSub ⦄ ⦃ SubVarSub ⦄ ⦃ SubVarSub ⦄
   ExtAppSubCompositionalSub .⟦-⟧ᵛ-compositional δ σ (`# x)   = refl
   ExtAppSubCompositionalSub .⟦-⟧ᵛ-compositional δ σ (`λ M)   = cong `λ_ (trans (⟦-⟧ᵛ-compositional (qᵉ δ) (qᵉ σ) M) (sym (⟦-⟧ᵛ-extensional M (qᵉ-distrib-∘ᵉˢ _ σ))))
   ExtAppSubCompositionalSub .⟦-⟧ᵛ-compositional δ σ (M `$ N) = cong₂ _`$_ (⟦-⟧ᵛ-compositional δ σ M) (⟦-⟧ᵛ-compositional δ σ N)
@@ -106,31 +106,7 @@ instance
 qᵉ-distrib-∘ˢ = qᵛ-distrib-∘ᵛ ⦃ ExtVarSub ⦄ ⦃ SubVarSub ⦄ ⦃ SubVarSub ⦄ ⦃ SubVarSub ⦄
 
 instance
-  SubAppSubCompositionalSub : VarSubAppCompositional ⦃ SubVarSub ⦄ ⦃ SubVarSub ⦄ ⦃ SubVarSub ⦄ ⦃ SubVarSub ⦄ ⦃ SubVarSub ⦄ ⦃ SubVarSub ⦄
+  SubAppSubCompositionalSub : VarSubAppCompositional ⦃ SubVarSub ⦄ ⦃ SubVarSub ⦄ ⦃ SubVarSub ⦄
   SubAppSubCompositionalSub .⟦-⟧ᵛ-compositional σ τ (`# x)   = refl
   SubAppSubCompositionalSub .⟦-⟧ᵛ-compositional σ τ (`λ M)   = cong `λ_ (trans (⟦-⟧ᵛ-compositional (qᵉ σ) (qᵉ τ) M) (sym (⟦-⟧ᵛ-extensional M (qᵉ-distrib-∘ˢ _ τ))))
   SubAppSubCompositionalSub .⟦-⟧ᵛ-compositional σ τ (M `$ N) = cong₂ _`$_ (⟦-⟧ᵛ-compositional σ τ M) (⟦-⟧ᵛ-compositional σ τ N)
-
-----------------------------------------------------------
--- Other Useful Properties for Extensions/Substitutions
-----------------------------------------------------------
-
-⟦!ˢ⟦-⟧ᵛ-⟧ᵛ⟦qᵉᵉ-⟧ᵛ≡⟦-⟧ᵛ⟦!ˢ-⟧ᵛ : ∀ (δ : Ext Γ Δ) (N : Tm Δ A) (M : Tm (A ∷ Δ) B) →
-                               ⟦ !ˢ (⟦ δ ⟧ᵛ N) ⟧ᵛ ⟦ qᵉ δ ⟧ᵛ M ≡ ⟦ δ ⟧ᵛ ⟦ !ˢ N ⟧ᵛ M
-⟦!ˢ⟦-⟧ᵛ-⟧ᵛ⟦qᵉᵉ-⟧ᵛ≡⟦-⟧ᵛ⟦!ˢ-⟧ᵛ δ N M =
-  begin _ ≡⟨ ⟦-⟧ᵛ-compositional _ (qᵉ δ) M ⟩
-        _ ≡⟨ ⟦-⟧ᵛ-extensional M (!ᵛ⟦-⟧-∘ᵛ-qᵛ ⦃ _ ⦄ ⦃ _ ⦄ ⦃ _ ⦄ ⦃ SubVarSub ⦄ _ N) ⟩
-        _ ≡˘⟨ ⟦-⟧ᵛ-compositional _ (!ᵛ N) M ⟩
-        _ ∎
-  where
-    open ≡-Reasoning
-
-⟦!ˢ⟦-⟧ᵛ-⟧ᵛ⟦qᵉˢ-⟧ᵛ≡⟦-⟧ᵛ⟦!ˢ-⟧ᵛ : ∀ (σ : Sub Γ Δ) (N : Tm Δ A) (M : Tm (A ∷ Δ) B) →
-                               ⟦ !ˢ (⟦ σ ⟧ᵛ N) ⟧ᵛ ⟦ qᵉ σ ⟧ᵛ M ≡ ⟦ σ ⟧ᵛ ⟦ !ˢ N ⟧ᵛ M
-⟦!ˢ⟦-⟧ᵛ-⟧ᵛ⟦qᵉˢ-⟧ᵛ≡⟦-⟧ᵛ⟦!ˢ-⟧ᵛ σ N M =
-  begin _ ≡⟨ ⟦-⟧ᵛ-compositional _ (qᵉ σ) M ⟩
-        _ ≡⟨ ⟦-⟧ᵛ-extensional M (!ᵛ⟦-⟧-∘ᵛ-qᵛ ⦃ _ ⦄ ⦃ SubVarSub ⦄ ⦃ _ ⦄ ⦃ SubVarSub ⦄ _ N) ⟩
-        _ ≡˘⟨ ⟦-⟧ᵛ-compositional _ (!ᵛ N) M ⟩
-        _ ∎
-  where
-    open ≡-Reasoning
