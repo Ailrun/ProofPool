@@ -109,36 +109,36 @@ module _
   open VarSubLiftId ⦃...⦄ public
 
 instance
-  VarSubLiftIdLiftId : ∀ ⦃ varSub₁ : VarSubBase R₁ ⦄
-                         ⦃ varSub₂ : VarSubBase R₂ ⦄
-                         ⦃ _ : RawVarSubId ⦃ varSub₁ ⦄ ⦄
-                         ⦃ _ : RawVarSubLift ⦃ varSub₁ ⦄ ⦃ varSub₂ ⦄ ⦄ →
-                       ----------------------------------------------------------
-                       VarSubLiftId ⦃ _ ⦄ ⦃ varSub₂ ⦄ ⦃ it ⦄ ⦃ RawVarSubLiftId ⦄
-  VarSubLiftIdLiftId .liftᵛ-preserves-Idᵛ = reflexiveᵛ (liftᵛ∘ Idᵛ)
-  {-# OVERLAPPABLE VarSubLiftIdLiftId #-}
+  VarSubLiftIdLift : ∀ ⦃ varSub₁ : VarSubBase R₁ ⦄
+                       ⦃ varSub₂ : VarSubBase R₂ ⦄
+                       ⦃ _ : RawVarSubId ⦃ varSub₁ ⦄ ⦄
+                       ⦃ _ : RawVarSubLift ⦃ varSub₁ ⦄ ⦃ varSub₂ ⦄ ⦄ →
+                     ----------------------------------------------------------
+                     VarSubLiftId ⦃ _ ⦄ ⦃ varSub₂ ⦄ ⦃ it ⦄ ⦃ RawVarSubLiftId ⦄
+  VarSubLiftIdLift .liftᵛ-preserves-Idᵛ = reflexiveᵛ (liftᵛ∘ Idᵛ)
+  {-# OVERLAPPABLE VarSubLiftIdLift #-}
 
-  VarSubWkSpecLiftId : ∀ ⦃ varSub₁ : VarSubBase R₁ ⦄
-                         ⦃ varSub₂ : VarSubBase R₂ ⦄
-                         ⦃ _ : RawVarSubId ⦃ varSub₁ ⦄ ⦄
-                         ⦃ _ : RawVarSubWk ⦃ varSub₁ ⦄ ⦄
-                         ⦃ _ : RawVarSubLift ⦃ varSub₁ ⦄ ⦃ varSub₂ ⦄ ⦄
-                         ⦃ varSubWkSpec₁ : VarSubWkSpec ⦃ varSub₁ ⦄ ⦄ →
-                       -----------------------------------------------------------------
-                       VarSubWkSpec ⦃ varSub₂ ⦄ ⦃ RawVarSubLiftId ⦄ ⦃ RawVarSubLiftWk ⦄
-  VarSubWkSpecLiftId ⦃ varSubWkSpec₁ = varSubWkSpec₁ ⦄ .Wkᵛ-spec x = cong liftᵛ (Wkᵛ-spec ⦃ _ ⦄ ⦃ _ ⦄ ⦃ _ ⦄ ⦃ varSubWkSpec₁ ⦄ x)
-  {-# OVERLAPPABLE VarSubWkSpecLiftId #-}
+  VarSubWkSpecLift : ∀ ⦃ varSub₁ : VarSubBase R₁ ⦄
+                       ⦃ varSub₂ : VarSubBase R₂ ⦄
+                       ⦃ _ : RawVarSubId ⦃ varSub₁ ⦄ ⦄
+                       ⦃ _ : RawVarSubWk ⦃ varSub₁ ⦄ ⦄
+                       ⦃ _ : RawVarSubLift ⦃ varSub₁ ⦄ ⦃ varSub₂ ⦄ ⦄
+                       ⦃ varSubWkSpec₁ : VarSubWkSpec ⦃ varSub₁ ⦄ ⦄ →
+                     -----------------------------------------------------------------
+                     VarSubWkSpec ⦃ varSub₂ ⦄ ⦃ RawVarSubLiftId ⦄ ⦃ RawVarSubLiftWk ⦄
+  VarSubWkSpecLift ⦃ varSubWkSpec₁ = varSubWkSpec₁ ⦄ .Wkᵛ-spec x = cong liftᵛ (Wkᵛ-spec ⦃ _ ⦄ ⦃ _ ⦄ ⦃ _ ⦄ ⦃ varSubWkSpec₁ ⦄ x)
+  {-# OVERLAPPABLE VarSubWkSpecLift #-}
 
-  VarSubOutHeadSpecLiftId : ∀ ⦃ varSub₁ : VarSubBase R₁ ⦄
-                              ⦃ varSub₂ : VarSubBase R₂ ⦄
-                              ⦃ _ : RawVarSubId ⦃ varSub₁ ⦄ ⦄
-                              ⦃ _ : RawVarSubOutHead ⦃ varSub₁ ⦄ ⦄
-                              ⦃ _ : RawVarSubLift ⦃ varSub₁ ⦄ ⦃ varSub₂ ⦄ ⦄
-                              ⦃ varSubOutHeadSpec₁ : VarSubOutHeadSpec ⦃ varSub₁ ⦄ ⦄ →
-                            ---------------------------------------------------------------------------
-                            VarSubOutHeadSpec ⦃ varSub₂ ⦄ ⦃ RawVarSubLiftId ⦄ ⦃ RawVarSubLiftOutHead ⦄
-  VarSubOutHeadSpecLiftId ⦃ varSubOutHeadSpec₁ = varSubOutHeadSpec₁ ⦄ .R-headᵛ-spec = cong liftᵛ (R-headᵛ-spec ⦃ _ ⦄ ⦃ _ ⦄ ⦃ _ ⦄ ⦃ varSubOutHeadSpec₁ ⦄)
-  {-# OVERLAPPABLE VarSubOutHeadSpecLiftId #-}
+  VarSubOutHeadSpecLift : ∀ ⦃ varSub₁ : VarSubBase R₁ ⦄
+                            ⦃ varSub₂ : VarSubBase R₂ ⦄
+                            ⦃ _ : RawVarSubId ⦃ varSub₁ ⦄ ⦄
+                            ⦃ _ : RawVarSubOutHead ⦃ varSub₁ ⦄ ⦄
+                            ⦃ _ : RawVarSubLift ⦃ varSub₁ ⦄ ⦃ varSub₂ ⦄ ⦄
+                            ⦃ varSubOutHeadSpec₁ : VarSubOutHeadSpec ⦃ varSub₁ ⦄ ⦄ →
+                          ---------------------------------------------------------------------------
+                          VarSubOutHeadSpec ⦃ varSub₂ ⦄ ⦃ RawVarSubLiftId ⦄ ⦃ RawVarSubLiftOutHead ⦄
+  VarSubOutHeadSpecLift ⦃ varSubOutHeadSpec₁ = varSubOutHeadSpec₁ ⦄ .R-headᵛ-spec = cong liftᵛ (R-headᵛ-spec ⦃ _ ⦄ ⦃ _ ⦄ ⦃ _ ⦄ ⦃ varSubOutHeadSpec₁ ⦄)
+  {-# OVERLAPPABLE VarSubOutHeadSpecLift #-}
 
 module _
   ⦃ varSub₁ : VarSubBase {ℓ₁} R₁ ⦄
@@ -217,6 +217,16 @@ module _
                              ⟦ liftᵛ∘ ⦃ _ ⦄ ⦃ varSub₂ ⦄ σ ⟧ᵛ M ≡ ⟦ σ ⟧ᵛ M
 
   open VarSubLiftApp ⦃...⦄ public
+
+instance
+  VarSubLiftAppLiftSelf : ∀ ⦃ varSub₁ : VarSubBase R₁ ⦄
+                            ⦃ varSub₂ : VarSubBase R₂ ⦄
+                            ⦃ varSub₃ : VarSubBase R₃ ⦄
+                            ⦃ _ : RawVarSubApp ⦃ varSub₁ ⦄ ⦃ varSub₂ ⦄ ⦃ varSub₃ ⦄ ⦄ →
+                          ------------------------------------------------------------------------
+                          VarSubLiftApp ⦃ _ ⦄ ⦃ varSub₁ ⦄ ⦃ _ ⦄ ⦃ _ ⦄ ⦃ RawVarSubLiftSelf ⦄
+  VarSubLiftAppLiftSelf .VarSubLiftApp.liftᵛ-preserves-Appᵛ σ M = refl
+  {-# OVERLAPPABLE VarSubLiftAppLiftSelf #-}
 
 module _
   ⦃ varSub₁ : VarSubBase {ℓ₁} R₁ ⦄

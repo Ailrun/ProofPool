@@ -63,7 +63,7 @@ instance
       forEx δ (`λ e)     = `λ (forEx (qᵉ δ) e)
       forEx δ (`injₗ e)  = `injₗ (forEx δ e)
       forEx δ (`injᵣ e)  = `injᵣ (forEx δ e)
-      forEx δ (e `∷ˢ ee) = forEx δ e `∷ˢ forExE δ ee
+      forEx δ (e `∷ᵉ ee) = forEx δ e `∷ᵉ forExE δ ee
 
       forExE δ (-`$ f)              = -`$ (forEx δ f)
       forExE δ (`case-`of fₗ `/ fᵣ) = `case-`of forEx (qᵉ δ) fₗ `/ forEx (qᵉ δ) fᵣ
@@ -79,5 +79,5 @@ infixr 50 ⟦_⟧ᵛ*_
            ⦃ _ : RawVarSubLift ⦃ varSub ⦄ ⦃ SubVarSub ⦄ ⦄
            ⦃ _ : RawVarSubApp ⦃ ExtVarSub ⦄ ⦃ varSub ⦄ ⦃ varSub ⦄ ⦄ →
          VarSub ⦃ varSub ⦄ Δ Γ → ExEs Γ A B → ExEs Δ A B
-⟦ δ ⟧ᵛ* `[]         = `[]
-⟦ δ ⟧ᵛ* (es `∷ˢ ee) = ⟦ δ ⟧ᵛ* es `∷ˢ RawAppSub.forExE δ ee
+⟦ δ ⟧ᵛ* []        = []
+⟦ δ ⟧ᵛ* (ee ∷ es) = RawAppSub.forExE δ ee ∷ ⟦ δ ⟧ᵛ* es

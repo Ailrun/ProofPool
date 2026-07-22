@@ -14,7 +14,7 @@ open STLC public hiding (module BVariables; module EVariables)
 data Ex : REL Ctx Tp lzero
 data ExE : Ctx → Tp → Tp → Set
 
-infixl  5 _`∷ˢ_
+infixl  5 _`∷ᵉ_
 infix  27 -`$_
 infix  26 `case-`of_`/_
 data Ex where
@@ -38,7 +38,7 @@ data Ex where
           --------------
           Ex Γ (A `+ B)
 
-  _`∷ˢ_ : ∀ {Γ A B} →
+  _`∷ᵉ_ : ∀ {Γ A B} →
           Ex Γ A →
           (ee : ExE Γ A B) →
           -------------------
@@ -57,29 +57,29 @@ data ExE where
                   ExE Γ (A `+ B) C
 
 data ExEs : Ctx → Tp → Tp → Set where
-  `[]   : ∀ {Γ A} →
-          -----------
-          ExEs Γ A A
+  []  : ∀ {Γ A} →
+        -----------
+        ExEs Γ A A
 
-  _`∷ˢ_ : ∀ {Γ A B C} →
-          ExEs Γ A B →
-          (ee : ExE Γ B C) →
-          -------------------
-          ExEs Γ A C
+  _∷_ : ∀ {Γ A B C} →
+        (ee : ExE Γ A B) →
+        ExEs Γ B C →
+        -------------------
+        ExEs Γ A C
 
 lengthˢ : ∀ {Γ A B} → ExEs Γ A B → ℕ
-lengthˢ `[]        = 0
-lengthˢ (es `∷ˢ _) = suc (lengthˢ es)
-
-infixl 5 _`∷_
-_`∷_ : ∀ {Γ A B C} → ExE Γ A B → ExEs Γ B C → ExEs Γ A C
-ee `∷ `[]          = `[] `∷ˢ ee
-ee `∷ (es `∷ˢ ee′) = (ee `∷ es) `∷ˢ ee′
+lengthˢ []       = 0
+lengthˢ (_ ∷ es) = suc (lengthˢ es)
 
 infixl 5 _`++ˢ_
 _`++ˢ_ : ∀ {Γ A B} → Ex Γ A → ExEs Γ A B → Ex Γ B
-e `++ˢ `[]         = e
-e `++ˢ (es `∷ˢ ee) = e `++ˢ es `∷ˢ ee
+e `++ˢ []        = e
+e `++ˢ (ee ∷ es) = e `∷ᵉ ee `++ˢ es
+
+infixr 5 _`++_
+_`++_ : ∀ {Γ A B C} → ExEs Γ A B → ExEs Γ B C → ExEs Γ A C
+[]        `++ es′ = es′
+(ee ∷ es) `++ es′ = ee ∷ es `++ es′
 
 module Variables where
   open BVariables public
