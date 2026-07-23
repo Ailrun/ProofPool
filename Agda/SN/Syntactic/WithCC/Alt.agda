@@ -8,27 +8,20 @@ open import Data.List.Membership.Propositional                          using (_
 open import Data.List.Relation.Unary.Any                                using (here; there)
 open import Data.Nat
 open import Data.Nat.Induction
-import Data.Nat.Properties as ℕ
-open import Data.Product                                                using (_×_; _,_; proj₁; proj₂; -,_; ∃-syntax; Σ-syntax)
+import Data.Nat.Properties                                              as ℕ
+open import Data.Product                                                using (_×_; _,_; proj₁; proj₂; ∃-syntax; Σ-syntax)
 open import Data.Sum                                                    as ⊎ using (_⊎_; inj₁; inj₂)
-open import Data.Unit                                                   using (⊤; tt)
 open import Data.Wrap                                                   using (Wrap; [_]; get)
 open import Function                                                    using (case_of_; flip; id; Morphism; _on_; _∘_; _∋_)
 open import Induction.WellFounded                                       using (Acc; acc; acc-inverse; WellFounded)
-open import Relation.Binary                                             using ( REL; Rel; Setoid
-                                                                              ; Symmetric; Trans; Transitive
-                                                                              ; _Preserves_⟶_; _Preserves₂_⟶_⟶_; _=[_]⇒_)
+open import Relation.Binary                                             using (REL; Rel; _=[_]⇒_)
 open import Relation.Binary.Construct.Closure.ReflexiveTransitive       using (Star; ε; _◅_; _◅◅_)
 import Relation.Binary.Construct.Closure.ReflexiveTransitive            as Star
-import Relation.Binary.Construct.Closure.ReflexiveTransitive.Properties as Star
 open import Relation.Binary.Construct.Closure.Transitive                using (TransClosure; [_]; _∷_)
 import Relation.Binary.Construct.Closure.Transitive                     as TransClosure
 open import Relation.Binary.Construct.Union                             using (_∪_)
-open import Relation.Binary.PropositionalEquality                       using (_≡_; refl; cong; subst; subst₂; sym; trans)
+open import Relation.Binary.PropositionalEquality                       using (_≡_; refl; cong; subst; sym; trans)
 open import Relation.Unary                                              using (Pred)
-open import Relation.Nullary                                            using (¬_)
-
-open import PPLib.Membership.Nth
 
 open import Syntax.Church.STLC.WithSum.Alt.Base         hiding (module Variables)
 open import Syntax.Church.STLC.WithSum.Alt.Properties
@@ -124,13 +117,9 @@ module OpSem where
   _⟶*_ : Rel (Ex Γ A) _
   _⟶*_ = Star _⟶_
 
-  module ⟶*-Reasoning {Γ A} = Star.StarReasoning (_⟶_ {Γ} {A})
-
   infix   4 _⟶ᵉ*_
   _⟶ᵉ*_ : Rel (ExE Γ A B) _
   _⟶ᵉ*_ = Star _⟶ᵉ_
-
-  module ⟶ᵉ*-Reasoning {Γ A B} = Star.StarReasoning (_⟶ᵉ_ {Γ} {A} {B})
 
   ----------------------------------------------------------
   -- Flipped Reductions
@@ -216,10 +205,6 @@ module OpSem where
     infixr 50 ⟦_⟧ᵛ⟶_
     ⟦_⟧ᵛ⟶_ : (σ : Sub Γ Δ) → ∀ {e e′ : Ex Δ A} → e ⟶ e′ → ⟦ σ ⟧ᵛ e ⟶ ⟦ σ ⟧ᵛ e′
     ⟦_⟧ᵛ⟶_ = ⟦_⟧ᵛ⟶_.forEx
-
-    infixr 50 ⟦_⟧ᵛ⟶*_
-    ⟦_⟧ᵛ⟶*_ : ∀ {e e′ : Ex Δ A} (σ : Sub Γ Δ) → e ⟶* e′ → ⟦ σ ⟧ᵛ e ⟶* ⟦ σ ⟧ᵛ e′
-    ⟦_⟧ᵛ⟶*_ σ = Star.gmap (Appᵛ σ) ⟦ σ ⟧ᵛ⟶_
 
     ------------------------------------------------------------
     -- Helpers for multi-step parallel reduction
@@ -309,8 +294,22 @@ module AccessibilitySN where
       acc λ where
         (`injᵣ e⟶) → `injᵣ∈sn (erec e⟶)
 
-    -- ⟦_⟧ᵛ∈sn : ∀ {M : Tm Γ A} (σ : Sub Δ Γ) → ⟦ σ ⟧ᵛ M ∈sn → M ∈sn
-    -- ⟦ σ ⟧ᵛ∈sn (acc ⟦σ⟧Mrec) = acc λ M⟶ → ⟦ σ ⟧ᵛ∈sn (⟦σ⟧Mrec (⟦ σ ⟧ˢ⟶ M⟶))
+    ∈ne$-closed : e ∈ne$ → e ⟶ e′ → e′ ∈ne$
+    ∈ne$-closed (ene$ `$-) (e⟶ `∷ᵉ?)      = ∈ne$-closed ene$ e⟶ `$-
+    ∈ne$-closed (ene$ `$-) (?`∷ᵉ (-`$ _)) = ene$ `$-
+
+    `$∈sn : e ∈ne$ → e ∈sn → f ∈sn → e `∷ᵉ -`$ f ∈sn
+    `$∈sn ene$ (acc erec) (acc frec) = acc λ where
+      (e⟶ `∷ᵉ?)         → `$∈sn (∈ne$-closed ene$ e⟶) (erec e⟶) (acc frec)
+      (  ?`∷ᵉ (-`$ f⟶)) → `$∈sn ene$ (acc erec) (frec f⟶)
+      `→β               → case ene$ of λ ()
+      `+χ               → case ene$ of λ ()
+
+    `case∈sn : e ∈ne$ → e ∈sn → fₗ ∈sn → fᵣ ∈sn → e `∷ᵉ `case-`of fₗ `/ fᵣ ∈sn
+    `case∈sn ene$ (acc erec) (acc fₗrec) (acc fᵣrec) = acc λ where
+      (e⟶ `∷ᵉ?)                   → `case∈sn (∈ne$-closed ene$ e⟶) (erec e⟶) (acc fₗrec) (acc fᵣrec)
+      (  ?`∷ᵉ `case-`of fₗ⟶ `/?)  → `case∈sn ene$ (acc erec) (fₗrec fₗ⟶) (acc fᵣrec)
+      (  ?`∷ᵉ (`case-`of?`/ fᵣ⟶)) → `case∈sn ene$ (acc erec) (acc fₗrec) (fᵣrec fᵣ⟶)
 
     `λ∈sn-inv : `λ e ∈sn → e ∈sn
     `λ∈sn-inv (acc erec) = acc λ e⟶ → `λ∈sn-inv (erec (`λ e⟶))
@@ -323,21 +322,6 @@ module AccessibilitySN where
 
     `∷ᵉ∈sn-invˡ : e `∷ᵉ ee ∈sn → e ∈sn
     `∷ᵉ∈sn-invˡ (acc erec) = acc λ e⟶ → `∷ᵉ∈sn-invˡ (erec (e⟶ `∷ᵉ?))
-
-    -- `$∈sn-invˡ : M `$ N ∈sn → M ∈sn
-    -- `$∈sn-invˡ (acc MNrec) = acc λ M⟶ → `$∈sn-invˡ (MNrec (M⟶ `$?))
-
-    -- `$∈sn-invʳ : M `$ N ∈sn → N ∈sn
-    -- `$∈sn-invʳ (acc MNrec) = acc λ N⟶ → `$∈sn-invʳ (MNrec (?`$ N⟶))
-
-    -- `case-`of-`/∈sn-invˢ : `case M `of Nₗ `/ Nᵣ ∈sn → M ∈sn
-    -- `case-`of-`/∈sn-invˢ (acc MNₗNᵣrec) = acc λ M⟶ → `case-`of-`/∈sn-invˢ (MNₗNᵣrec (`case M⟶ `of?`/?))
-
-    -- `case-`of-`/∈sn-invˡ : `case M `of Nₗ `/ Nᵣ ∈sn → Nₗ ∈sn
-    -- `case-`of-`/∈sn-invˡ (acc MNₗNᵣrec) = acc λ Nₗ⟶ → `case-`of-`/∈sn-invˡ (MNₗNᵣrec (`case?`of Nₗ⟶ `/?))
-
-    -- `case-`of-`/∈sn-invʳ : `case M `of Nₗ `/ Nᵣ ∈sn → Nᵣ ∈sn
-    -- `case-`of-`/∈sn-invʳ (acc MNₗNᵣrec) = acc λ Nᵣ⟶ → `case-`of-`/∈sn-invʳ (MNₗNᵣrec (`case?`of?`/ Nᵣ⟶))
 
     _`++ˢ⟶_ : e ⟶ e′ →
               ∀ (es : ExEs Γ A B) →
@@ -498,10 +482,6 @@ module AccessibilitySN where
               rewrite eq″                                                    = acc (go _ (acc esrec) (erec e⟶) (acc fₗesrec) (acc ⟦e⟧fᵣesrec))
         ...    | inj₂ ⟦e⟧fᵣ⟶+                                                = acc (go _ (acc esrec) (erec e⟶) (acc fₗesrec) (⟦e⟧fᵣesrec (TC.equivalent .to (TC.map (_`++ˢ⟶ es) (TC.equivalent .from ⟦e⟧fᵣ⟶+)))))
 
-    ∈ne$-closed : e ∈ne$ → e ⟶ e′ → e′ ∈ne$
-    ∈ne$-closed (ene$ `$-) (e⟶ `∷ᵉ?)      = ∈ne$-closed ene$ e⟶ `$-
-    ∈ne$-closed (ene$ `$-) (?`∷ᵉ (-`$ _)) = ene$ `$-
-
     ∈sn-commuting-expansion : ∀ {e : Ex Γ (A `+ B)} {fₗ : Ex (A ∷ Γ) C} {fᵣ : Ex (B ∷ Γ) C}
                                 (ee : ExE Γ C D) (es : ExEs Γ D E) →
                               e ∈ne$ →
@@ -538,19 +518,6 @@ module AccessibilitySN where
             `+χ′ {F = F}
               rewrite forExE-qᵉᵉ-forExE-Wkᵛ≡forExE-Wkᵛ-forExE {A = C} (Wkᵛ {A = F}) ee′
                     | forExE-qᵉᵉ-forExE-Wkᵛ≡forExE-Wkᵛ-forExE {A = D} (Wkᵛ {A = F}) ee′ = `+χ
-
-    `$∈sn : e ∈ne$ → e ∈sn → f ∈sn → e `∷ᵉ -`$ f ∈sn
-    `$∈sn ene$ (acc erec) (acc frec) = acc λ where
-      (e⟶ `∷ᵉ?)         → `$∈sn (∈ne$-closed ene$ e⟶) (erec e⟶) (acc frec)
-      (  ?`∷ᵉ (-`$ f⟶)) → `$∈sn ene$ (acc erec) (frec f⟶)
-      `→β               → case ene$ of λ ()
-      `+χ               → case ene$ of λ ()
-
-    `case∈sn : e ∈ne$ → e ∈sn → fₗ ∈sn → fᵣ ∈sn → e `∷ᵉ `case-`of fₗ `/ fᵣ ∈sn
-    `case∈sn ene$ (acc erec) (acc fₗrec) (acc fᵣrec) = acc λ where
-      (e⟶ `∷ᵉ?)                   → `case∈sn (∈ne$-closed ene$ e⟶) (erec e⟶) (acc fₗrec) (acc fᵣrec)
-      (  ?`∷ᵉ `case-`of fₗ⟶ `/?)  → `case∈sn ene$ (acc erec) (fₗrec fₗ⟶) (acc fᵣrec)
-      (  ?`∷ᵉ (`case-`of?`/ fᵣ⟶)) → `case∈sn ene$ (acc erec) (acc fₗrec) (fᵣrec fᵣ⟶)
 
 open AccessibilitySN            hiding (module Properties) public
 open AccessibilitySN.Properties public
@@ -680,10 +647,6 @@ module InductiveSN where
   size⟦ e ∈SN⟦ es ⟧⟧ `+βᵣ eSN ⟦e⟧fᵣSN fₗSN      = (suc (size⟦ _ ∈SN⟦ _ ⟧⟧ eSN + size⟦ _ ∈SN⟦ _ ⟧⟧ ⟦e⟧fᵣSN + size⟦ _ ∈SN⟦ _ ⟧⟧  fₗSN))
   size⟦ e ∈SN⟦ es ⟧⟧ `+χ _ eSN                  = suc (size⟦ _ ∈SN⟦ _ ⟧⟧ eSN)
 
---   infix   4 _∈SN*
---   _∈SN* : Sub Δ Γ → Set
---   σ ∈SN* = ∀ {A} (x : A ∈ _) → σ x ∈SN
-
   module Properties where
     infixr 50 ⟦_⟧ᵉ∈SN_
     infixr 50 ⟦_⟧ᵉ∈SNe$_
@@ -723,18 +686,6 @@ module InductiveSN where
 
     ⟦ δ ⟧ᵉ∈SN$ˢ []           = []
     ⟦ δ ⟧ᵉ∈SN$ˢ (fSN ∷ esSN) = ⟦ δ ⟧ᵉ∈SN fSN ∷ ⟦ δ ⟧ᵉ∈SN$ˢ esSN
-
---     !ᵛ∈SN : ∀ {e : Ex Γ A} →
---             e ∈SN →
---             !ᵛ e ∈SN*
---     !ᵛ∈SN eSN (here refl) = eSN
---     !ᵛ∈SN eSN (there x)   = `Ne (`Ne$ (`# x))
-
---     qᵛ∈SN : ∀ {σ : Sub Δ Γ} →
---             σ ∈SN* →
---             qᵛ_ {A = A} σ ∈SN*
---     qᵛ∈SN σSN (here refl) = `Ne (`Ne$ (`# `!! 0))
---     qᵛ∈SN σSN (there x)   = ⟦ Wkᵛ ⟧ᵉ∈SN (σSN x)
 
     `++∈SN$ˢ : es₀ ∈SN$ˢ →
                es₁ ∈SN$ˢ →
@@ -973,7 +924,7 @@ module InductiveSN where
                     ⊎ (qᵛ⟦ Δ ⟧ (Sub _ _ ∋ !ᵛ f)) x ∈SNe$
     !ᵛ-closure∈ {Δ = []}    (here refl) fSN = inj₁ (fSN , refl)
     !ᵛ-closure∈ {Δ = []}    (there x)   fSN = inj₂ (`# x)
-    !ᵛ-closure∈ {Δ = _ ∷ _} (here refl) fSN = inj₂ (`# `!! 0)
+    !ᵛ-closure∈ {Δ = _ ∷ _} (here refl) fSN = inj₂ (`# here refl)
     !ᵛ-closure∈ {Δ = _ ∷ _} (there x)   fSN
       with !ᵛ-closure∈ x fSN
     ...  | inj₁ (⟦f⟧xSN , refl)             = inj₁ (⟦ Wkᵛ ⟧ᵉ∈SN ⟦f⟧xSN , refl)

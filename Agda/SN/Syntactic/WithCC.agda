@@ -1,31 +1,12 @@
 {-# OPTIONS --safe #-}
 module SN.Syntactic.WithCC where
 
-open import Agda.Primitive                                              using (Level; lzero)
-open import Data.List                                                   using ([]; _∷_)
-open import Data.List.Membership.Propositional                          using (_∈_)
-open import Data.List.Relation.Unary.Any                                using (here; there)
-open import Data.Nat
-open import Data.Nat.Induction
-import Data.Nat.Properties as ℕ
-open import Data.Product                                                using (_×_; _,_; proj₁; proj₂; -,_; ∃-syntax)
-open import Data.Sum                                                    as ⊎ using (_⊎_; inj₁; inj₂)
-open import Data.Unit                                                   using (⊤; tt)
-open import Function                                                    using (case_of_; flip; id; Morphism; _on_; _∘_)
-open import Induction.WellFounded                                       using (Acc; acc; acc-inverse; WellFounded)
-open import Relation.Binary                                             using ( REL; Rel; Setoid
-                                                                              ; Symmetric; Trans; Transitive
-                                                                              ; _Preserves_⟶_; _Preserves₂_⟶_⟶_; _=[_]⇒_)
-open import Relation.Binary.Construct.Closure.ReflexiveTransitive       using (Star; ε; _◅_; _◅◅_)
-import Relation.Binary.Construct.Closure.ReflexiveTransitive            as Star
-import Relation.Binary.Construct.Closure.ReflexiveTransitive.Properties as Star
-open import Relation.Binary.Construct.Closure.Transitive                using (TransClosure; [_]; _∷_)
-import Relation.Binary.Construct.Closure.Transitive                     as TransClosure
-open import Relation.Binary.Construct.Union                             using (_∪_)
-open import Relation.Binary.PropositionalEquality                       using (_≡_; refl; subst; sym; trans)
-open import Relation.Unary                                              using (Pred)
-
-open import PPLib.Membership.Nth
+open import Agda.Primitive        using (Level; lzero)
+open import Data.List             using (_∷_)
+open import Function              using (flip)
+open import Induction.WellFounded using (Acc; acc; WellFounded)
+open import Relation.Binary       using (Rel)
+open import Relation.Unary        using (Pred)
 
 open import Syntax.Church.STLC.WithSum.Base         hiding (module Variables)
 open import Syntax.Church.STLC.WithSum.Substitution

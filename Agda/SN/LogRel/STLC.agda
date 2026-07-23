@@ -10,9 +10,7 @@ open import Data.Sum                                                    as ⊎ u
 open import Data.Unit                                                   using (⊤; tt)
 open import Function                                                    using (case_of_; flip; id; Morphism; _on_; _∘_)
 open import Induction.WellFounded                                       using (Acc; acc; acc-inverse; WellFounded)
-open import Relation.Binary                                             using ( REL; Rel; Setoid
-                                                                              ; Symmetric; Trans; Transitive
-                                                                              ; _Preserves_⟶_; _Preserves₂_⟶_⟶_; _=[_]⇒_)
+open import Relation.Binary                                             using (REL; Rel; _=[_]⇒_)
 open import Relation.Binary.Construct.Closure.ReflexiveTransitive       using (Star; ε; _◅_; _◅◅_)
 import Relation.Binary.Construct.Closure.ReflexiveTransitive            as Star
 import Relation.Binary.Construct.Closure.ReflexiveTransitive.Properties as Star
@@ -229,9 +227,9 @@ module AccessibilitySN where
                                                                       (λ{ refl → refl })
                                                                       (λ{ (_ , M₀⟶* , M₁⟶sn) → -, ξ-of-⟶*′ _ _`$? M₀⟶* , M₁⟶sn `$- })
                                                                       (⟶sn-⟶-confluence M⟶sn M⟶)
-    ⟶sn-⟶-confluence                   (M⟶sn `$-) (?`$ N⟶)        = inj₂ (_ , ?`$ N⟶ ◅ ε , M⟶sn `$-)
-    ⟶sn-⟶-confluence                   (`→β Nsn)  ((`λ M⟶) `$?)   = inj₂ (_ , ⟦ !ᵛ _ ⟧ˢ⟶ M⟶ ◅ ε , `→β Nsn)
-    ⟶sn-⟶-confluence {M = (`λ M) `$ _} (`→β Nsn)  (       ?`$ N⟶) = inj₂ (_ , ⟦!ᵛ⟶ N⟶ ⟧ᵛ M , `→β (acc-inverse Nsn N⟶))
+    ⟶sn-⟶-confluence                   (M⟶sn `$-) (?`$ N⟶)        = inj₂ (-, ?`$ N⟶ ◅ ε , M⟶sn `$-)
+    ⟶sn-⟶-confluence                   (`→β Nsn)  ((`λ M⟶) `$?)   = inj₂ (-, ⟦ !ᵛ _ ⟧ˢ⟶ M⟶ ◅ ε , `→β Nsn)
+    ⟶sn-⟶-confluence {M = (`λ M) `$ _} (`→β Nsn)  (       ?`$ N⟶) = inj₂ (-, ⟦!ᵛ⟶ N⟶ ⟧ᵛ M , `→β (acc-inverse Nsn N⟶))
     ⟶sn-⟶-confluence                   (`→β Nsn)  `→β             = inj₁ refl
 
     `$∈sn-closed⁻¹ : M ∈sn → N ∈sn → M ⟶sn M′ → M′ `$ N ∈sn → M `$ N ∈sn
@@ -321,17 +319,17 @@ module InductiveSN where
     ⟦_⟧ᵉ⁻¹∈SNe_of_by_ : ∀ {M₀ : Tm Δ A} (δ : Ext Δ Γ) → M₀ ∈SNe → ∀ M → M₀ ≡ ⟦ δ ⟧ᵛ M → M ∈SNe
     ⟦_⟧ᵉ⁻¹⟶SN_of_by_  : ∀ {M₀ : Tm Δ A} (δ : Ext Δ Γ) → M₀ ⟶SN M′₀ → ∀ M → M₀ ≡ ⟦ δ ⟧ᵛ M → ∃[ M′ ] M ⟶SN M′ × ⟦ δ ⟧ᵛ M′ ≡ M′₀
 
-    ⟦ δ ⟧ᵉ⁻¹∈SN `λ M₀SN           of `λ M by refl = `λ (⟦ qᵉ δ ⟧ᵉ⁻¹∈SN M₀SN of M by refl)
-    ⟦ δ ⟧ᵉ⁻¹∈SN `Ne M₀SNe         of M    by eq   = `Ne (⟦ δ ⟧ᵉ⁻¹∈SNe M₀SNe of M by eq)
+    ⟦ δ ⟧ᵉ⁻¹∈SN `λ M₀SN           of `λ M by refl         = `λ (⟦ qᵉ δ ⟧ᵉ⁻¹∈SN M₀SN of M by refl)
+    ⟦ δ ⟧ᵉ⁻¹∈SN `Ne M₀SNe         of M    by eq           = `Ne (⟦ δ ⟧ᵉ⁻¹∈SNe M₀SNe of M by eq)
     ⟦ δ ⟧ᵉ⁻¹∈SN `bclo M₀⟶SN M′₀SN of M    by eq
       with _ , M⟶SN , refl ← ⟦ δ ⟧ᵉ⁻¹⟶SN M₀⟶SN of M by eq = `bclo M⟶SN (⟦ δ ⟧ᵉ⁻¹∈SN M′₀SN of _ by refl)
 
-    ⟦ δ ⟧ᵉ⁻¹∈SNe `# y          of `# x   by eq = `# x
+    ⟦ δ ⟧ᵉ⁻¹∈SNe `# y          of `# x   by eq   = `# x
     ⟦ δ ⟧ᵉ⁻¹∈SNe M₀SNe `$ N₀SN of M `$ N by refl = (⟦ δ ⟧ᵉ⁻¹∈SNe M₀SNe of M by refl) `$ (⟦ δ ⟧ᵉ⁻¹∈SN N₀SN of N by refl)
 
     ⟦ δ ⟧ᵉ⁻¹⟶SN M₀⟶SN `$- of M `$ N      by refl
-      with _ , M⟶SN , refl ← ⟦ δ ⟧ᵉ⁻¹⟶SN M₀⟶SN of M by refl = _ , M⟶SN `$- , refl
-    ⟦ δ ⟧ᵉ⁻¹⟶SN `→β N₀SN  of (`λ M) `$ N by refl = _ , `→β (⟦ δ ⟧ᵉ⁻¹∈SN N₀SN of N by refl) , sym (⟦!ᵛ⟦-⟧ᵛ-⟧ᵛ⟦qᵛ-⟧ᵛ≡⟦-⟧ᵛ⟦!ᵛ-⟧ᵛ ⦃ ExtVarSub ⦄ ⦃ _ ⦄ ⦃ _ ⦄ ⦃ SubVarSub ⦄ δ N M)
+      with _ , M⟶SN , refl ← ⟦ δ ⟧ᵉ⁻¹⟶SN M₀⟶SN of M by refl = -, M⟶SN `$- , refl
+    ⟦ δ ⟧ᵉ⁻¹⟶SN `→β N₀SN  of (`λ M) `$ N by refl            = -, `→β (⟦ δ ⟧ᵉ⁻¹∈SN N₀SN of N by refl) , sym (⟦!ᵛ⟦-⟧ᵛ-⟧ᵛ⟦qᵛ-⟧ᵛ≡⟦-⟧ᵛ⟦!ᵛ-⟧ᵛ ⦃ ExtVarSub ⦄ ⦃ _ ⦄ ⦃ _ ⦄ ⦃ SubVarSub ⦄ δ N M)
 
     infixr 50 ⟦_⟧ᵉ⁻¹∈SN_
     ⟦_⟧ᵉ⁻¹∈SN_ : ∀ {M : Tm Γ A} (δ : Ext Δ Γ) → ⟦ δ ⟧ᵛ M ∈SN → M ∈SN
@@ -350,7 +348,7 @@ module InductiveSN where
     ∈SN-extensionality (`bclo                   (Mx⟶SN `$-)        M′xSN) = `bclo Mx⟶SN (∈SN-extensionality M′xSN)
     ∈SN-extensionality (`bclo {M = (`λ M) `$ _} (`→β (`Ne (`# x))) M′xSN)
       rewrite sym (⟦-⟧ᵛ-extensional ⦃ SubVarSub ⦄ M (liftᵛ-preserves-,ᵛ Idᵛ x))
-            | liftᵛ-preserves-Appᵛ (!ᵛ x) M                               = `λ (⟦ !ᵛ x ⟧ᵉ⁻¹∈SN M′xSN)
+            | liftᵛ-preserves-Appᵛ ⦃ ExtVarSub ⦄ ⦃ SubVarSub ⦄ (!ᵛ x) M   = `λ ⟦ !ᵛ x ⟧ᵉ⁻¹∈SN M′xSN
 
 open InductiveSN hiding (module Properties) public
 open InductiveSN.Properties public
