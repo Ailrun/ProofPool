@@ -1,5 +1,5 @@
 {-# OPTIONS --safe #-}
-module SN.LogRel.WithCC.Alt where
+module SN.Syntactic.WithCC.Alt where
 
 open import Agda.Primitive                                              using (Level; lzero)
 open import Data.Empty                                                  using (⊥)
@@ -31,6 +31,7 @@ open import Relation.Nullary                                            using (�
 open import PPLib.Membership.Nth
 
 open import Syntax.Church.STLC.WithSum.Alt.Base         hiding (module Variables)
+open import Syntax.Church.STLC.WithSum.Alt.Properties
 open import Syntax.Church.STLC.WithSum.Alt.Substitution
 
 variable
@@ -264,8 +265,8 @@ module OpSem where
         (inj₁ refl) e⟶ → inj₂ [ e⟶ ]
         (inj₂ e″⟶+) e⟶ → inj₂ (e⟶ ∷ e″⟶+)
 
-open OpSem hiding (module Properties)
-open OpSem.Properties
+open OpSem            hiding (module Properties) public
+open OpSem.Properties public
 
 module AccessibilitySN where
   infix   4 _∈sn
@@ -374,12 +375,13 @@ module AccessibilitySN where
                     -----------------------------------------------------------------------------------
                     `++ˢ-case (e `∷ᵉ `case-`of fₗ `/ fᵣ) (ee ∷ es) (e `∷ᵉ `+χ-result fₗ fᵣ ee `++ˢ es)
 
-      `++ˢ-cases : ∀ (e : Ex Γ A) (es : ExEs Γ A B) {ees′} →
-                   e `++ˢ es ⟶ ees′ →
-                   `++ˢ-case e es ees′
-      `++ˢ-cases e []        e⟶                  = e-step e⟶
-      `++ˢ-cases e (ee ∷ es) ees⟶
-        with `++ˢ-cases (e `∷ᵉ ee) es ees⟶
+      `++ˢ-⟶-cases : ∀ (e : Ex Γ A) (es : ExEs Γ A B) {ees′} →
+                     e `++ˢ es ⟶ ees′ →
+                     ------------------------------------------
+                     `++ˢ-case e es ees′
+      `++ˢ-⟶-cases e []        e⟶                                = e-step e⟶
+      `++ˢ-⟶-cases e (ee ∷ es) ees⟶
+        with `++ˢ-⟶-cases (e `∷ᵉ ee) es ees⟶
       ...  | e-step (e⟶ `∷ᵉ?)                                    = e-step e⟶
       ...  | e-step (?`∷ᵉ ee⟶)                                   = es-step _ ≤‴-refl [ (λ σ e′ → (?`∷ᵉ ⟦_⟧ᵛ⟶_.forExE σ ee⟶) `++ˢ⟶ ⟦ σ ⟧ᵛ* es) ]
       ...  | e-step `→β                                          = `→β-step
@@ -410,7 +412,7 @@ module AccessibilitySN where
              ⟦ !ˢ f ⟧ᵛ e `++ˢ es ∈sn+ →
              Induction.WellFounded.WfRec _⟵_ (Acc _⟵_) ((`λ e) `∷ᵉ -`$ f `++ˢ es)
         go e es (acc frec) (acc ⟦f⟧eesrec) efes⟶
-          with `++ˢ-cases (`λ _ `∷ᵉ -`$ _) es efes⟶
+          with `++ˢ-⟶-cases (`λ _ `∷ᵉ -`$ _) es efes⟶
         ...  | es-step es′ _ es⟶                         = acc (go _ es′ (acc frec) (⟦f⟧eesrec [ simplify-⟶ˢ es⟶ _ ]))
         ...  | e-step `→β                                = TC.accessible⁻ _⟵_ (acc ⟦f⟧eesrec)
         ...  | e-step ((`λ e⟶) `∷ᵉ?)                     = acc (go _ es (acc frec) (⟦f⟧eesrec [ (⟦ !ᵛ _ ⟧ᵛ⟶ e⟶) `++ˢ⟶ es ]))
@@ -437,7 +439,7 @@ module AccessibilitySN where
              ⟦ !ˢ e ⟧ᵛ fₗ `++ˢ es ∈sn+ →
              Induction.WellFounded.WfRec _⟵_ (Acc _⟵_) (`injₗ e `∷ᵉ `case-`of fₗ `/ fᵣ `++ˢ es)
         go es (acc esrec) (acc erec) (acc fᵣesrec) (acc ⟦e⟧fₗesrec) efₗfᵣes⟶
-          with `++ˢ-cases (`injₗ _ `∷ᵉ `case-`of _ `/ _) es efₗfᵣes⟶
+          with `++ˢ-⟶-cases (`injₗ _ `∷ᵉ `case-`of _ `/ _) es efₗfᵣes⟶
         ... | `+χ-step {B = B} {e = `injₗ e} {fₗ} {fᵣ} {ee′} {es′}
             rewrite cong ((ExE _ _ _ → Ex _ _) ∋ ⟦ !ˢ e ⟧ᵛ fₗ `∷ᵉ_)
                       (sym
@@ -475,7 +477,7 @@ module AccessibilitySN where
              ⟦ !ˢ e ⟧ᵛ fᵣ `++ˢ es ∈sn+ →
              Induction.WellFounded.WfRec _⟵_ (Acc _⟵_) (`injᵣ e `∷ᵉ `case-`of fₗ `/ fᵣ `++ˢ es)
         go es (acc esrec) (acc erec) (acc fₗesrec) (acc ⟦e⟧fᵣesrec) efₗfₗes⟶
-          with `++ˢ-cases (`injᵣ _ `∷ᵉ `case-`of _ `/ _) es efₗfₗes⟶
+          with `++ˢ-⟶-cases (`injᵣ _ `∷ᵉ `case-`of _ `/ _) es efₗfₗes⟶
         ... | `+χ-step {B = B} {e = `injᵣ e} {fₗ} {fᵣ} {ee′} {es′}
             rewrite cong ((ExE _ _ _ → Ex _ _) ∋ ⟦ !ˢ e ⟧ᵛ fᵣ `∷ᵉ_)
                       (sym
@@ -519,7 +521,7 @@ module AccessibilitySN where
              e `∷ᵉ `case-`of (fₗ `∷ᵉ RawAppSub.forExE Wkᵛ ee) `/ (fᵣ `∷ᵉ RawAppSub.forExE Wkᵛ ee) `++ˢ es ∈sn+ →
              Induction.WellFounded.WfRec _⟵_ (Acc _⟵_) (e `∷ᵉ `case-`of fₗ `/ fᵣ `∷ᵉ ee `++ˢ es)
         go ee es ene$ (acc esrec) (acc efₗeefᵣeerec) efₗfᵣeees⟶
-          with `++ˢ-cases (_ `∷ᵉ `case-`of _ `/ _ `∷ᵉ _) es efₗfᵣeees⟶
+          with `++ˢ-⟶-cases (_ `∷ᵉ `case-`of _ `/ _ `∷ᵉ _) es efₗfᵣeees⟶
         ...  | e-step ((e⟶ `∷ᵉ?)                   `∷ᵉ?)           = acc (go ee es (∈ne$-closed ene$ e⟶) (acc esrec) (efₗeefᵣeerec [ (e⟶ `∷ᵉ?) `++ˢ⟶ es ]))
         ...  | e-step ((  ?`∷ᵉ `case-`of fₗ⟶ `/?)  `∷ᵉ?)           = acc (go ee es ene$ (acc esrec) (efₗeefᵣeerec [ (?`∷ᵉ `case-`of (fₗ⟶ `∷ᵉ?) `/?) `++ˢ⟶ es ]))
         ...  | e-step ((  ?`∷ᵉ (`case-`of?`/ fᵣ⟶)) `∷ᵉ?)           = acc (go ee es ene$ (acc esrec) (efₗeefᵣeerec [ (?`∷ᵉ `case-`of?`/ (fᵣ⟶ `∷ᵉ?)) `++ˢ⟶ es ]))
@@ -550,7 +552,7 @@ module AccessibilitySN where
       (  ?`∷ᵉ `case-`of fₗ⟶ `/?)  → `case∈sn ene$ (acc erec) (fₗrec fₗ⟶) (acc fᵣrec)
       (  ?`∷ᵉ (`case-`of?`/ fᵣ⟶)) → `case∈sn ene$ (acc erec) (acc fₗrec) (fᵣrec fᵣ⟶)
 
-open AccessibilitySN hiding (module Properties) public
+open AccessibilitySN            hiding (module Properties) public
 open AccessibilitySN.Properties public
 
 module InductiveSN where
@@ -979,17 +981,17 @@ module InductiveSN where
 
     module ClosureBase {A} (`$-rec : ∀ {B} →
                                      Tp-size B < Tp-size A →
-                                     ∀ {Γ C} {e : Ex Γ (B `→ C)} {f : Ex Γ B} →
-                                     e ∈SN →
+                                     ∀ {Γ C D} {e : Ex Γ C} {es : ExEs Γ C (B `→ D)} {f : Ex Γ B} →
+                                     e ∈SN⟦ es ⟧ →
                                      f ∈SN →
-                                     e `∷ᵉ -`$ f ∈SN)
-                           (`case-rec : ∀ {B C} →
-                                        Tp-size (B `+ C) < Tp-size A →
-                                        ∀ {Γ D} {e : Ex Γ (B `+ C)} {fₗ : Ex (B ∷ Γ) D} {fᵣ : Ex (C ∷ Γ) D} →
-                                        e ∈SN →
+                                     e ∈SN⟦ es `++ (-`$ f ∷ []) ⟧)
+                           (`case-rec : ∀ {C D} →
+                                        Tp-size (C `+ D) < Tp-size A →
+                                        ∀ {Γ B E} {e : Ex Γ B} {es : ExEs Γ B (C `+ D)} {fₗ : Ex (C ∷ Γ) E} {fᵣ : Ex (D ∷ Γ) E} →
+                                        e ∈SN⟦ es ⟧ →
                                         fₗ ∈SN →
                                         fᵣ ∈SN →
-                                        e `∷ᵉ `case-`of fₗ `/ fᵣ ∈SN)
+                                        e ∈SN⟦ es `++ (`case-`of fₗ `/ fᵣ ∷ []) ⟧)
                            (⟦!ᵛ-⟧ᵛ-rec : ∀ {B} →
                                          Tp-size B < Tp-size A →
                                          ∀ {Δ Γ C} {e : Ex (Δ ++ B ∷ Γ) C} {f : Ex Γ B} →
@@ -997,14 +999,13 @@ module InductiveSN where
                                          f ∈SN →
                                          ⟦ qᵛ⟦ Δ ⟧ !ˢ f ⟧ᵛ e ∈SN) where
 
-      `case-closure     : ∀ {e : Ex Γ B} {es : ExEs Γ B (C `+ D)}
-                            {fₗ : Ex (C ∷ Γ) E} {fᵣ : Ex (D ∷ Γ) E} →
-                          A ≡ C `+ D →
-                          e ∈SN⟦ es ⟧ →
-                          fₗ ∈SN →
-                          fᵣ ∈SN →
-                          e ∈SN⟦ es `++ (`case-`of fₗ `/ fᵣ ∷ []) ⟧
-
+      `case-closure : ∀ {e : Ex Γ B} {es : ExEs Γ B (C `+ D)}
+                        {fₗ : Ex (C ∷ Γ) E} {fᵣ : Ex (D ∷ Γ) E} →
+                      A ≡ C `+ D →
+                      e ∈SN⟦ es ⟧ →
+                      fₗ ∈SN →
+                      fᵣ ∈SN →
+                      e ∈SN⟦ es `++ (`case-`of fₗ `/ fᵣ ∷ []) ⟧
       `case-closure                         refl (`injₗ eSN)                     fₗSN fᵣSN = `+βₗ eSN (⟦!ᵛ-⟧ᵛ-rec (ℕ.m≤m+n _ _) fₗSN eSN) fᵣSN
       `case-closure                         refl (`injᵣ eSN)                     fₗSN fᵣSN = `+βᵣ eSN (⟦!ᵛ-⟧ᵛ-rec (s≤s (ℕ.m≤n+m _ _)) fᵣSN eSN) fₗSN
       `case-closure                         refl (eSNe$ `$⁻ appSN)               fₗSN fᵣSN = eSNe$ `$⁻ `case-closure refl appSN fₗSN fᵣSN
@@ -1025,26 +1026,34 @@ module InductiveSN where
           rewrite sym (`++-⟦-⟧ᵛ-commute (Wkᵛ {A = F}) es (`case-`of fₗ `/ fᵣ ∷ []))        = `+βᵣ eSN (`case-closure refl ⟦e⟧gᵣSN fₗSN fᵣSN) gₗSN′
       `case-closure                         refl (`+χ eSNe$ eSN)                 fₗSN fᵣSN = `+χ eSNe$ (`case-closure refl eSN fₗSN fᵣSN)
 
-      `$-closure      : ∀ {e : Ex Γ B} {es : ExEs Γ B (A `→ C)} {f : Ex Γ A} →
-                        e ∈SN⟦ es ⟧ →
-                        f ∈SN →
-                        e ∈SN⟦ es `++ (-`$ f ∷ []) ⟧
-      ⟦!ᵛ-⟧ᵛ-closure  : ∀ {e : Ex (Δ ++ A ∷ Γ) B} {es : ExEs (Δ ++ A ∷ Γ) B C} {f : Ex Γ A} →
-                        e ∈SN⟦ es ⟧ →
-                        f ∈SN →
-                        ⟦ qᵛ⟦ Δ ⟧ !ˢ f ⟧ᵛ e ∈SN⟦ ⟦ qᵛ⟦ Δ ⟧ !ˢ f ⟧ᵛ* es ⟧
-      ⟦!ᵛ-⟧ᵛ-closure$ : ∀ {e : Ex (Δ ++ A ∷ Γ) B} {f : Ex Γ A} →
-                        e ∈SNe$ →
-                        f ∈SN →
-                        (⟦ qᵛ⟦ Δ ⟧ !ˢ f ⟧ᵛ e ∈SN × Tp-size B < Tp-size A)
-                          ⊎ (⟦ qᵛ⟦ Δ ⟧ !ˢ f ⟧ᵛ e ∈SN × B ≡ A)
-                          ⊎ (⟦ qᵛ⟦ Δ ⟧ !ˢ f ⟧ᵛ e ∈SNe$)
+      `$-rec* : ∀ {e : Ex Γ B} {es₀ : ExEs Γ B C} {es₁ : ExEs Γ C D} →
+                es₁ ∈SN$ˢ →
+                e ∈SN⟦ es₀ ⟧ →
+                Tp-size C ≤ Tp-size A →
+                e ∈SN⟦ es₀ `++ es₁ ⟧ × Tp-size D ≤ Tp-size A
+      `$-rec* {es₀ = es₀}                   []           eSN ≤A
+        rewrite `++-identityʳ es₀                               = eSN , ≤A
+      `$-rec* {es₀ = es₀} {es₁ = ee₁ ∷ es₁} (fSN ∷ esSN) eSN <A
+        rewrite `++-assoc es₀ (ee₁ ∷ []) {es₁}                  = `$-rec* esSN (`$-rec (ℕ.≤-<-trans (ℕ.m≤m+n _ _) <A) eSN fSN) (ℕ.≤-trans (ℕ.m≤n+m _ _) <A)
+
+      `$-closure       : ∀ {e : Ex Γ B} {es : ExEs Γ B (A `→ C)} {f : Ex Γ A} →
+                         e ∈SN⟦ es ⟧ →
+                         f ∈SN →
+                         e ∈SN⟦ es `++ (-`$ f ∷ []) ⟧
+      ⟦!ᵛ-⟧ᵛ-closure   : ∀ {e : Ex (Δ ++ A ∷ Γ) B} {es : ExEs (Δ ++ A ∷ Γ) B C} {f : Ex Γ A} →
+                         e ∈SN⟦ es ⟧ →
+                         f ∈SN →
+                         ⟦ qᵛ⟦ Δ ⟧ !ˢ f ⟧ᵛ e ∈SN⟦ ⟦ qᵛ⟦ Δ ⟧ !ˢ f ⟧ᵛ* es ⟧
+      ⟦!ᵛ-⟧ᵛ-closure$  : ∀ {e : Ex (Δ ++ A ∷ Γ) B} {f : Ex Γ A} →
+                         e ∈SNe$ →
+                         f ∈SN →
+                         (⟦ qᵛ⟦ Δ ⟧ !ˢ f ⟧ᵛ e ∈SN × Tp-size B < Tp-size A)
+                           ⊎ (⟦ qᵛ⟦ Δ ⟧ !ˢ f ⟧ᵛ e ∈SN × B ≡ A)
+                           ⊎ (⟦ qᵛ⟦ Δ ⟧ !ˢ f ⟧ᵛ e ∈SNe$)
       ⟦!ᵛ-⟧ᵛ-closure$ˢ : ∀ {es : ExEs (Δ ++ A ∷ Γ) B C} {f : Ex Γ A} →
                          es ∈SN$ˢ →
                          f ∈SN →
-                         Tp-size B ≤ Tp-size A →
-                         e ∈SN →
-                         e `++ˢ ⟦ qᵛ⟦ Δ ⟧ !ˢ f ⟧ᵛ* es ∈SN × Tp-size C ≤ Tp-size A
+                         ⟦ qᵛ⟦ Δ ⟧ !ˢ f ⟧ᵛ* es ∈SN$ˢ
 
       `$-closure                   (eSNe$ `$⁻ appSN)               fSN = eSNe$ `$⁻ `$-closure appSN fSN
       `$-closure                   (`case⁻ eSNe$ `of caseSN)       fSN = `∷ᵉ?-inv (`$-closure caseSN fSN) .proj₁
@@ -1061,158 +1070,102 @@ module InductiveSN where
           rewrite sym (`++-⟦-⟧ᵛ-commute (Wkᵛ {A = D}) es (-`$ f ∷ [])) = `+βᵣ eSN (`$-closure ⟦e⟧gᵣSN fSN) gₗSN′
       `$-closure                   (`+χ eSNe$ eSN)                 fSN = `+χ eSNe$ (`$-closure eSN fSN)
 
-      ⟦!ᵛ-⟧ᵛ-closure (eSNe$ `$⁻ appSN)              fSN = `∷ᵉ?-inv (⟦!ᵛ-⟧ᵛ-closure appSN fSN) .proj₁
-      ⟦!ᵛ-⟧ᵛ-closure (`case⁻ eSNe$ `of caseSN)      fSN = `∷ᵉ?-inv (⟦!ᵛ-⟧ᵛ-closure caseSN fSN) .proj₁
-      ⟦!ᵛ-⟧ᵛ-closure (eSN `∷ᵉ?)                     fSN = ⟦!ᵛ-⟧ᵛ-closure eSN fSN `∷ᵉ?
-      ⟦!ᵛ-⟧ᵛ-closure (`λ eSN)                       fSN = `λ (⟦!ᵛ-⟧ᵛ-closure eSN fSN)
-      ⟦!ᵛ-⟧ᵛ-closure (`injₗ eSN)                    fSN = `injₗ (⟦!ᵛ-⟧ᵛ-closure eSN fSN)
-      ⟦!ᵛ-⟧ᵛ-closure (`injᵣ eSN)                    fSN = `injᵣ (⟦!ᵛ-⟧ᵛ-closure eSN fSN)
-      ⟦!ᵛ-⟧ᵛ-closure (`case eSNe$ `of gₗSN `/ gᵣSN) fSN
+      ⟦!ᵛ-⟧ᵛ-closure                               (eSNe$ `$⁻ appSN)                                fSN = `∷ᵉ?-inv (⟦!ᵛ-⟧ᵛ-closure appSN fSN) .proj₁
+      ⟦!ᵛ-⟧ᵛ-closure                               (`case⁻ eSNe$ `of caseSN)                        fSN = `∷ᵉ?-inv (⟦!ᵛ-⟧ᵛ-closure caseSN fSN) .proj₁
+      ⟦!ᵛ-⟧ᵛ-closure                               (eSN `∷ᵉ?)                                       fSN = ⟦!ᵛ-⟧ᵛ-closure eSN fSN `∷ᵉ?
+      ⟦!ᵛ-⟧ᵛ-closure                               (`λ eSN)                                         fSN = `λ (⟦!ᵛ-⟧ᵛ-closure eSN fSN)
+      ⟦!ᵛ-⟧ᵛ-closure                               (`injₗ eSN)                                      fSN = `injₗ (⟦!ᵛ-⟧ᵛ-closure eSN fSN)
+      ⟦!ᵛ-⟧ᵛ-closure                               (`injᵣ eSN)                                      fSN = `injᵣ (⟦!ᵛ-⟧ᵛ-closure eSN fSN)
+      ⟦!ᵛ-⟧ᵛ-closure                               (`case eSNe$ `of gₗSN `/ gᵣSN)                   fSN
         with ⟦!ᵛ-⟧ᵛ-closure$ eSNe$ fSN
-      ...  | inj₁ (⟦f⟧eSN , _)                          = {!!} -- ⟦f⟧eSN
-      ...  | inj₂ (inj₁ (⟦f⟧eSN , _))                   = {!!} -- ⟦f⟧eSN
-      ...  | inj₂ (inj₂ ⟦f⟧eSNe$)                       = {!!}
-      ⟦!ᵛ-⟧ᵛ-closure (`Ne$ eSNe$ esSN)              fSN
+      ...  | inj₁ (⟦f⟧eSN , <A)                                                                         = `case-rec <A ⟦f⟧eSN (⟦!ᵛ-⟧ᵛ-closure gₗSN fSN) (⟦!ᵛ-⟧ᵛ-closure gᵣSN fSN) `∷ᵉ?
+      ...  | inj₂ (inj₁ (⟦f⟧eSN , refl))                                                                = `case-closure refl ⟦f⟧eSN (⟦!ᵛ-⟧ᵛ-closure gₗSN fSN) (⟦!ᵛ-⟧ᵛ-closure gᵣSN fSN) `∷ᵉ?
+      ...  | inj₂ (inj₂ ⟦f⟧eSNe$)                                                                       = `case ⟦f⟧eSNe$ `of (⟦!ᵛ-⟧ᵛ-closure gₗSN fSN) `/ ⟦!ᵛ-⟧ᵛ-closure gᵣSN fSN
+      ⟦!ᵛ-⟧ᵛ-closure                               (`Ne$ eSNe$ esSN)                                fSN
         with ⟦!ᵛ-⟧ᵛ-closure$ eSNe$ fSN
-      ...  | inj₁ (⟦f⟧eSN , _)                          = {!!} -- ⟦f⟧eSN
-      ...  | inj₂ (inj₁ (⟦f⟧eSN , _))                   = {!!} -- ⟦f⟧eSN
-      ...  | inj₂ (inj₂ ⟦f⟧eSNe$)                       = `Ne$ ⟦f⟧eSNe$ {!!} -- `Ne (`Ne$ ⟦f⟧eSNe$)
-      ⟦!ᵛ-⟧ᵛ-closure (`→β gSN ⟦g⟧eSN)               fSN = `→β (⟦!ᵛ-⟧ᵛ-closure gSN fSN) {!⟦!ᵛ-⟧ᵛ-closure ⟦g⟧eSN fSN!}
-      ⟦!ᵛ-⟧ᵛ-closure (`+βₗ eSN ⟦e⟧gₗSN gᵣSN)        fSN = `+βₗ (⟦!ᵛ-⟧ᵛ-closure eSN fSN) {!⟦!ᵛ-⟧ᵛ-closure ⟦e⟧gₗSN fSN!} {!⟦!ᵛ-⟧ᵛ-closure gᵣSN fSN!}
-      ⟦!ᵛ-⟧ᵛ-closure (`+βᵣ eSN ⟦e⟧gᵣSN gₗSN)        fSN = `+βᵣ (⟦!ᵛ-⟧ᵛ-closure eSN fSN) {!⟦!ᵛ-⟧ᵛ-closure ⟦e⟧gᵣSN fSN!} {!⟦!ᵛ-⟧ᵛ-closure gₗSN fSN!}
-      ⟦!ᵛ-⟧ᵛ-closure (`+χ eSNe$ eSN)                fSN = ∈SN-commuting-expansion⁺ [] {!⟦!ᵛ-⟧ᵛ-closure eSN fSN!}
-      -- ⟦!ᵛ-⟧ᵛ-closure (`Ne (`Ne$ eSNe$))                   fSN
-      --   with ⟦!ᵛ-⟧ᵛ-closure$ eSNe$ fSN
-      -- ...  | inj₁ (⟦f⟧eSN , _)                                = ⟦f⟧eSN
-      -- ...  | inj₂ (inj₁ (⟦f⟧eSN , _))                         = ⟦f⟧eSN
-      -- ...  | inj₂ (inj₂ ⟦f⟧eSNe$)                             = `Ne (`Ne$ ⟦f⟧eSNe$)
-      -- ⟦!ᵛ-⟧ᵛ-closure (`Ne (`case eSNe$ `of gₗSN `/ gᵣSN)) fSN
-      --   with ⟦!ᵛ-⟧ᵛ-closure$ eSNe$ fSN
-      -- ...  | inj₁ (⟦f⟧eSN , <A)                               = `case-rec <A ⟦f⟧eSN (⟦!ᵛ-⟧ᵛ-closure gₗSN fSN) (⟦!ᵛ-⟧ᵛ-closure gᵣSN fSN)
-      -- ...  | inj₂ (inj₁ (⟦f⟧eSN , refl))                      = `case-closure refl ⟦f⟧eSN (⟦!ᵛ-⟧ᵛ-closure gₗSN fSN) (⟦!ᵛ-⟧ᵛ-closure gᵣSN fSN)
-      -- ...  | inj₂ (inj₂ ⟦f⟧eSNe$)                             = `Ne (`case ⟦f⟧eSNe$ `of ⟦!ᵛ-⟧ᵛ-closure gₗSN fSN `/ ⟦!ᵛ-⟧ᵛ-closure gᵣSN fSN)
+      ...  | inj₁ (⟦f⟧eSN , <A)                                                                         = `$-rec* (⟦!ᵛ-⟧ᵛ-closure$ˢ esSN fSN) ⟦f⟧eSN (ℕ.<⇒≤ <A) .proj₁
+      ...  | inj₂ (inj₁ (⟦f⟧eSN , refl))                                                                = `$-rec* (⟦!ᵛ-⟧ᵛ-closure$ˢ esSN fSN) ⟦f⟧eSN ℕ.≤-refl .proj₁
+      ...  | inj₂ (inj₂ ⟦f⟧eSNe$)                                                                       = `Ne$ ⟦f⟧eSNe$ (⟦!ᵛ-⟧ᵛ-closure$ˢ esSN fSN)
+      ⟦!ᵛ-⟧ᵛ-closure {Δ = Δ}               {f = f} (`→β {e = e} {g} gSN ⟦g⟧eSN)                     fSN
+        with ⟦f⟧⟦g⟧eSN ← ⟦!ᵛ-⟧ᵛ-closure ⟦g⟧eSN fSN
+          rewrite sym (⟦!ᵛ⟦-⟧ᵛ-⟧ᵛ⟦qᵛ-⟧ᵛ≡⟦-⟧ᵛ⟦!ᵛ-⟧ᵛ (qᵛ⟦ Δ ⟧ !ˢ f) g e)                                  = `→β (⟦!ᵛ-⟧ᵛ-closure gSN fSN) ⟦f⟧⟦g⟧eSN
+      ⟦!ᵛ-⟧ᵛ-closure {Δ = Δ} {es = _ ∷ es} {f}     (`+βₗ {B = E} {e = e} {gₗ} {_} eSN ⟦e⟧gₗSN gᵣSN) fSN
+        with ⟦f⟧⟦e⟧gₗSN ← ⟦!ᵛ-⟧ᵛ-closure ⟦e⟧gₗSN fSN
+           | ⟦f⟧gᵣSN ← ⟦!ᵛ-⟧ᵛ-closure {Δ = _ ∷ _} gᵣSN fSN
+          rewrite sym (⟦!ᵛ⟦-⟧ᵛ-⟧ᵛ⟦qᵛ-⟧ᵛ≡⟦-⟧ᵛ⟦!ᵛ-⟧ᵛ (qᵛ⟦ Δ ⟧ !ˢ f) e gₗ)
+                | ⟦qᵉˢ-⟧ᵛ*⟦Wkᵛ⟧ᵛ*≡⟦Wkᵛ⟧ᵛ*⟦-⟧ᵛ* {A = E} (qᵛ⟦ Δ ⟧ !ˢ f) es                                = `+βₗ (⟦!ᵛ-⟧ᵛ-closure eSN fSN) ⟦f⟧⟦e⟧gₗSN ⟦f⟧gᵣSN
+      ⟦!ᵛ-⟧ᵛ-closure {Δ = Δ} {es = _ ∷ es} {f}     (`+βᵣ {A = D} {e = e} {_} {gᵣ} eSN ⟦e⟧gᵣSN gₗSN) fSN
+        with ⟦f⟧⟦e⟧gᵣSN ← ⟦!ᵛ-⟧ᵛ-closure ⟦e⟧gᵣSN fSN
+           | ⟦f⟧gₗSN ← ⟦!ᵛ-⟧ᵛ-closure {Δ = _ ∷ _} gₗSN fSN
+          rewrite sym (⟦!ᵛ⟦-⟧ᵛ-⟧ᵛ⟦qᵛ-⟧ᵛ≡⟦-⟧ᵛ⟦!ᵛ-⟧ᵛ (qᵛ⟦ Δ ⟧ !ˢ f) e gᵣ)
+                | ⟦qᵉˢ-⟧ᵛ*⟦Wkᵛ⟧ᵛ*≡⟦Wkᵛ⟧ᵛ*⟦-⟧ᵛ* {A = D} (qᵛ⟦ Δ ⟧ !ˢ f) es                                = `+βᵣ (⟦!ᵛ-⟧ᵛ-closure eSN fSN) ⟦f⟧⟦e⟧gᵣSN ⟦f⟧gₗSN
+      ⟦!ᵛ-⟧ᵛ-closure {Δ = Δ}               {f = f} (`+χ {A = D} {E} {ee = ee} eSNe$ eSN)            fSN
+        with ⟦f⟧e∈SN ← ⟦!ᵛ-⟧ᵛ-closure eSN fSN
+          rewrite forExE-qᵉˢ-forExE-Wkᵛ≡forExE-Wkᵛ-forExE {A = D} (qᵛ⟦ Δ ⟧ !ˢ f) ee
+                | forExE-qᵉˢ-forExE-Wkᵛ≡forExE-Wkᵛ-forExE {A = E} (qᵛ⟦ Δ ⟧ !ˢ f) ee                     = ∈SN-commuting-expansion⁺ [] ⟦f⟧e∈SN
 
       ⟦!ᵛ-⟧ᵛ-closure$ (`# x)          fSN = inj₂ (!ᵛ-closure∈ x fSN)
       ⟦!ᵛ-⟧ᵛ-closure$ (eSNe$ `∷ᵉ gSN) fSN
         with ⟦!ᵛ-⟧ᵛ-closure$ eSNe$ fSN
-      ...  | inj₁ (⟦f⟧eSN , <A)           = inj₁ (`$-rec (ℕ.m+n≤o⇒m≤o _ (ℕ.<⇒≤ <A)) ⟦f⟧eSN (⟦!ᵛ-⟧ᵛ-closure gSN fSN) , ℕ.≤-<-trans (ℕ.m≤n+m _ _) <A)
-      ...  | inj₂ (inj₁ (⟦f⟧eSN , refl))  = inj₁ (`$-rec (s≤s (ℕ.m≤m+n _ _)) ⟦f⟧eSN (⟦!ᵛ-⟧ᵛ-closure gSN fSN) , s≤s (ℕ.m≤n+m _ _))
+      ...  | inj₁ (⟦f⟧eSN , <A)           = inj₁ ((`$-rec (ℕ.m+n≤o⇒m≤o _ (ℕ.<⇒≤ <A)) ⟦f⟧eSN (⟦!ᵛ-⟧ᵛ-closure gSN fSN) `∷ᵉ?) , ℕ.≤-<-trans (ℕ.m≤n+m _ _) <A)
+      ...  | inj₂ (inj₁ (⟦f⟧eSN , refl))  = inj₁ ((`$-rec (s≤s (ℕ.m≤m+n _ _)) ⟦f⟧eSN (⟦!ᵛ-⟧ᵛ-closure gSN fSN) `∷ᵉ?) , s≤s (ℕ.m≤n+m _ _))
       ...  | inj₂ (inj₂ (⟦f⟧eSNe$))       = inj₂ (inj₂ (⟦f⟧eSNe$ `∷ᵉ ⟦!ᵛ-⟧ᵛ-closure gSN fSN))
 
-      ⟦!ᵛ-⟧ᵛ-closure$ˢ = {!!}
+      ⟦!ᵛ-⟧ᵛ-closure$ˢ []           fSN = []
+      ⟦!ᵛ-⟧ᵛ-closure$ˢ (gSN ∷ esSN) fSN = (⟦!ᵛ-⟧ᵛ-closure gSN fSN) ∷ (⟦!ᵛ-⟧ᵛ-closure$ˢ esSN fSN)
 
---     `$-closure-acc     : Acc _<_ (Tp-size A) →
---                          ∀ {e : Ex Γ (A `→ B)} {f : Ex Γ A} →
---                          e ∈SN →
---                          f ∈SN →
---                          e `∷ᵉ -`$ f ∈SN
---     `case-closure-acc  : Acc _<_ (Tp-size (A `+ B)) →
---                          ∀ {e : Ex Γ (A `+ B)} {fₗ : Ex (A ∷ Γ) C} {fᵣ : Ex (B ∷ Γ) C} →
---                          e ∈SN →
---                          fₗ ∈SN →
---                          fᵣ ∈SN →
---                          e `∷ᵉ `case-`of fₗ `/ fᵣ ∈SN
---     ⟦!ᵛ-⟧ᵛ-closure-acc : Acc _<_ (Tp-size A) →
---                          ∀ {e : Ex (Δ ++ A ∷ Γ) B} {f : Ex Γ A} →
---                          e ∈SN →
---                          f ∈SN →
---                          ⟦ qᵛ⟦ Δ ⟧ !ˢ f ⟧ᵛ e ∈SN
+    `$-closure-acc     : Acc _<_ (Tp-size A) →
+                         ∀ {e : Ex Γ B} {es : ExEs Γ B (A `→ C)} {f : Ex Γ A} →
+                         e ∈SN⟦ es ⟧ →
+                         f ∈SN →
+                         e ∈SN⟦ es `++ (-`$ f ∷ []) ⟧
+    `case-closure-acc  : Acc _<_ (Tp-size (A `+ B)) →
+                         ∀ {e : Ex Γ C} {es : ExEs Γ C (A `+ B)}
+                           {fₗ : Ex (A ∷ Γ) D} {fᵣ : Ex (B ∷ Γ) D} →
+                         e ∈SN⟦ es ⟧ →
+                         fₗ ∈SN →
+                         fᵣ ∈SN →
+                         e ∈SN⟦ es `++ (`case-`of fₗ `/ fᵣ ∷ []) ⟧
+    ⟦!ᵛ-⟧ᵛ-closure-acc : Acc _<_ (Tp-size A) →
+                         ∀ {e : Ex (Δ ++ A ∷ Γ) B} {es : ExEs (Δ ++ A ∷ Γ) B C} {f : Ex Γ A} →
+                         e ∈SN⟦ es ⟧ →
+                         f ∈SN →
+                         ⟦ qᵛ⟦ Δ ⟧ !ˢ f ⟧ᵛ e ∈SN⟦ ⟦ qᵛ⟦ Δ ⟧ !ˢ f ⟧ᵛ* es ⟧
 
---     `$-closure-acc (acc Arec) = ClosureBase.`$-closure (λ <A → `$-closure-acc (Arec <A)) (λ <A → `case-closure-acc (Arec <A)) (λ <A → ⟦!ᵛ-⟧ᵛ-closure-acc (Arec <A))
+    `$-closure-acc (acc Arec) = ClosureBase.`$-closure (λ <A → `$-closure-acc (Arec <A)) (λ <A → `case-closure-acc (Arec <A)) (λ <A → ⟦!ᵛ-⟧ᵛ-closure-acc (Arec <A))
+    `case-closure-acc (acc Arec) = ClosureBase.`case-closure (λ <A → `$-closure-acc (Arec <A)) (λ <A → `case-closure-acc (Arec <A)) (λ <A → ⟦!ᵛ-⟧ᵛ-closure-acc (Arec <A)) refl
+    ⟦!ᵛ-⟧ᵛ-closure-acc (acc Arec) = ClosureBase.⟦!ᵛ-⟧ᵛ-closure (λ <A → `$-closure-acc (Arec <A)) (λ <A → `case-closure-acc (Arec <A)) (λ <A → ⟦!ᵛ-⟧ᵛ-closure-acc (Arec <A))
 
---     `case-closure-acc (acc ABrec) = ClosureBase.`case-closure (λ <AB → `$-closure-acc (ABrec <AB)) (λ <AB → `case-closure-acc (ABrec <AB)) (λ <AB → ⟦!ᵛ-⟧ᵛ-closure-acc (ABrec <AB)) refl
+    `$-closure : ∀ {e : Ex Γ B} {es : ExEs Γ B (A `→ C)} {f : Ex Γ A} →
+                 e ∈SN⟦ es ⟧ →
+                 f ∈SN →
+                 e ∈SN⟦ es `++ (-`$ f ∷ []) ⟧
+    `$-closure = `$-closure-acc (<-wellFounded _)
 
---     ⟦!ᵛ-⟧ᵛ-closure-acc (acc Arec) = ClosureBase.⟦!ᵛ-⟧ᵛ-closure (λ <A → `$-closure-acc (Arec <A)) (λ <A → `case-closure-acc (Arec <A)) (λ <A → ⟦!ᵛ-⟧ᵛ-closure-acc (Arec <A))
+    `case-closure : ∀ {e : Ex Γ C} {es : ExEs Γ C (A `+ B)}
+                      {fₗ : Ex (A ∷ Γ) D} {fᵣ : Ex (B ∷ Γ) D} →
+                    e ∈SN⟦ es ⟧ →
+                    fₗ ∈SN →
+                    fᵣ ∈SN →
+                    e ∈SN⟦ es `++ (`case-`of fₗ `/ fᵣ ∷ []) ⟧
+    `case-closure = `case-closure-acc (<-wellFounded _)
 
---     `$-closure : ∀ {e : Ex Γ (A `→ B)} {f : Ex Γ A} →
---                  e ∈SN →
---                  f ∈SN →
---                  e `∷ᵉ -`$ f ∈SN
---     `$-closure = `$-closure-acc (<-wellFounded _)
+    ⟦!ᵛ-⟧ᵛ-closure : ∀ {e : Ex (Δ ++ A ∷ Γ) B} {es : ExEs (Δ ++ A ∷ Γ) B C} {f : Ex Γ A} →
+                     e ∈SN⟦ es ⟧ →
+                     f ∈SN →
+                     ⟦ qᵛ⟦ Δ ⟧ !ˢ f ⟧ᵛ e ∈SN⟦ ⟦ qᵛ⟦ Δ ⟧ !ˢ f ⟧ᵛ* es ⟧
+    ⟦!ᵛ-⟧ᵛ-closure = ⟦!ᵛ-⟧ᵛ-closure-acc (<-wellFounded _)
 
---     `case-closure : ∀ {e : Ex Γ (A `+ B)} {fₗ : Ex (A ∷ Γ) C} {fᵣ : Ex (B ∷ Γ) C} →
---                     e ∈SN →
---                     fₗ ∈SN →
---                     fᵣ ∈SN →
---                     e `∷ᵉ `case-`of fₗ `/ fᵣ ∈SN
---     `case-closure = `case-closure-acc (<-wellFounded _)
+    ∈SN-fundamental : ∀ (e : Ex Γ A) →
+                      e ∈SN
+    ∈SN-fundamental (`# x)                     = `Ne$ (`# x) []
+    ∈SN-fundamental (`λ e)                     = `λ ∈SN-fundamental e
+    ∈SN-fundamental (`injₗ e)                  = `injₗ (∈SN-fundamental e)
+    ∈SN-fundamental (`injᵣ e)                  = `injᵣ (∈SN-fundamental e)
+    ∈SN-fundamental (e `∷ᵉ -`$ f)              = `$-closure (∈SN-fundamental e) (∈SN-fundamental f) `∷ᵉ?
+    ∈SN-fundamental (e `∷ᵉ `case-`of fₗ `/ fᵣ) = `case-closure (∈SN-fundamental e) (∈SN-fundamental fₗ) (∈SN-fundamental fᵣ) `∷ᵉ?
 
---     ⟦!ᵛ-⟧ᵛ-closure : ∀ {e : Ex (Δ ++ A ∷ Γ) B} {f : Ex Γ A} →
---                      e ∈SN →
---                      f ∈SN →
---                      ⟦ qᵛ⟦ Δ ⟧ !ˢ f ⟧ᵛ e ∈SN
---     ⟦!ᵛ-⟧ᵛ-closure = ⟦!ᵛ-⟧ᵛ-closure-acc (<-wellFounded _)
-
---     ⟶SN-`$-closure : ∀ {e e′ : Ex Γ B} {f : Ex Γ A} →
---                      e ⟶SN⟦ es ⟧ e′ →
---                      f ∈SN →
---                      e ⟶SN⟦ es `∷ᵉ -`$ f ⟧ e′
---     ⟶SN-`$-closure = ClosureBase.⟶SN-`$-closure (λ _ → `$-closure) (λ _ → `case-closure) (λ _ → ⟦!ᵛ-⟧ᵛ-closure)
-
---     ⟶SN-`case-closure  : ∀ {e e′ : Ex Γ A} {fₗ : Ex (B ∷ Γ) D} {fᵣ : Ex (C ∷ Γ) D} →
---                          e ⟶SN⟦ es ⟧ e′ →
---                          fₗ ∈SN →
---                          fᵣ ∈SN →
---                          e ⟶SN⟦ es `∷ᵉ `case-`of fₗ `/ fᵣ ⟧ e′
---     ⟶SN-`case-closure = ClosureBase.⟶SN-`case-closure (λ _ → `$-closure) (λ _ → `case-closure) (λ _ → ⟦!ᵛ-⟧ᵛ-closure) refl
-
---     private
---       -- data ∈SN-commuting-case : Ex Γ (A `+ B) → Ex (A ∷ Γ) C → Ex (B ∷ Γ) C → ExE Γ C D → ExEs Γ D E → Set where
---       --   e-step : e ⟶SN⟦ ⟧
-
---       ∈SN-commuting-cases : ∀ {e : Ex Γ (A `+ B)} {fₗ : Ex (A ∷ Γ) C} {fᵣ : Ex (B ∷ Γ) C}
---                               (ee : ExE Γ C D) (es : ExEs Γ D E) →
---                             e `∷ᵉ `case-`of (fₗ `∷ᵉ RawAppSub.forExE Wkᵛ ee)
---                                          `/ (fᵣ `∷ᵉ RawAppSub.forExE Wkᵛ ee)
---                               `++ˢ es ∈SN →
---                             ⊤
---       ∈SN-commuting-cases ee `[]          (`Ne (`case x `of x₁ `/ x₂)) = {!!}
---       ∈SN-commuting-cases ee `[] (`bclo (e⟶ `∷ᵉ?) efₗeefᵣee′SN) = {!!}
---       ∈SN-commuting-cases ee `[] (`bclo (`+βₗ x x₁) efₗeefᵣee′SN) = {!!}
---       ∈SN-commuting-cases ee `[] (`bclo (`+βᵣ x x₁) efₗeefᵣee′SN) = {!!}
---       ∈SN-commuting-cases ee `[] (`bclo (`+χ x) efₗeefᵣee′SN) = {!!}
---       ∈SN-commuting-cases ee (es `∷ᵉ ee₁) (`Ne efₗeefᵣeeSNe) = {!!}
---       ∈SN-commuting-cases ee (es `∷ᵉ ee₁) (`bclo efₗeefᵣee⟶ efₗeefᵣee′SN) = {!!}
-
--- --     infixr 50 ⟦_⟧ᵉ⁻¹∈SN_of_by_
--- --     infixr 50 ⟦_⟧ᵉ⁻¹∈SNe_of_by_
--- --     infixr 50 ⟦_⟧ᵉ⁻¹⟶SN_of_by_
--- --     ⟦_⟧ᵉ⁻¹∈SN_of_by_  : ∀ {M₀ : Tm Δ A} (δ : Ext Δ Γ) → M₀ ∈SN → ∀ M → M₀ ≡ ⟦ δ ⟧ᵛ M → M ∈SN
--- --     ⟦_⟧ᵉ⁻¹∈SNe_of_by_ : ∀ {M₀ : Tm Δ A} (δ : Ext Δ Γ) → M₀ ∈SNe → ∀ M → M₀ ≡ ⟦ δ ⟧ᵛ M → M ∈SNe
--- --     ⟦_⟧ᵉ⁻¹⟶SN_of_by_  : ∀ {M₀ : Tm Δ A} (δ : Ext Δ Γ) → M₀ ⟶SN M′₀ → ∀ M → M₀ ≡ ⟦ δ ⟧ᵛ M → ∃[ M′ ] M ⟶SN M′ × ⟦ δ ⟧ᵛ M′ ≡ M′₀
-
--- --     ⟦ δ ⟧ᵉ⁻¹∈SN `λ M₀SN           of `λ M by refl = `λ (⟦ qᵉ δ ⟧ᵉ⁻¹∈SN M₀SN of M by refl)
--- --     ⟦ δ ⟧ᵉ⁻¹∈SN `Ne M₀SNe         of M    by eq   = `Ne (⟦ δ ⟧ᵉ⁻¹∈SNe M₀SNe of M by eq)
--- --     ⟦ δ ⟧ᵉ⁻¹∈SN `bclo M₀⟶SN M′₀SN of M    by eq
--- --       with _ , M⟶SN , refl ← ⟦ δ ⟧ᵉ⁻¹⟶SN M₀⟶SN of M by eq = `bclo M⟶SN (⟦ δ ⟧ᵉ⁻¹∈SN M′₀SN of _ by refl)
-
--- --     ⟦ δ ⟧ᵉ⁻¹∈SNe `# y          of `# x   by eq = `# x
--- --     ⟦ δ ⟧ᵉ⁻¹∈SNe M₀SNe `$ N₀SN of M `$ N by refl = (⟦ δ ⟧ᵉ⁻¹∈SNe M₀SNe of M by refl) `$ (⟦ δ ⟧ᵉ⁻¹∈SN N₀SN of N by refl)
-
--- --     ⟦ δ ⟧ᵉ⁻¹⟶SN M₀⟶SN `$- of M `$ N      by refl
--- --       with _ , M⟶SN , refl ← ⟦ δ ⟧ᵉ⁻¹⟶SN M₀⟶SN of M by refl = _ , M⟶SN `$- , refl
--- --     ⟦ δ ⟧ᵉ⁻¹⟶SN `→β N₀SN  of (`λ M) `$ N by refl = _ , `→β (⟦ δ ⟧ᵉ⁻¹∈SN N₀SN of N by refl) , sym (⟦!ˢ⟦-⟧ᵛ-⟧ᵛ⟦qᵉᵉ-⟧ᵛ≡⟦-⟧ᵛ⟦!ˢ-⟧ᵛ δ N M)
-
--- --     infixr 50 ⟦_⟧ᵉ⁻¹∈SN_
--- --     ⟦_⟧ᵉ⁻¹∈SN_ : ∀ {M : Tm Γ A} (δ : Ext Δ Γ) → ⟦ δ ⟧ᵛ M ∈SN → M ∈SN
--- --     ⟦ δ ⟧ᵉ⁻¹∈SN [δ]MSN = ⟦ δ ⟧ᵉ⁻¹∈SN [δ]MSN of _ by refl
-
--- --     infixr 50 ⟦_⟧ᵉ⁻¹∈SNe_
--- --     ⟦_⟧ᵉ⁻¹∈SNe_ : ∀ {M : Tm Γ A} (δ : Ext Δ Γ) → ⟦ δ ⟧ᵛ M ∈SNe → M ∈SNe
--- --     ⟦ δ ⟧ᵉ⁻¹∈SNe [δ]MSNe = ⟦ δ ⟧ᵉ⁻¹∈SNe [δ]MSNe of _ by refl
-
--- --     infixr 50 ⟦_⟧ᵉ⁻¹⟶SN_
--- --     ⟦_⟧ᵉ⁻¹⟶SN_ : ∀ {M : Tm Γ A} (δ : Ext Δ Γ) → ⟦ δ ⟧ᵛ M ⟶SN M′ → ∃[ M″ ] M ⟶SN M″ × ⟦ δ ⟧ᵛ M″ ≡ M′
--- --     ⟦ δ ⟧ᵉ⁻¹⟶SN [δ]M⟶SN = ⟦ δ ⟧ᵉ⁻¹⟶SN [δ]M⟶SN of _ by refl
-
--- --     ∈SN-extensionality : M `$ (`# x) ∈SN → M ∈SN
--- --     ∈SN-extensionality (`Ne (MSNe `$ xSN))                                = `Ne MSNe
--- --     ∈SN-extensionality (`bclo                   (Mx⟶SN `$-)        M′xSN) = `bclo Mx⟶SN (∈SN-extensionality M′xSN)
--- --     ∈SN-extensionality (`bclo {M = (`λ M) `$ _} (`→β (`Ne (`# x))) M′xSN)
--- --       rewrite sym (⟦-⟧ᵛ-extensional ⦃ SubVarSub ⦄ M (liftᵛ-preserves-,ᵛ Idᵛ x))
--- --             | liftᵛ-preserves-Appᵛ (!ᵛ x) M                               = `λ (⟦ !ᵛ x ⟧ᵉ⁻¹∈SN M′xSN)
-
-open InductiveSN hiding (module Properties) public
+open InductiveSN            hiding (module Properties) public
 open InductiveSN.Properties public
 
 module Soundness where
@@ -1249,101 +1202,10 @@ module Soundness where
 
 open Soundness public
 
--- module LogicalRelation where
---   LogicalRelation   : Pred (Ex Γ A) lzero
---   LogicalRelationEs : Pred (ExEs Γ (A `+ B) C) lzero
+strong-normalization : ∀ (e : Ex Γ A) →
+                       e ∈sn
+strong-normalization e = SN-sound (∈SN-fundamental e)
 
---   infix 4 LogicalRelationSyntax
---   LogicalRelationSyntax = LogicalRelation
---   syntax LogicalRelationSyntax {A = A} e = e ∈ℜ[ A ]
-
---   infix 4 LogicalRelationEsSyntax
---   LogicalRelationEsSyntax = LogicalRelationEs
---   syntax LogicalRelationEsSyntax {A = A} {B = B} es = es ∈ℜᵉ*[ A `+ B ]
-
---   LogicalRelation {A = `base}    = _∈SN
---   LogicalRelation {A = _ `→ _} e = ∀ {Δ} (δ : Ext Δ _) {f} → f ∈ℜ[ _ ] → ⟦ δ ⟧ᵛ e `∷ᵉ -`$ f ∈ℜ[ _ ]
---   LogicalRelation {A = _ `+ _} e = ∀ {Δ} (δ : Ext Δ _) {C} (es : ExEs Δ _ C) → es ∈ℜᵉ*[ _ `+ _ ] → ⟦ δ ⟧ᵛ e `++ˢ es ∈SN
-
---   LogicalRelationEs {A = A} {B = B} es = ∀ {Δ} (δ : Ext Δ _) → (∀ {eₗ} → eₗ ∈ℜ[ _ ] → `injₗ eₗ `++ˢ ⟦ δ ⟧ᵛ* es ∈SN) × (∀ {eᵣ} → eᵣ ∈ℜ[ _ ] → `injᵣ eᵣ `++ˢ ⟦ δ ⟧ᵛ* es ∈SN)
-
---   SubstLogicalRelation : Pred (Sub Γ Δ) lzero
-
---   infix 4 SubstLogicalRelationSyntax
---   SubstLogicalRelationSyntax = SubstLogicalRelation
---   syntax SubstLogicalRelationSyntax {Δ = Δ} σ = σ ∈ℜs[ Δ ]
-
---   SubstLogicalRelation {Δ = []}    σ = ⊤
---   SubstLogicalRelation {Δ = _ ∷ _} σ = σ ∘ Wkᵛ ∈ℜs[ _ ] × σ (here refl) ∈ℜ[ _ ]
-
---   module Properties where
---     reify    : e ∈ℜ[ A ] → e ∈SN
---     reflect$ : e ∈SNe$ → e ∈ℜ[ A ]
-
---     reify {A = `base}          eℜ = eℜ
---     reify {A = _ `→ _}         eℜ = {!!} -- ⟦ Wkᵛ ⟧ᵉ⁻¹∈SN ∈SN-extensionality (reify (eℜ Wkᵛ (reflect (`# here refl))))
---     reify {A = _ `+ _} {e = e} eℜ = subst _∈SN (⟦Idᵛ⟧ᵛ≡liftᵛ ⦃ _ ⦄ ⦃ SubVarSub ⦄ e) (eℜ Idᵛ `[] λ δ → (λ eₗℜ → `injₗ (reify eₗℜ)) , (λ eᵣℜ → `injᵣ (reify eᵣℜ)))
-
---     reflect$ {A = `base}  eSNe$          = `Ne (`Ne$ eSNe$)
---     reflect$ {A = _ `→ _} eSNe$ δ fℜ     = reflect$ ((⟦ δ ⟧ᵉ∈SNe$ eSNe$) `$ (reify fℜ))
---     reflect$ {A = _ `+ _} eSNe$ δ es esℜ = {!esℜ Wkᵛ!} -- inj₁ (_ , ε , `Ne$ eSNe$)
-
---     bclosed : e ⟶SN⟦ `[] ⟧ e′ → e′ ∈ℜ[ A ] → e ∈ℜ[ A ]
---     bclosed {A = `base}  e⟶SN e′ℜ      = `bclo e⟶SN e′ℜ
---     bclosed {A = _ `→ _} e⟶SN e′ℜ δ fℜ = bclosed ({!!} `∷ᵉ?) (e′ℜ δ fℜ)
---     bclosed {A = _ `+ _} e⟶SN e′ℜ      = {!!}
-
--- --     liftᵛ∈ℜs : ∀ Δ (δ : Ext Γ Δ) → liftᵛ∘ δ ∈ℜs[ Δ ]
--- --     liftᵛ∈ℜs []      δ = tt
--- --     liftᵛ∈ℜs (_ ∷ Δ) δ = liftᵛ∈ℜs Δ (δ ∘ Wkᵛ) , reflect (`Ne$ (`# δ (here refl)))
-
--- --     Idˢ∈ℜs : ∀ Γ → Idᵛ ∈ℜs[ Γ ]
--- --     Idˢ∈ℜs Γ = liftᵛ∈ℜs Γ Idᵛ
-
--- --     infixr 50 ⟦_⟧ᵉ∈ℜ_
--- --     ⟦_⟧ᵉ∈ℜ_ : ∀ (δ : Ext Γ Δ) → M ∈ℜ[ A ] → ⟦ δ ⟧ᵛ M ∈ℜ[ A ]
--- --     ⟦_⟧ᵉ∈ℜ_ {A = base}           δ Mℜ      = ⟦ δ ⟧ᵉ∈SN Mℜ
--- --     ⟦_⟧ᵉ∈ℜ_ {A = _ `→ _} {M = M} δ Mℜ ρ Nℜ
--- --       rewrite ⟦-⟧ᵛ-compositional ρ δ M     = Mℜ (ρ ∘ᵛ δ) Nℜ
-
--- --     infixr 50 ⟦_⟧ᵉ∈ℜs_
--- --     ⟦_⟧ᵉ∈ℜs_ : ∀ (δ : Ext Γ Δ) → σ ∈ℜs[ Ψ ] → δ ∘ᵛ σ ∈ℜs[ Ψ ]
--- --     ⟦_⟧ᵉ∈ℜs_ {Ψ = []}    δ σℜ = tt
--- --     ⟦_⟧ᵉ∈ℜs_ {Ψ = _ ∷ _} δ σℜ = ⟦ δ ⟧ᵉ∈ℜs σℜ .proj₁ , ⟦ δ ⟧ᵉ∈ℜ (σℜ .proj₂)
-
---     fundamental-lemma-∈ : ∀ {σ : Sub Γ Δ} (x : A ∈ Δ) → σ ∈ℜs[ Δ ] → σ x ∈ℜ[ A ]
---     fundamental-lemma-∈ (here refl) σℜ = σℜ .proj₂
---     fundamental-lemma-∈ (there x)   σℜ = fundamental-lemma-∈ x (σℜ .proj₁)
-
---     fundamental-lemma : ∀ {σ : Sub Γ Δ} (e : Ex Δ A) → σ ∈ℜs[ Δ ] → ⟦ σ ⟧ᵛ e ∈ℜ[ A ]
---     fundamental-lemma         (`# x)                     σℜ          = fundamental-lemma-∈ x σℜ
---     fundamental-lemma {σ = σ} (`λ e)                     σℜ δ {f} fℜ
---       with eℜ ← fundamental-lemma {σ = (δ ∘ᵛ σ) ,ᵛ _} e ({!!} , fℜ)
---         rewrite sym (⟦-⟧ᵛ-extensional e (!ᵛ-∘ᵛ-qᵛ (δ ∘ᵛ σ) f))
---               | sym (⟦-⟧ᵛ-compositional (!ᵛ f) (qᵉ (δ ∘ᵛ σ)) e)
---               | ⟦-⟧ᵛ-extensional e (qᵉ-distrib-∘ᵉˢ δ σ)
---               | sym (⟦-⟧ᵛ-compositional (qᵉ δ) (qᵉ σ) e) = bclosed (`→β (reify fℜ)) eℜ
---     fundamental-lemma {σ = σ} (`injₗ e)                  σℜ          = {!!} -- inj₂ (inj₁ (_ , ε , fundamental-lemma e σℜ))
---     fundamental-lemma {σ = σ} (`injᵣ e)                  σℜ          = {!!} -- inj₂ (inj₂ (_ , ε , fundamental-lemma e σℜ))
---     fundamental-lemma {σ = σ} (e `∷ᵉ -`$ f)              σℜ
---       rewrite sym (⟦Idᵛ⟧ᵛ≡liftᵛ ⦃ _ ⦄ ⦃ SubVarSub ⦄ (⟦ σ ⟧ᵛ e))      = fundamental-lemma e σℜ Idᵛ (fundamental-lemma f σℜ)
---     fundamental-lemma {σ = σ} (e `∷ᵉ `case-`of fₗ `/ fᵣ) σℜ          = {!!}
---     --   with fundamental-lemma e σℜ
---     -- ...  | inj₁ (_ , e⟶ , e′ℜ)                                       = bclosed {!!} {!reflect!}
---     -- ...  | inj₂ (inj₁ (_ , e⟶ , eₗℜ))                                = {!!}
---     -- ...  | inj₂ (inj₂ (_ , e⟶ , eᵣℜ))                                = {!!}
---       -- with eℜ ← fundamental-lemma e σℜ               = {!!}
---     -- fundamental-lemma {σ = σ} (M `$ N) σℜ
---     --   rewrite sym (⟦Idᵉ⟧ᵛ-id (⟦ σ ⟧ᵛ M))           = fundamental-lemma M σℜ Idᵛ (fundamental-lemma N σℜ)
-
--- -- open LogicalRelation hiding (module Properties) public
--- -- open LogicalRelation.Properties public
-
--- -- strong-normalization : ∀ (M : Tm Γ A) →
--- --                        M ∈sn
--- -- strong-normalization M
--- --   rewrite sym (⟦Idˢ⟧ˢ-id M) = SN-sound (reify (fundamental-lemma M (Idˢ∈ℜs _)))
-
--- -- strong-normalization′ : ∀ {Γ A} →
--- --                         WellFounded (_⟵_ {Γ} {A})
--- -- strong-normalization′ = strong-normalization
+strong-normalization′ : ∀ {Γ A} →
+                        WellFounded (_⟵_ {Γ} {A})
+strong-normalization′ = strong-normalization
