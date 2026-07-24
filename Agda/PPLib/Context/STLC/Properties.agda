@@ -1,4 +1,4 @@
-{-# OPTIONS --safe #-}
+{-# OPTIONS --safe --without-K --instance-search-depth=10 #-}
 module PPLib.Context.STLC.Properties {ℓ₀} (Tp : Set ℓ₀) where
 
 open import Agda.Primitive                        using (Level; _⊔_)

@@ -1,4 +1,4 @@
-{-# OPTIONS --safe #-}
+{-# OPTIONS --safe --without-K #-}
 module PPLib.Context.STLC {ℓ₀} (Tp : Set ℓ₀) where
 
 open import PPLib.Context.STLC.Base Tp       renaming (module Variables to BVariables) public

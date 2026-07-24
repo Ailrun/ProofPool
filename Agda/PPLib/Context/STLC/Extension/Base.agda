@@ -1,4 +1,4 @@
-{-# OPTIONS --safe #-}
+{-# OPTIONS --safe --without-K #-}
 module PPLib.Context.STLC.Extension.Base {ℓ₀} (Tp : Set ℓ₀) where
 
 open import Data.List                             using (_∷_)

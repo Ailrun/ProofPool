@@ -1,4 +1,4 @@
-{-# OPTIONS --safe #-}
+{-# OPTIONS --safe --without-K #-}
 module PPLib.Base where
 
 open import Agda.Primitive                        using (Level)

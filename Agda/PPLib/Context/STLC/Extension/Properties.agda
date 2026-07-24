@@ -1,4 +1,4 @@
-{-# OPTIONS --safe #-}
+{-# OPTIONS --safe --without-K #-}
 module PPLib.Context.STLC.Extension.Properties {ℓ₀} (Tp : Set ℓ₀) where
 
 open import Agda.Primitive                        using (lzero)
@@ -11,7 +11,6 @@ open import Relation.Binary.PropositionalEquality hiding (J)
 open import PPLib.Context.STLC.Base Tp           renaming (module Variables to BVariables)
 open import PPLib.Context.STLC.Properties Tp
 open import PPLib.Context.STLC.Extension.Base Tp renaming (module Variables to EVariables)
-open import PPLib.Membership.Nth
 
 open BVariables
 open EVariables

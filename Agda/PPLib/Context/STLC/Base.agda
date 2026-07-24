@@ -1,4 +1,4 @@
-{-# OPTIONS --safe #-}
+{-# OPTIONS --safe --without-K #-}
 module PPLib.Context.STLC.Base {ℓ₀} (Tp : Set ℓ₀) where
 
 open import Agda.Primitive                        using (Level; lsuc; _⊔_)

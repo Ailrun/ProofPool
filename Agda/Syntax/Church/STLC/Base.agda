@@ -1,4 +1,4 @@
-{-# OPTIONS --safe #-}
+{-# OPTIONS --safe --without-K #-}
 module Syntax.Church.STLC.Base where
 
 open import Agda.Primitive                     using (lzero)

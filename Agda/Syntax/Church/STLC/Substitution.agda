@@ -1,4 +1,4 @@
-{-# OPTIONS --safe #-}
+{-# OPTIONS --safe --without-K #-}
 module Syntax.Church.STLC.Substitution where
 
 open import Syntax.Church.STLC.Substitution.Base       public

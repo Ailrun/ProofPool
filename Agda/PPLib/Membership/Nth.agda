@@ -1,4 +1,4 @@
-{-# OPTIONS --safe #-}
+{-# OPTIONS --safe --without-K #-}
 module PPLib.Membership.Nth where
 
 open import Data.List                                 using ([]; _∷_)
