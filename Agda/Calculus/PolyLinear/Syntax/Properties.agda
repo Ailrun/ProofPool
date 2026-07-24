@@ -12,7 +12,7 @@ open import Function
 open import Relation.Binary.Definitions using (DecidableEquality)
 open import Relation.Binary.PropositionalEquality
 open import Relation.Nullary hiding (Irrelevant)
-open import Relation.Nullary.Decidable using (dec-yes; dec-yes-irr; dec-no) renaming (map′ to Dec-map′)
+open import Relation.Nullary.Decidable using (dec-yes; dec-yes-irr; dec-no; _×?_) renaming (map′ to Dec-map′)
 
 𝕋-tvarₗ-injective : tvarₗ x ≡ tvarₗ x′ →
                     x ≡ x′
@@ -127,7 +127,7 @@ open import Relation.Nullary.Decidable using (dec-yes; dec-yes-irr; dec-no) rena
 𝕋-≡-dec (tvarₗ x₀)   (!ₗ T₁)      = no λ()
 𝕋-≡-dec (tvarₗ x₀)   (∀ₗ K₁ ∙ T₁) = no λ()
 𝕋-≡-dec (T₀ ⊸ₗ U₀)   (tvarₗ x₁)   = no λ()
-𝕋-≡-dec (T₀ ⊸ₗ U₀)   (T₁ ⊸ₗ U₁)   = Dec-map′ (uncurry (cong₂ _⊸ₗ_)) 𝕋-⊸ₗ-injective ((𝕋-≡-dec T₀ T₁) ×-dec (𝕋-≡-dec U₀ U₁))
+𝕋-≡-dec (T₀ ⊸ₗ U₀)   (T₁ ⊸ₗ U₁)   = Dec-map′ (uncurry (cong₂ _⊸ₗ_)) 𝕋-⊸ₗ-injective ((𝕋-≡-dec T₀ T₁) ×? (𝕋-≡-dec U₀ U₁))
 𝕋-≡-dec (T₀ ⊸ₗ U₀)   (!ₗ T₁)      = no λ()
 𝕋-≡-dec (T₀ ⊸ₗ U₀)   (∀ₗ K₁ ∙ T₁) = no λ()
 𝕋-≡-dec (!ₗ T₀)      (tvarₗ x₁)   = no λ()
@@ -137,7 +137,7 @@ open import Relation.Nullary.Decidable using (dec-yes; dec-yes-irr; dec-no) rena
 𝕋-≡-dec (∀ₗ K₀ ∙ T₀) (tvarₗ x₁)   = no λ()
 𝕋-≡-dec (∀ₗ K₀ ∙ T₀) (T₁ ⊸ₗ U₁)   = no λ()
 𝕋-≡-dec (∀ₗ K₀ ∙ T₀) (!ₗ T₁)      = no λ()
-𝕋-≡-dec (∀ₗ K₀ ∙ T₀) (∀ₗ K₁ ∙ T₁) = Dec-map′ (uncurry (cong₂ ∀ₗ_∙_)) 𝕋-∀ₗ∙-injective ((𝕂-≡-dec K₀ K₁) ×-dec (𝕋-≡-dec T₀ T₁))
+𝕋-≡-dec (∀ₗ K₀ ∙ T₀) (∀ₗ K₁ ∙ T₁) = Dec-map′ (uncurry (cong₂ ∀ₗ_∙_)) 𝕋-∀ₗ∙-injective ((𝕂-≡-dec K₀ K₁) ×? (𝕋-≡-dec T₀ T₁))
 
 𝕌-≡-dec : DecidableEquality 𝕌
 𝕌-≡-dec ∞ₗ   ∞ₗ   = yes refl
@@ -154,7 +154,7 @@ open import Relation.Nullary.Decidable using (dec-yes; dec-yes-irr; dec-no) rena
 ℂ𝔼-≡-dec (K₀        /𝕂) (K₁        /𝕂) = Dec-map′ (cong _/𝕂) ℂ𝔼-/𝕂-injective (𝕂-≡-dec K₀ K₁)
 ℂ𝔼-≡-dec (_         /𝕂) (_         /𝕋) = no (λ ())
 ℂ𝔼-≡-dec (_         /𝕋) (_         /𝕂) = no (λ ())
-ℂ𝔼-≡-dec ((T₀ , u₀) /𝕋) ((T₁ , u₁) /𝕋) = Dec-map′ (uncurry (cong₂ (curry _/𝕋))) ℂ𝔼-/𝕋-injective ((𝕋-≡-dec T₀ T₁) ×-dec (𝕌-≡-dec u₀ u₁))
+ℂ𝔼-≡-dec ((T₀ , u₀) /𝕋) ((T₁ , u₁) /𝕋) = Dec-map′ (uncurry (cong₂ (curry _/𝕋))) ℂ𝔼-/𝕋-injective ((𝕋-≡-dec T₀ T₁) ×? (𝕌-≡-dec u₀ u₁))
 
 ℂ𝔼⁻-≡-dec : DecidableEquality ℂ𝔼⁻
 ℂ𝔼⁻-≡-dec (K₀ /𝕂) (K₁ /𝕂) = Dec-map′ (cong _/𝕂) ℂ𝔼⁻-/𝕂-injective (𝕂-≡-dec K₀ K₁)
@@ -276,7 +276,7 @@ private
     rewrite dec-yes-≤? (≤-trans y≤n+x (+-monoʳ-≤ n z≥x))
           | +-assoc m n z                                = refl
 ...  | no  z≱x
-    rewrite dec-no-≤? (<⇒≱ (<-transˡ (≰⇒> z≱x) x≤y))     = refl
+    rewrite dec-no-≤? (<⇒≱ (<-≤-trans (≰⇒> z≱x) x≤y))     = refl
 
 ≤≤⇒wk𝕂wk𝕂-compose : ∀ (K : 𝕂) {n x} m {y} →
                     x ≤ y →
@@ -342,7 +342,7 @@ private
           rewrite +-comm x m
                 | dec-no-≤? (<⇒≱ m+z<m+x)          = refl
 ...      | no  z≱y
-        with z<m+x ← <-transˡ z<x (m≤n+m _ m)
+        with z<m+x ← <-≤-trans z<x (m≤n+m _ m)
           rewrite +-comm x m
                 | dec-no-≤? (<⇒≱ z<m+x)            = refl
 
@@ -413,7 +413,7 @@ private
 ≤⇒wk𝕋s𝕋-exchange {s = s} (tvarₗ z) {x} m {y} x≤y
   with z ≥? x in ≥?≡
 ...  | no  z≱x
-    with z<y ← <-transˡ (≰⇒> z≱x) x≤y
+    with z<y ← <-≤-trans (≰⇒> z≱x) x≤y
       rewrite dec-no-≤? (<⇒≯ z<y)
             | dec-no-≤? (<⇒≱ z<y)
             | ≥?≡                       = refl
@@ -433,10 +433,10 @@ private
 ...      | yes y<z
         rewrite dec-yes-≤? (<⇒≤pred y<z)
               | dec-yes-≤? (m≤n⇒m≤o+n m z≥x)
-              | dec-no (_ ≟ _) (>⇒≢ (m≤n⇒m≤o+n m (<-transʳ x≤y y<z)))
+              | dec-no (_ ≟ _) (>⇒≢ (m≤n⇒m≤o+n m (≤-<-trans x≤y y<z)))
               | +-∸-assoc m (≤-trans (s≤s z≤n) y<z) = refl
 ...      | no  y≮z
-        rewrite dec-no-≤? (<⇒≱ (<-transˡ (∸-monoʳ-< ≤-refl (≤-trans (s≤s z≤n) (≤∧≢⇒< z≥x (≢-sym z≢x)))) (≮⇒≥ y≮z)))
+        rewrite dec-no-≤? (<⇒≱ (<-≤-trans (∸-monoʳ-< ≤-refl (≤-trans (s≤s z≤n) (≤∧≢⇒< z≥x (≢-sym z≢x)))) (≮⇒≥ y≮z)))
               | ≥?≡
               | ≟≡ = refl
 ≤⇒wk𝕋s𝕋-exchange (T ⊸ₗ U) m x≤y = cong₂ _⊸ₗ_ (≤⇒wk𝕋s𝕋-exchange T m x≤y) (≤⇒wk𝕋s𝕋-exchange U m x≤y)

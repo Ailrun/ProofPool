@@ -8,7 +8,7 @@ open import Relation.Binary
 import Relation.Binary.Construct.NonStrictToStrict as Strict
 open import Relation.Binary.PropositionalEquality using (_≡_; _≢_)
 open import Relation.Nullary
-open import Relation.Nullary.Decidable using (_×-dec_; ¬?)
+open import Relation.Nullary.Decidable using (_×?_; ¬?)
 
 -- Might add universe cumulativity? How about predicativity?
 data ModeSpecSt : Set where
@@ -40,7 +40,7 @@ record ModeSpec ℓ₁ ℓ₂ : Set (lsuc (ℓ₁ ⊔ ℓ₂)) where
   <ₘ⇒≤ₘ = proj₁
 
   _<?ₘ_ : Decidable _<ₘ_
-  m₁ <?ₘ m₂ = m₁ ≤?ₘ m₂ ×-dec ¬? (m₁ ≟ₘ m₂)
+  m₁ <?ₘ m₂ = m₁ ≤?ₘ m₂ ×? ¬? (m₁ ≟ₘ m₂)
 
   _≰ₘ_ : Rel `Mode ℓ₂
   x ≰ₘ y = ¬ (x ≤ₘ y)

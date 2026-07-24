@@ -91,7 +91,7 @@ data _⊢ₜ₁_∈ₜ₁_ : Ctx₁ → Tm₁ → Ty₁ → Set where
 
 Tm₁-substₜ : Tm₁ → Tm₁ → ℕ → Tm₁
 Tm₁-substₜ (varₜ₁ x)  w y
-  with x ≡? y
+  with x ≟ y
 ...  | yes _ = w
 ...  | no  _ = varₜ₁ x
 Tm₁-substₜ unitₜ₁     _ _ = unitₜ₁

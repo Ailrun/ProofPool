@@ -1,10 +1,12 @@
-open import Relation.Binary.Core
+open import Relation.Binary
 
 module Math.CompletePartialOrder.Monotone
   {a b aℓ aℓ′ bℓ bℓ′} {A : Set a} {B : Set b}
   (_≈a_ : Rel A aℓ)
+  (≈aEquivalence : IsEquivalence _≈a_)
   (_≤a_ : Rel A aℓ′)
   (_≈b_ : Rel B bℓ)
+  (≈bEquivalence : IsEquivalence _≈b_)
   (_≤b_ : Rel B bℓ′)
   where
 
@@ -18,6 +20,8 @@ open import Relation.Unary
 open import Math.CompletePartialOrder.Base
 
 private
+  module ≈bEquivalence = IsEquivalence ≈bEquivalence
+
   variable
     aℓ″ bℓ″ : Level
 
@@ -45,7 +49,7 @@ record IsMonotone (f : A → B) : Set (lsuc (a ⊔ aℓ ⊔ aℓ′ ⊔ aℓ″ 
                             IsDirected _≈a_ _≤a_ P →
                             IsDirected _≈b_ _≤b_ (f $$ P)
   isDirectedˡ⇒isDirectedʳ isDirectedˡ = record
-    { isSubset = {!!}
+    { isSubset = record { P-resp-≈ = λ{ x≈y (_ , Pu , x≈fu) → -, Pu , ≈bEquivalence.trans (≈bEquivalence.sym x≈y) x≈fu } }
     ; satisfiable = f (proj₁ isDirectedˡ.satisfiable)
                   , proj₁ isDirectedˡ.satisfiable
                   , proj₂ isDirectedˡ.satisfiable
@@ -73,7 +77,7 @@ record IsMonotone (f : A → B) : Set (lsuc (a ⊔ aℓ ⊔ aℓ′ ⊔ aℓ″ 
 
       isUBʳ : IsUB _≈b_ _≤b_ (f $$ P) (f (proj₁ (isCPOˡ.complete isDirectedˡ)))
       isUBʳ = record
-        { isSubset = {!!}
+        { isSubset = record { P-resp-≈ = λ{ x≈y (_ , Pu , x≈fu) → -, Pu , ≈bEquivalence.trans (≈bEquivalence.sym x≈y) x≈fu } }
         ; isPartialOrder = isCPOʳ.isPartialOrder
         ; upperbound = λ{ {fx} (x , Px , fx≈) → isCPOʳ.≤-respˡ-≈ (isCPOʳ.Eq.sym fx≈) (monotone (IsLUB.upperbound isLUBˡ Px)) }
         }

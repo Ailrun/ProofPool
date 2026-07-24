@@ -40,6 +40,7 @@ record IsUB (P : Pred A ℓ″) (ub : A) : Set (a ⊔ ℓ ⊔ ℓ′ ⊔ ℓ″)
   open IsPartialOrder isPartialOrder public
 
 record IsLUB (P : Pred A ℓ″) (⊔P : A) : Set (a ⊔ ℓ ⊔ ℓ′ ⊔ ℓ″) where
+  eta-equality
   field
     isUB : IsUB P ⊔P
     least : ∀ {ub} → IsUB P ub → ⊔P ≤ ub

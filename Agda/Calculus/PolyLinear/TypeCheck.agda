@@ -15,7 +15,6 @@ open import Function using (case_of_)
 open import Relation.Binary.PropositionalEquality
 open import Relation.Nullary
 open import Relation.Nullary.Decidable using (fromWitness) renaming (map′ to Dec-map′)
-open import Relation.Nullary.Product
 
 𝕂∈-infer : ∀ x Γ →
            -------------------------
@@ -43,10 +42,10 @@ kind-infer         : ∀ Γ T →
 context-form-check []             = yes []
 context-form-check (_ ∷ Γ) = {!!}
 -- context-form-check (_       𝕂∷ Γ) = Dec-map′ ⋆𝕂∷_ (λ{ (⋆𝕂∷ ⊢Γ) → ⊢Γ }) (context-form-check Γ)
--- context-form-check ((T , u) 𝕋∷ Γ) = Dec-map′ (λ{ ((Tyₗ , ⊢T) , ⊢Γ) → ⊢T 𝕋∷ ⊢Γ }) (λ{ (⊢T 𝕋∷ ⊢Γ) → (Tyₗ , ⊢T) , ⊢Γ }) ((kind-infer Γ T) ×-dec (context-form-check Γ))
+-- context-form-check ((T , u) 𝕋∷ Γ) = Dec-map′ (λ{ ((Tyₗ , ⊢T) , ⊢Γ) → ⊢T 𝕋∷ ⊢Γ }) (λ{ (⊢T 𝕋∷ ⊢Γ) → (Tyₗ , ⊢T) , ⊢Γ }) ((kind-infer Γ T) ×? (context-form-check Γ))
 
 kind-infer Γ (tvarₗ x) = Dec-map′ (×-map₂ {!!} {- tvarₗ -}) (×-map₂ {!!} {- λ{ (tvarₗ x∈) → x∈ } -}) (𝕂∈-infer x Γ)
-kind-infer Γ (T ⊸ₗ U)       = Dec-map′ (λ{ ((Tyₗ , ⊢T) , (Tyₗ , ⊢U)) → Tyₗ , ⊢T ⊸ₗ ⊢U }) (λ{ (Tyₗ , ⊢T ⊸ₗ ⊢U) → (Tyₗ , ⊢T) , (Tyₗ , ⊢U) }) ((kind-infer Γ T) ×-dec (kind-infer Γ U))
+kind-infer Γ (T ⊸ₗ U)       = Dec-map′ (λ{ ((Tyₗ , ⊢T) , (Tyₗ , ⊢U)) → Tyₗ , ⊢T ⊸ₗ ⊢U }) (λ{ (Tyₗ , ⊢T ⊸ₗ ⊢U) → (Tyₗ , ⊢T) , (Tyₗ , ⊢U) }) ((kind-infer Γ T) ×? (kind-infer Γ U))
 kind-infer Γ (!ₗ T)         = Dec-map′ (λ{ (Tyₗ , ⊢T) -> Tyₗ , !ₗ ⊢T }) (×-map₂ λ{ (!ₗ ⊢T) → ⊢T }) (kind-infer Γ T)
 kind-infer Γ (∀ₗ K ∙ T)     = Dec-map′ (λ{ (Tyₗ , ⊢T) -> Tyₗ , ∀ₗ⋆∙ ⊢T }) (×-map₂ λ{ (∀ₗ⋆∙ ⊢T) → ⊢T }) (kind-infer (K /𝕂 ∷ Γ) T)
 

@@ -12,10 +12,8 @@ open import Calculus.LambdaBox.Typing
         x ⦂ S ∈ Γ₀ →
         ----------------------------
         length Γ₁ + x ⦂ S ∈ Γ₁ ++ Γ₀
-∈-++ˡ {x = x} []      x∈
-  rewrite ℕ.+-identityʳ x     = x∈
-∈-++ˡ {x = x} (b ∷ Γ₁) x∈
-  rewrite +-suc x (length Γ₁) = there (∈-++ˡ Γ₁ x∈)
+∈-++ˡ {x = x} []       x∈ = x∈
+∈-++ˡ {x = x} (b ∷ Γ₁) x∈ = there (∈-++ˡ Γ₁ x∈)
 
 ∈-++ʳ : ∀ Γ₀ →
         x ⦂ S ∈ Γ₁ →

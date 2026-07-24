@@ -45,7 +45,7 @@ _Ty≟_ : ∀ (A A' : Ty) →
 `N       Ty≟ `N         = yes refl
 `N       Ty≟ (A' `→ B') = no λ ()
 (A `→ B) Ty≟ `N         = no λ ()
-(A `→ B) Ty≟ (A' `→ B') = Dec.map′ (λ{ (refl , refl) → refl }) (λ{ refl → refl , refl }) ((A Ty≟ A') Dec.×-dec (B Ty≟ B'))
+(A `→ B) Ty≟ (A' `→ B') = Dec.map′ (λ{ (refl , refl) → refl }) (λ{ refl → refl , refl }) ((A Ty≟ A') Dec.×? (B Ty≟ B'))
 
 infixl 30 _`,_
 data Ctx : Set where
@@ -162,7 +162,7 @@ _Ctx≟_ : ∀ (Γ Γ' : Ctx) →
 `·       Ctx≟ `·         = yes refl
 `·       Ctx≟ (Γ' `, A') = no λ ()
 (Γ `, A) Ctx≟ `·         = no λ ()
-(Γ `, A) Ctx≟ (Γ' `, A') = Dec.map′ (λ{ (refl , refl) → refl }) (λ{ refl → refl , refl }) ((Γ Ctx≟ Γ') Dec.×-dec (A Ty≟ A'))
+(Γ `, A) Ctx≟ (Γ' `, A') = Dec.map′ (λ{ (refl , refl) → refl }) (λ{ refl → refl , refl }) ((Γ Ctx≟ Γ') Dec.×? (A Ty≟ A'))
 
 `,-injective : Γ `, A ≡ Δ `, B → Γ ≡ Δ × A ≡ B
 `,-injective refl = refl , refl
@@ -1306,13 +1306,13 @@ _⊨s_≋_`:_ : Ctx → Sub → Sub → Ctx → Set
 ------------------------------------------------------------
 -- The Problematic One
 ------------------------------------------------------------
--- This one is problematic for a calculus without
--- explicit substitutions.
-⊨[_]_ :  Γ ⊨s σ ≋ σ' `: Δ →
-         Δ ⊨ M ≋ M' `: A →
-        ------------------------------
-         Γ ⊨ [ σ ] M ≋ [ σ' ] M' `: A
-(⊨[ σ≋σ' ] M≋M') ρ ρ' ρ≣ρ' = {!!}
+-- -- This one is problematic for a calculus without
+-- -- explicit substitutions.
+-- ⊨[_]_ :  Γ ⊨s σ ≋ σ' `: Δ →
+--          Δ ⊨ M ≋ M' `: A →
+--         ------------------------------
+--          Γ ⊨ [ σ ] M ≋ [ σ' ] M' `: A
+-- (⊨[ σ≋σ' ] M≋M') ρ ρ' ρ≣ρ' = {!!}
 
 -- Nf* : Ty → Set
 -- Nf* A = ∀ Γ → Γ ⊢⇇: A

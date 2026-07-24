@@ -1051,91 +1051,91 @@ module LogRelProp where
     with hN ← rN (Wkᵉ (_ ∷ _ ∷ [])) (reflect (`# here refl)) (reflect (`# there (here refl)))
       rewrite reify-∧-eq N = reify _ hN
 
-  ℜ-∧-elim : ℜ[ A₁ `∧ A₂ ] M →
-             (∀ {Δ} (δ : Ext Δ _) {M₁ M₂} → ℜ[ A₁ ] M₁ → ℜ[ A₂ ] M₂ → ℜ[ B ] ([| !ˢ M₂ ,ˢ M₁ |] ext[ qᵉ qᵉ δ ] N)) →
-             ℜ[ B ] (`let M `in N)
-  ℜ-∧-elim {M = M} {B = base}     {N = N} rM rN
-    with _ , N↠* , VN′ ← reify _ (rN (Wkᵉ (_ ∷ _ ∷ [])) (reflect (`# here refl)) (reflect (`# there (here refl))))
-      rewrite reify-∧-eq N
-        with hMN ← rM Idᵉ (_ ∷ []) ((_ ∷ [] , ξ-of-↝*-↠ᶜ* _↠_ (_∷ []) (_∷ []) N↠* , VN′ ∷[]) , λ δ rM₁ rM₂ → halts-closed (rN δ rM₁ rM₂) (`∧β ↠-refl ↠-refl ↠-refl))
-          rewrite ext[Idᵉ]-id M                              = hMN
-  ℜ-∧-elim {M = M} {B = B `→ C}   {N = N} rM rN {N = L} δ rL =
-    ℜ-closed
-      (ℜ-∧-elim
-        (ext[-]-preserves-ℜ {M = M} δ rM)
-        λ γ {M₁ = M₁} {M₂ = M₂} rM₁ rM₂ →
-          subst
-            ℜ[ C ]_
-            (cong₂
-              _`$_
-              (begin _ ≡⟨ ext[Idᵉ]-id ([| !ˢ M₂ ,ˢ M₁ |] ext[ qᵉ qᵉ (γ ∘ᵉ δ) ] N) ⟩
-                     _ ≡⟨ cong [| !ˢ M₂ ,ˢ M₁ |]_ (ext[-]-extensional (transᵉ (qᵉ-congᵉ qᵉ-distrib-∘ᵉ) qᵉ-distrib-∘ᵉ) N) ⟩
-                     _ ≡˘⟨ cong [| !ˢ M₂ ,ˢ M₁ |]_ (ext[-]-ext[-]≡ext[-∘ᵉ-] N) ⟩
-                     _ ∎)
-              (begin _ ≡˘⟨ [|forgetˢ-|]≡ext[-] γ L ⟩
-                     _ ≡˘⟨ [|-|]-ext[-]≡[|-ˢ∘ᵉ-|] L ⟩
-                     _ ≡˘⟨ [|-|]-extensional (!ˢ-,ˢ-ˢ∘ᵉ-qᵉ-qᵉ′ γ M₂ M₁) (ext[ Wkᵉ (_ ∷ _ ∷ []) ] L) ⟩
-                     _ ≡˘⟨ [|-|]-ext[-]≡[|-ˢ∘ᵉ-|] (ext[ Wkᵉ (_ ∷ _ ∷ []) ] L) ⟩
-                     _ ∎))
-            (rN (γ ∘ᵉ δ) rM₁ rM₂ Idᵉ (ext[-]-preserves-ℜ γ rL)))
-      `→c
-    where
-      open ≡-Reasoning
-  ℜ-∧-elim         {B = B₁ `∧ B₂} {N = N} rM rN δ K rK       =
-    rM
-      δ
-      (_ ∷ K)
-      ({!!}
-      , λ γ {M₁ = M₁} {M₂ = M₂} rM₁ rM₂ →
-        halts-closed
-          (subst
-            (λ L → (ext[ γ ]ᶜ K `$$ᶜ L) halts)
-            (begin _ ≡⟨ ext[Idᵉ]-id ([| !ˢ M₂ ,ˢ M₁ |] ext[ qᵉ qᵉ (γ ∘ᵉ δ) ] N) ⟩
-                   _ ≡⟨ cong [| !ˢ M₂ ,ˢ M₁ |]_ (ext[-]-extensional (transᵉ (qᵉ-congᵉ qᵉ-distrib-∘ᵉ) qᵉ-distrib-∘ᵉ) N) ⟩
-                   _ ≡˘⟨ cong [| !ˢ M₂ ,ˢ M₁ |]_ (ext[-]-ext[-]≡ext[-∘ᵉ-] N) ⟩
-                   _ ∎)
-            (rN (γ ∘ᵉ δ) rM₁ rM₂ Idᵉ (ext[ γ ]ᶜ K) (ext[-]-preserves-ℜᶜ {K = K} γ rK)))
-          (ext[ γ ]ᶜ K `$$ᶜ↠ `∧β ↠-refl ↠-refl ↠-refl))
-    where
-      open ≡-Reasoning
+  -- ℜ-∧-elim : ℜ[ A₁ `∧ A₂ ] M →
+  --            (∀ {Δ} (δ : Ext Δ _) {M₁ M₂} → ℜ[ A₁ ] M₁ → ℜ[ A₂ ] M₂ → ℜ[ B ] ([| !ˢ M₂ ,ˢ M₁ |] ext[ qᵉ qᵉ δ ] N)) →
+  --            ℜ[ B ] (`let M `in N)
+  -- ℜ-∧-elim {M = M} {B = base}     {N = N} rM rN
+  --   with _ , N↠* , VN′ ← reify _ (rN (Wkᵉ (_ ∷ _ ∷ [])) (reflect (`# here refl)) (reflect (`# there (here refl))))
+  --     rewrite reify-∧-eq N
+  --       with hMN ← rM Idᵉ (_ ∷ []) ((_ ∷ [] , ξ-of-↝*-↠ᶜ* _↠_ (_∷ []) (_∷ []) N↠* , VN′ ∷[]) , λ δ rM₁ rM₂ → halts-closed (rN δ rM₁ rM₂) (`∧β ↠-refl ↠-refl ↠-refl))
+  --         rewrite ext[Idᵉ]-id M                              = hMN
+  -- ℜ-∧-elim {M = M} {B = B `→ C}   {N = N} rM rN {N = L} δ rL =
+  --   ℜ-closed
+  --     (ℜ-∧-elim
+  --       (ext[-]-preserves-ℜ {M = M} δ rM)
+  --       λ γ {M₁ = M₁} {M₂ = M₂} rM₁ rM₂ →
+  --         subst
+  --           ℜ[ C ]_
+  --           (cong₂
+  --             _`$_
+  --             (begin _ ≡⟨ ext[Idᵉ]-id ([| !ˢ M₂ ,ˢ M₁ |] ext[ qᵉ qᵉ (γ ∘ᵉ δ) ] N) ⟩
+  --                    _ ≡⟨ cong [| !ˢ M₂ ,ˢ M₁ |]_ (ext[-]-extensional (transᵉ (qᵉ-congᵉ qᵉ-distrib-∘ᵉ) qᵉ-distrib-∘ᵉ) N) ⟩
+  --                    _ ≡˘⟨ cong [| !ˢ M₂ ,ˢ M₁ |]_ (ext[-]-ext[-]≡ext[-∘ᵉ-] N) ⟩
+  --                    _ ∎)
+  --             (begin _ ≡˘⟨ [|forgetˢ-|]≡ext[-] γ L ⟩
+  --                    _ ≡˘⟨ [|-|]-ext[-]≡[|-ˢ∘ᵉ-|] L ⟩
+  --                    _ ≡˘⟨ [|-|]-extensional (!ˢ-,ˢ-ˢ∘ᵉ-qᵉ-qᵉ′ γ M₂ M₁) (ext[ Wkᵉ (_ ∷ _ ∷ []) ] L) ⟩
+  --                    _ ≡˘⟨ [|-|]-ext[-]≡[|-ˢ∘ᵉ-|] (ext[ Wkᵉ (_ ∷ _ ∷ []) ] L) ⟩
+  --                    _ ∎))
+  --           (rN (γ ∘ᵉ δ) rM₁ rM₂ Idᵉ (ext[-]-preserves-ℜ γ rL)))
+  --     `→c
+  --   where
+  --     open ≡-Reasoning
+  -- ℜ-∧-elim         {B = B₁ `∧ B₂} {N = N} rM rN δ K rK       =
+  --   rM
+  --     δ
+  --     (_ ∷ K)
+  --     ({!!}
+  --     , λ γ {M₁ = M₁} {M₂ = M₂} rM₁ rM₂ →
+  --       halts-closed
+  --         (subst
+  --           (λ L → (ext[ γ ]ᶜ K `$$ᶜ L) halts)
+  --           (begin _ ≡⟨ ext[Idᵉ]-id ([| !ˢ M₂ ,ˢ M₁ |] ext[ qᵉ qᵉ (γ ∘ᵉ δ) ] N) ⟩
+  --                  _ ≡⟨ cong [| !ˢ M₂ ,ˢ M₁ |]_ (ext[-]-extensional (transᵉ (qᵉ-congᵉ qᵉ-distrib-∘ᵉ) qᵉ-distrib-∘ᵉ) N) ⟩
+  --                  _ ≡˘⟨ cong [| !ˢ M₂ ,ˢ M₁ |]_ (ext[-]-ext[-]≡ext[-∘ᵉ-] N) ⟩
+  --                  _ ∎)
+  --           (rN (γ ∘ᵉ δ) rM₁ rM₂ Idᵉ (ext[ γ ]ᶜ K) (ext[-]-preserves-ℜᶜ {K = K} γ rK)))
+  --         (ext[ γ ]ᶜ K `$$ᶜ↠ `∧β ↠-refl ↠-refl ↠-refl))
+  --   where
+  --     open ≡-Reasoning
 
-  eval : ℜˢ[ Γ ] σ →
-         ∀ (M : Tm Γ A) →
-         ℜ[ A ] [| σ |] M
-  eval {σ = σ} rσ (`# x) = ∈-of-ℜˢ x rσ
-  eval {σ = σ} rσ (`λ M) {N = N} δ rN =
-    ℜ-closed
-      (eval {σ = (δ ᵉ∘ˢ σ) ,ˢ N} (ᵉ∘ˢ-preserves-ℜˢ δ rσ , rN) M)
-      (↠-≡-trans (`→β ↠-refl ↠-refl)
-        (trans
-          (cong
-            [| !ˢ N |]_
-            (trans
-              (ext[-]-[|-|]≡[|-ᵉ∘ˢ-|] M)
-              ([|-|]-extensional (symˢ qˢ-distrib-ᵉ∘ˢ) M)))
-          (trans
-            ([|-|]-[|-|]≡[|-∘ˢ-|] M)
-            ([|-|]-extensional (!ˢ-∘ˢ-qˢ′ (δ ᵉ∘ˢ σ) N) M))))
-  eval {σ = σ} rσ (M `$ N)
-    with rMN ← eval rσ M Idᵉ (eval rσ N)
-      rewrite ext[Idᵉ]-id ([| σ |] M) = rMN
-  eval {σ = σ} rσ (M₁ `, M₂) δ K rK
-    with rM₁ ← eval rσ M₁
-       | rM₂ ← eval rσ M₂
-      with rM₁M₂ ← rK .proj₂ Idᵉ (ext[-]-preserves-ℜ δ rM₁) (ext[-]-preserves-ℜ δ rM₂)
-        rewrite ext[Idᵉ]ᶜ-id K        = rM₁M₂
-  eval {σ = σ} rσ (`let M `in N)
-    with rM ← eval rσ M =
-    ℜ-∧-elim
-      rM
-      λ δ {M₁ = M₁} {M₂ = M₂} rM₁ rM₂ →
-        subst
-          ℜ[ _ ]_
-          (begin _ ≡˘⟨ [|-|]-extensional (!ˢ-,ˢ-∘ˢ-qˢ-qˢ′ (δ ᵉ∘ˢ σ) M₂ M₁) N ⟩
-                 _ ≡˘⟨ [|-|]-[|-|]≡[|-∘ˢ-|] N ⟩
-                 _ ≡⟨ cong [| !ˢ M₂ ,ˢ M₁ |]_ ([|-|]-extensional (transˢ (qˢ-congˢ qˢ-distrib-ᵉ∘ˢ) qˢ-distrib-ᵉ∘ˢ) N) ⟩
-                 _ ≡˘⟨ cong [| !ˢ M₂ ,ˢ M₁ |]_ (ext[-]-[|-|]≡[|-ᵉ∘ˢ-|] N) ⟩
-                 _ ∎)
-          (eval {σ = (δ ᵉ∘ˢ σ) ,ˢ M₂ ,ˢ M₁} ((ᵉ∘ˢ-preserves-ℜˢ δ rσ , rM₂) , rM₁) N)
-    where
-      open ≡-Reasoning
+  -- eval : ℜˢ[ Γ ] σ →
+  --        ∀ (M : Tm Γ A) →
+  --        ℜ[ A ] [| σ |] M
+  -- eval {σ = σ} rσ (`# x) = ∈-of-ℜˢ x rσ
+  -- eval {σ = σ} rσ (`λ M) {N = N} δ rN =
+  --   ℜ-closed
+  --     (eval {σ = (δ ᵉ∘ˢ σ) ,ˢ N} (ᵉ∘ˢ-preserves-ℜˢ δ rσ , rN) M)
+  --     (↠-≡-trans (`→β ↠-refl ↠-refl)
+  --       (trans
+  --         (cong
+  --           [| !ˢ N |]_
+  --           (trans
+  --             (ext[-]-[|-|]≡[|-ᵉ∘ˢ-|] M)
+  --             ([|-|]-extensional (symˢ qˢ-distrib-ᵉ∘ˢ) M)))
+  --         (trans
+  --           ([|-|]-[|-|]≡[|-∘ˢ-|] M)
+  --           ([|-|]-extensional (!ˢ-∘ˢ-qˢ′ (δ ᵉ∘ˢ σ) N) M))))
+  -- eval {σ = σ} rσ (M `$ N)
+  --   with rMN ← eval rσ M Idᵉ (eval rσ N)
+  --     rewrite ext[Idᵉ]-id ([| σ |] M) = rMN
+  -- eval {σ = σ} rσ (M₁ `, M₂) δ K rK
+  --   with rM₁ ← eval rσ M₁
+  --      | rM₂ ← eval rσ M₂
+  --     with rM₁M₂ ← rK .proj₂ Idᵉ (ext[-]-preserves-ℜ δ rM₁) (ext[-]-preserves-ℜ δ rM₂)
+  --       rewrite ext[Idᵉ]ᶜ-id K        = rM₁M₂
+  -- eval {σ = σ} rσ (`let M `in N)
+  --   with rM ← eval rσ M =
+  --   ℜ-∧-elim
+  --     rM
+  --     λ δ {M₁ = M₁} {M₂ = M₂} rM₁ rM₂ →
+  --       subst
+  --         ℜ[ _ ]_
+  --         (begin _ ≡˘⟨ [|-|]-extensional (!ˢ-,ˢ-∘ˢ-qˢ-qˢ′ (δ ᵉ∘ˢ σ) M₂ M₁) N ⟩
+  --                _ ≡˘⟨ [|-|]-[|-|]≡[|-∘ˢ-|] N ⟩
+  --                _ ≡⟨ cong [| !ˢ M₂ ,ˢ M₁ |]_ ([|-|]-extensional (transˢ (qˢ-congˢ qˢ-distrib-ᵉ∘ˢ) qˢ-distrib-ᵉ∘ˢ) N) ⟩
+  --                _ ≡˘⟨ cong [| !ˢ M₂ ,ˢ M₁ |]_ (ext[-]-[|-|]≡[|-ᵉ∘ˢ-|] N) ⟩
+  --                _ ∎)
+  --         (eval {σ = (δ ᵉ∘ˢ σ) ,ˢ M₂ ,ˢ M₁} ((ᵉ∘ˢ-preserves-ℜˢ δ rσ , rM₂) , rM₁) N)
+  --   where
+  --     open ≡-Reasoning
