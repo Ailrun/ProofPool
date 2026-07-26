@@ -11,7 +11,8 @@ data Tp : Set where
   `base : Tp
   _`→_  : Tp → Tp → Tp
 
-import PPLib.Context.STLC Tp as STLC
+import PPLib.Context.STLC
+module STLC = PPLib.Context.STLC Tp
 open STLC public hiding (module BVariables; module EVariables)
 
 infixr 25 `λ_
