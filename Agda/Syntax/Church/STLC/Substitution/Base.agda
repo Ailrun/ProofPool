@@ -24,6 +24,12 @@ instance
   RawExtLiftSub : RawVarSubLift ⦃ ExtVarSub ⦄ ⦃ SubVarSub ⦄
   RawExtLiftSub .liftᵛ = `#_
 
+  RawSubId : RawVarSubId ⦃ SubVarSub ⦄
+  RawSubId = RawVarSubLiftId ⦃ ExtVarSub ⦄
+
+  RawSubOutHead : RawVarSubOutHead ⦃ SubVarSub ⦄
+  RawSubOutHead = RawVarSubLiftOutHead ⦃ ExtVarSub ⦄
+
 infixr 30 !ˢ_
 !ˢ_ = !ᵛ_ ⦃ SubVarSub ⦄
 

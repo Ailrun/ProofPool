@@ -71,7 +71,7 @@ instance
   SubIdNoOpSubˡ .Idᵛ-idˡ = λ σ x → helper (σ x)
     where
       helper : ∀ (M : Tm Γ A) → ⟦ Idᵛ ⦃ SubVarSub ⦄ ⟧ᵛ M ≡ M
-      helper M = trans (liftᵛ-preserves-Appᵛ Idᵛ M) (⟦Idᵛ⟧ᵛ≡liftᵛ M)
+      helper M = trans (liftᵛ-preserves-Appᵛ (Idᵛ ⦃ ExtVarSub ⦄) M) (⟦Idᵛ⟧ᵛ≡liftᵛ M)
 
   IdNoOpSubʳ : ∀ {R}
                  ⦃ varSub : VarSubBase {lzero} R ⦄
