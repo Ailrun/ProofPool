@@ -52,16 +52,16 @@ module OpSem where
 
   data _⟶_ where
     _`∷ᵉ? : e ⟶ e′ →
-            ----------------------
+            ---------------------
             e `∷ᵉ ee ⟶ e′ `∷ᵉ ee
 
     ?`∷ᵉ_ : ∀ {ee : ExE Γ A B} →
             ee ⟶ᵉ ee′ →
-            ----------------------
+            ---------------------
             e `∷ᵉ ee ⟶ e `∷ᵉ ee′
 
     `λ_   : e ⟶ e′ →
-            --------------
+            -------------
             `λ e ⟶ `λ e′
 
     `→β   : ∀ {e : Ex (A ∷ Γ) B} {f : Ex Γ A} →
@@ -69,21 +69,21 @@ module OpSem where
             `λ e `∷ᵉ -`$ f ⟶ ⟦ !ˢ f ⟧ᵛ e
 
     `injₗ : e ⟶ e′ →
-            ----------------------------
+            ---------------------------
             `injₗ {B = B} e ⟶ `injₗ e′
 
     `injᵣ : e ⟶ e′ →
-            ----------------------------
+            ---------------------------
             `injᵣ {A = A} e ⟶ `injᵣ e′
 
     `+βₗ  : ∀ {e : Ex Γ A}
               {fₗ : Ex (A ∷ Γ) C} {fᵣ : Ex (B ∷ Γ) C} →
-            -----------------------------------------------
+            ----------------------------------------------
             `injₗ e `∷ᵉ `case-`of fₗ `/ fᵣ ⟶ ⟦ !ˢ e ⟧ᵛ fₗ
 
     `+βᵣ  : ∀ {e : Ex Γ B}
               {fₗ : Ex (A ∷ Γ) C} {fᵣ : Ex (B ∷ Γ) C} →
-            -----------------------------------------------
+            ----------------------------------------------
             `injᵣ e `∷ᵉ `case-`of fₗ `/ fᵣ ⟶ ⟦ !ˢ e ⟧ᵛ fᵣ
 
     `+χ   : ∀ {e : Ex Γ (A `+ B)}
@@ -107,7 +107,7 @@ module OpSem where
 
   infix   4 _⟶ˢ_
   _⟶ˢ_ : Rel (ExEs Γ A B) lzero
-  _⟶ˢ_ = Wrap λ es es′ → ∀ {Δ} (σ : Sub Δ _) e → e `++ˢ ⟦ σ ⟧ᵛ* es ⟶ e `++ˢ ⟦ σ ⟧ᵛ* es′
+  _⟶ˢ_ = Wrap λ es es′ → ∀ {Δ} (δ : Ext Δ _) e → e `++ˢ ⟦ δ ⟧ᵛ* es ⟶ e `++ˢ ⟦ δ ⟧ᵛ* es′
 
   ----------------------------------------------------------
   -- Ordinary Multi-step Reduction
@@ -139,16 +139,8 @@ module OpSem where
                   e `++ˢ es ⟶ e `++ˢ es′
     simplify-⟶ˢ {es = es} {es′ = es′} es⟶ e
       with ees⟶ ← es⟶ .get Idᵛ e
-        rewrite ⟦Idᵛ⟧ᵛ*≡id ⦃ SubVarSub ⦄ es
-              | ⟦Idᵛ⟧ᵛ*≡id ⦃ SubVarSub ⦄ es′ = ees⟶
-
-    ⟦-⟧ᵉ-⟶ˢ : es ⟶ˢ es′ →
-              ∀ {Δ} (δ : Ext Δ _) e →
-              e `++ˢ ⟦ δ ⟧ᵛ* es ⟶ e `++ˢ ⟦ δ ⟧ᵛ* es′
-    ⟦-⟧ᵉ-⟶ˢ {es = es} {es′ = es′} es⟶ δ e
-      with ees⟶ ← es⟶ .get (liftᵛ∘ δ) e
-        rewrite liftᵛ-preserves-Appᵛ* δ es
-              | liftᵛ-preserves-Appᵛ* δ es′ = ees⟶
+        rewrite ⟦Idᵛ⟧ᵛ*≡id ⦃ ExtVarSub ⦄ es
+              | ⟦Idᵛ⟧ᵛ*≡id ⦃ ExtVarSub ⦄ es′ = ees⟶
 
     module ⟦_⟧ᵉ⟶_ where
       forEx  : (δ : Ext Γ Δ) → ∀ {e e′ : Ex Δ A} → e ⟶ e′ → ⟦ δ ⟧ᵛ e ⟶ ⟦ δ ⟧ᵛ e′
@@ -346,7 +338,7 @@ module AccessibilitySN where
       `++ˢ-⟶-cases e (ee ∷ es) ees⟶
         with `++ˢ-⟶-cases (e `∷ᵉ ee) es ees⟶
       ...  | e-step (e⟶ `∷ᵉ?)                                    = e-step e⟶
-      ...  | e-step (?`∷ᵉ ee⟶)                                   = es-step _ ≤‴-refl [ (λ σ e′ → (?`∷ᵉ ⟦_⟧ᵛ⟶_.forExE σ ee⟶) `++ˢ⟶ ⟦ σ ⟧ᵛ* es) ]
+      ...  | e-step (?`∷ᵉ ee⟶)                                   = es-step _ ≤‴-refl [ (λ δ e′ → (?`∷ᵉ ⟦_⟧ᵉ⟶_.forExE δ ee⟶) `++ˢ⟶ ⟦ δ ⟧ᵛ* es) ]
       ...  | e-step `→β                                          = `→β-step
       ...  | e-step `+βₗ                                         = `+βₗ-step
       ...  | e-step `+βᵣ                                         = `+βᵣ-step
@@ -354,112 +346,102 @@ module AccessibilitySN where
       ...  | es-step _ ≤es es⟶                                   = es-step _ (ℕ.≤⇒≤‴ (s≤s (ℕ.≤‴⇒≤ ≤es))) [ (λ σ e′ → es⟶ .get σ (e′ `∷ᵉ RawAppSub.forExE σ ee)) ]
       ...  | `+χ-step {A = A} {B = B} {fₗ = fₗ} {fᵣ} {ee₀} {es₀} = es-step _ (≤‴-step ≤‴-refl) [ helper ]
         where
-          helper : ∀ {Δ} (σ : Sub Δ _) e′ →
-                   e′ `++ˢ ⟦ σ ⟧ᵛ* (`case-`of fₗ `/ fᵣ ∷ ee₀ ∷ es₀)
-                   ⟶ e′ `++ˢ ⟦ σ ⟧ᵛ* (`+χ-result fₗ fᵣ ee₀ ∷ es₀)
-          helper σ e′
-            rewrite forExE-qᵉˢ-forExE-Wkᵛ≡forExE-Wkᵛ-forExE {A = A} σ ee₀
-                  | forExE-qᵉˢ-forExE-Wkᵛ≡forExE-Wkᵛ-forExE {A = B} σ ee₀ = `+χ `++ˢ⟶ ⟦ σ ⟧ᵛ* es₀
+          helper : ∀ {Δ} (δ : Ext Δ _) e′ →
+                   e′ `++ˢ ⟦ δ ⟧ᵛ* (`case-`of fₗ `/ fᵣ ∷ ee₀ ∷ es₀)
+                   ⟶ e′ `++ˢ ⟦ δ ⟧ᵛ* (`+χ-result fₗ fᵣ ee₀ ∷ es₀)
+          helper δ e′
+            rewrite forExE-qᵉᵉ-forExE-Wkᵛ≡forExE-Wkᵛ-forExE {A = A} δ ee₀
+                  | forExE-qᵉᵉ-forExE-Wkᵛ≡forExE-Wkᵛ-forExE {A = B} δ ee₀ = `+χ `++ˢ⟶ ⟦ δ ⟧ᵛ* es₀
 
     ∈sn-weak-head-expansion`→ : ∀ (e : Ex (A ∷ Γ) B) {f : Ex Γ A} (es : ExEs Γ B C) →
                                 f ∈sn →
                                 ⟦ !ˢ f ⟧ᵛ e `++ˢ es ∈sn →
                                 (`λ e) `∷ᵉ -`$ f `++ˢ es ∈sn
-    ∈sn-weak-head-expansion`→ = λ e es fsn ⟦f⟧esn → acc (go e es fsn (TC.accessible _⟵_ ⟦f⟧esn))
+    ∈sn-weak-head-expansion`→ = λ e es fsn ⟦f⟧esn → acc (go {e = e} es fsn (TC.accessible _⟵_ ⟦f⟧esn))
       where
         open Function.Equivalence
         module TC = Relation.Binary.Construct.Closure.Transitive
 
-        go : ∀ e es →
+        go : ∀ {e} es →
              f ∈sn →
              ⟦ !ˢ f ⟧ᵛ e `++ˢ es ∈sn+ →
              WfRec _⟵_ _∈sn ((`λ e) `∷ᵉ -`$ f `++ˢ es)
-        go e es (acc frec) (acc ⟦f⟧eesrec) efes⟶
-          with `++ˢ-⟶-cases (`λ _ `∷ᵉ -`$ _) es efes⟶
-        ...  | es-step es′ _ es⟶                         = acc (go _ es′ (acc frec) (⟦f⟧eesrec [ simplify-⟶ˢ es⟶ _ ]))
-        ...  | e-step `→β                                = TC.accessible⁻ _⟵_ (acc ⟦f⟧eesrec)
-        ...  | e-step ((`λ e⟶) `∷ᵉ?)                     = acc (go _ es (acc frec) (⟦f⟧eesrec [ (⟦ !ᵛ _ ⟧ᵛ⟶ e⟶) `++ˢ⟶ es ]))
+        go {e = e} es (acc frec) (acc ⟦f⟧eesrec) efes⟶
+          with `++ˢ-⟶-cases _ es efes⟶
+        ...  | es-step es′ _ es⟶                       = acc (go es′ (acc frec) (⟦f⟧eesrec [ simplify-⟶ˢ es⟶ _ ]))
+        ...  | e-step `→β                              = TC.accessible⁻ _⟵_ (acc ⟦f⟧eesrec)
+        ...  | e-step ((`λ e⟶) `∷ᵉ?)                   = acc (go es (acc frec) (⟦f⟧eesrec [ (⟦ !ᵛ _ ⟧ᵛ⟶ e⟶) `++ˢ⟶ es ]))
         ...  | e-step (       ?`∷ᵉ (-`$ f⟶))
             with ⟶*-cases (⟦!ᵛ⟶ f⟶ ⟧ˣ e)
         ...    | inj₁ eq″
-              rewrite eq″                                = acc (go _ es (frec f⟶) (acc ⟦f⟧eesrec))
-        ...    | inj₂ ⟦f⟧e⟶+                             = acc (go _ es (frec f⟶) (⟦f⟧eesrec (TC.equivalent .to (TC.map (_`++ˢ⟶ es) (TC.equivalent .from ⟦f⟧e⟶+)))))
+              rewrite eq″                              = acc (go es (frec f⟶) (acc ⟦f⟧eesrec))
+        ...    | inj₂ ⟦f⟧e⟶+                           = acc (go es (frec f⟶) (⟦f⟧eesrec (TC.equivalent .to (TC.map (_`++ˢ⟶ es) (TC.equivalent .from ⟦f⟧e⟶+)))))
 
     ∈sn-weak-head-expansion`+ₗ : ∀ {e : Ex Γ A} {fₗ : Ex (A ∷ Γ) C} {fᵣ : Ex (B ∷ Γ) C} (es : ExEs Γ C D) →
                                  e ∈sn →
                                  fᵣ `++ˢ ⟦ Wkᵛ ⟧ᵛ* es ∈sn →
                                  ⟦ !ˢ e ⟧ᵛ fₗ `++ˢ es ∈sn →
                                  `injₗ e `∷ᵉ `case-`of fₗ `/ fᵣ `++ˢ es ∈sn
-    ∈sn-weak-head-expansion`+ₗ = λ es esn fᵣessn ⟦e⟧fₗessn → acc (go es (<-wellFounded _) esn fᵣessn (TC.accessible _⟵_ ⟦e⟧fₗessn))
+    ∈sn-weak-head-expansion`+ₗ = λ es esn fᵣessn ⟦e⟧fₗessn → acc (go {es = es} (<-wellFounded _) esn fᵣessn (TC.accessible _⟵_ ⟦e⟧fₗessn))
       where
         open Function.Equivalence
         module TC = Relation.Binary.Construct.Closure.Transitive
 
-        go : ∀ {e : Ex Γ A} {fₗ : Ex (A ∷ Γ) C} {fᵣ : Ex (B ∷ Γ) C} (es : ExEs Γ C D) →
+        go : ∀ {e : Ex Γ A} {fₗ : Ex (A ∷ Γ) C} {fᵣ : Ex (B ∷ Γ) C} {es : ExEs Γ C D} →
              Acc _<_ (lengthˢ es) →
              e ∈sn →
              fᵣ `++ˢ ⟦ Wkᵛ ⟧ᵛ* es ∈sn →
              ⟦ !ˢ e ⟧ᵛ fₗ `++ˢ es ∈sn+ →
              WfRec _⟵_ _∈sn (`injₗ e `∷ᵉ `case-`of fₗ `/ fᵣ `++ˢ es)
-        go es (acc esrec) (acc erec) (acc fᵣesrec) (acc ⟦e⟧fₗesrec) efₗfᵣes⟶
-          with `++ˢ-⟶-cases (`injₗ _ `∷ᵉ `case-`of _ `/ _) es efₗfᵣes⟶
-        ... | `+χ-step {B = B} {e = `injₗ e} {fₗ} {fᵣ} {ee′} {es′}
+        go {fₗ = fₗ} {es = es} (acc esrec) (acc erec) (acc fᵣesrec) (acc ⟦e⟧fₗesrec) efₗfᵣes⟶
+          with `++ˢ-⟶-cases _ es efₗfᵣes⟶
+        ... | `+χ-step {B = B} {e = `injₗ e} {fₗ} {ee = ee′} {es′}
             rewrite cong ((ExE _ _ _ → Ex _ _) ∋ ⟦ !ˢ e ⟧ᵛ fₗ `∷ᵉ_)
-                      (sym
-                        (trans
-                          (SubAppExtCompositionalSub.forExE (!ˢ e) Wkᵛ ee′)
-                          (trans
-                            (ExtLiftSubApp.forExE Idᵛ ee′)
-                            (ExtIdNoOpSubˡ.forExE ee′))))                    = acc (go es′ (esrec ℕ.≤-refl) (acc erec) (acc fᵣesrec) (acc ⟦e⟧fₗesrec))
+                      (sym (forExE-!ˢ-forExE-Wkᵛ≡id e ee′))                                   = acc (go {es = es′} (esrec ℕ.≤-refl) (acc erec) (acc fᵣesrec) (acc ⟦e⟧fₗesrec))
         ... | es-step _ (≤‴-reflexive eq) es⟶
-          rewrite sym eq                                                     = acc (go _ (acc esrec) (acc erec) (fᵣesrec (⟦-⟧ᵉ-⟶ˢ es⟶ Wkᵛ _)) (⟦e⟧fₗesrec [ simplify-⟶ˢ es⟶ _ ]))
-        ... | es-step _ (≤‴-step <es)     es⟶                                = acc (go _ (esrec (ℕ.≤‴⇒≤ <es)) (acc erec) (fᵣesrec (⟦-⟧ᵉ-⟶ˢ es⟶ Wkᵛ _)) (⟦e⟧fₗesrec [ simplify-⟶ˢ es⟶ _ ]))
-        ... | e-step `+βₗ                                                    = TC.accessible⁻ _⟵_ (acc ⟦e⟧fₗesrec)
-        ... | e-step (        ?`∷ᵉ `case-`of fₗ⟶ `/?)                        = acc (go _ (acc esrec) (acc erec) (acc fᵣesrec) (⟦e⟧fₗesrec [ (⟦ !ᵛ _ ⟧ᵛ⟶ fₗ⟶) `++ˢ⟶ es ]))
-        ... | e-step (        ?`∷ᵉ (`case-`of?`/ fᵣ⟶))                       = acc (go _ (acc esrec) (acc erec) (fᵣesrec (fᵣ⟶ `++ˢ⟶ ⟦ Wkᵛ ⟧ᵛ* es)) (acc ⟦e⟧fₗesrec))
-        ... | e-step {e = `injₗ _ `∷ᵉ `case-`of fₗ `/ _} (`injₗ e⟶ `∷ᵉ?)
+          rewrite sym eq                                                                      = acc (go (acc esrec) (acc erec) (fᵣesrec (es⟶ .get Wkᵛ _)) (⟦e⟧fₗesrec [ simplify-⟶ˢ es⟶ _ ]))
+        ... | es-step _ (≤‴-step <es)     es⟶                                                 = acc (go (esrec (ℕ.≤‴⇒≤ <es)) (acc erec) (fᵣesrec (es⟶ .get Wkᵛ _)) (⟦e⟧fₗesrec [ simplify-⟶ˢ es⟶ _ ]))
+        ... | e-step `+βₗ                                                                     = TC.accessible⁻ _⟵_ (acc ⟦e⟧fₗesrec)
+        ... | e-step (        ?`∷ᵉ `case-`of fₗ⟶ `/?)                                         = acc (go (acc esrec) (acc erec) (acc fᵣesrec) (⟦e⟧fₗesrec [ (⟦ !ᵛ _ ⟧ᵛ⟶ fₗ⟶) `++ˢ⟶ es ]))
+        ... | e-step (        ?`∷ᵉ (`case-`of?`/ fᵣ⟶))                                        = acc (go (acc esrec) (acc erec) (fᵣesrec (fᵣ⟶ `++ˢ⟶ ⟦ Wkᵛ ⟧ᵛ* es)) (acc ⟦e⟧fₗesrec))
+        ... | e-step (`injₗ e⟶ `∷ᵉ?)
             with ⟶*-cases (⟦!ᵛ⟶ e⟶ ⟧ˣ fₗ)
         ...    | inj₁ eq″
-              rewrite eq″                                                    = acc (go _ (acc esrec) (erec e⟶) (acc fᵣesrec) (acc ⟦e⟧fₗesrec))
-        ...    | inj₂ ⟦e⟧fₗ⟶+                                                = acc (go _ (acc esrec) (erec e⟶) (acc fᵣesrec) (⟦e⟧fₗesrec (TC.equivalent .to (TC.map (_`++ˢ⟶ es) (TC.equivalent .from ⟦e⟧fₗ⟶+)))))
+              rewrite eq″                                                                     = acc (go (acc esrec) (erec e⟶) (acc fᵣesrec) (acc ⟦e⟧fₗesrec))
+        ...    | inj₂ ⟦e⟧fₗ⟶+                                                                 = acc (go (acc esrec) (erec e⟶) (acc fᵣesrec) (⟦e⟧fₗesrec (TC.equivalent .to (TC.map (_`++ˢ⟶ es) (TC.equivalent .from ⟦e⟧fₗ⟶+)))))
 
     ∈sn-weak-head-expansion`+ᵣ : ∀ {e : Ex Γ B} {fₗ : Ex (A ∷ Γ) C} {fᵣ : Ex (B ∷ Γ) C} (es : ExEs Γ C D) →
                                  e ∈sn →
                                  fₗ `++ˢ ⟦ Wkᵛ ⟧ᵛ* es ∈sn →
                                  ⟦ !ˢ e ⟧ᵛ fᵣ `++ˢ es ∈sn →
                                  `injᵣ e `∷ᵉ `case-`of fₗ `/ fᵣ `++ˢ es ∈sn
-    ∈sn-weak-head-expansion`+ᵣ = λ es esn fₗessn ⟦e⟧fᵣessn → acc (go es (<-wellFounded _) esn fₗessn (TC.accessible _⟵_ ⟦e⟧fᵣessn))
+    ∈sn-weak-head-expansion`+ᵣ = λ es esn fₗessn ⟦e⟧fᵣessn → acc (go {es = es} (<-wellFounded _) esn fₗessn (TC.accessible _⟵_ ⟦e⟧fᵣessn))
       where
         open Function.Equivalence
         module TC = Relation.Binary.Construct.Closure.Transitive
 
-        go : ∀ {e : Ex Γ B} {fₗ : Ex (A ∷ Γ) C} {fᵣ : Ex (B ∷ Γ) C} (es : ExEs Γ C D) →
+        go : ∀ {e : Ex Γ B} {fₗ : Ex (A ∷ Γ) C} {fᵣ : Ex (B ∷ Γ) C} {es : ExEs Γ C D} →
              Acc _<_ (lengthˢ es) →
              e ∈sn →
              fₗ `++ˢ ⟦ Wkᵛ ⟧ᵛ* es ∈sn →
              ⟦ !ˢ e ⟧ᵛ fᵣ `++ˢ es ∈sn+ →
              WfRec _⟵_ _∈sn (`injᵣ e `∷ᵉ `case-`of fₗ `/ fᵣ `++ˢ es)
-        go es (acc esrec) (acc erec) (acc fₗesrec) (acc ⟦e⟧fᵣesrec) efₗfₗes⟶
-          with `++ˢ-⟶-cases (`injᵣ _ `∷ᵉ `case-`of _ `/ _) es efₗfₗes⟶
-        ... | `+χ-step {B = B} {e = `injᵣ e} {fₗ} {fᵣ} {ee′} {es′}
+        go {fᵣ = fᵣ} {es} (acc esrec) (acc erec) (acc fₗesrec) (acc ⟦e⟧fᵣesrec) efₗfₗes⟶
+          with `++ˢ-⟶-cases _ es efₗfₗes⟶
+        ... | `+χ-step {B = B} {e = `injᵣ e} {ee = ee′} {es′}
             rewrite cong ((ExE _ _ _ → Ex _ _) ∋ ⟦ !ˢ e ⟧ᵛ fᵣ `∷ᵉ_)
-                      (sym
-                        (trans
-                          (SubAppExtCompositionalSub.forExE (!ˢ e) Wkᵛ ee′)
-                          (trans
-                            (ExtLiftSubApp.forExE Idᵛ ee′)
-                            (ExtIdNoOpSubˡ.forExE ee′))))                    = acc (go es′ (esrec ℕ.≤-refl) (acc erec) (acc fₗesrec) (acc ⟦e⟧fᵣesrec))
+                      (sym (forExE-!ˢ-forExE-Wkᵛ≡id e ee′))                              = acc (go {es = es′} (esrec ℕ.≤-refl) (acc erec) (acc fₗesrec) (acc ⟦e⟧fᵣesrec))
         ... | es-step _ (≤‴-reflexive eq) es⟶
-          rewrite sym eq                                                     = acc (go _ (acc esrec) (acc erec) (fₗesrec (⟦-⟧ᵉ-⟶ˢ es⟶ Wkᵛ _)) (⟦e⟧fᵣesrec [ simplify-⟶ˢ es⟶ _ ]))
-        ... | es-step _ (≤‴-step <es)     es⟶                                = acc (go _ (esrec (ℕ.≤‴⇒≤ <es)) (acc erec) (fₗesrec (⟦-⟧ᵉ-⟶ˢ es⟶ Wkᵛ _)) (⟦e⟧fᵣesrec [ simplify-⟶ˢ es⟶ _ ]))
-        ... | e-step `+βᵣ                                                    = TC.accessible⁻ _⟵_ (acc ⟦e⟧fᵣesrec)
-        ... | e-step (        ?`∷ᵉ `case-`of fₗ⟶ `/?)                        = acc (go _ (acc esrec) (acc erec) (fₗesrec (fₗ⟶ `++ˢ⟶ ⟦ Wkᵛ ⟧ᵛ* es)) (acc ⟦e⟧fᵣesrec))
-        ... | e-step (        ?`∷ᵉ (`case-`of?`/ fᵣ⟶))                       = acc (go _ (acc esrec) (acc erec) (acc fₗesrec) (⟦e⟧fᵣesrec [ (⟦ !ᵛ _ ⟧ᵛ⟶ fᵣ⟶) `++ˢ⟶ es ]))
-        ... | e-step {e = `injᵣ _ `∷ᵉ `case-`of _ `/ fᵣ} (`injᵣ e⟶ `∷ᵉ?)
+          rewrite sym eq                                                                 = acc (go (acc esrec) (acc erec) (fₗesrec (es⟶ .get Wkᵛ _)) (⟦e⟧fᵣesrec [ simplify-⟶ˢ es⟶ _ ]))
+        ... | es-step _ (≤‴-step <es)     es⟶                                            = acc (go (esrec (ℕ.≤‴⇒≤ <es)) (acc erec) (fₗesrec (es⟶ .get Wkᵛ _)) (⟦e⟧fᵣesrec [ simplify-⟶ˢ es⟶ _ ]))
+        ... | e-step `+βᵣ                                                                = TC.accessible⁻ _⟵_ (acc ⟦e⟧fᵣesrec)
+        ... | e-step (        ?`∷ᵉ `case-`of fₗ⟶ `/?)                                    = acc (go (acc esrec) (acc erec) (fₗesrec (fₗ⟶ `++ˢ⟶ ⟦ Wkᵛ ⟧ᵛ* es)) (acc ⟦e⟧fᵣesrec))
+        ... | e-step (        ?`∷ᵉ (`case-`of?`/ fᵣ⟶))                                   = acc (go (acc esrec) (acc erec) (acc fₗesrec) (⟦e⟧fᵣesrec [ (⟦ !ᵛ _ ⟧ᵛ⟶ fᵣ⟶) `++ˢ⟶ es ]))
+        ... | e-step (`injᵣ e⟶ `∷ᵉ?)
             with ⟶*-cases (⟦!ᵛ⟶ e⟶ ⟧ˣ fᵣ)
         ...    | inj₁ eq″
-              rewrite eq″                                                    = acc (go _ (acc esrec) (erec e⟶) (acc fₗesrec) (acc ⟦e⟧fᵣesrec))
-        ...    | inj₂ ⟦e⟧fᵣ⟶+                                                = acc (go _ (acc esrec) (erec e⟶) (acc fₗesrec) (⟦e⟧fᵣesrec (TC.equivalent .to (TC.map (_`++ˢ⟶ es) (TC.equivalent .from ⟦e⟧fᵣ⟶+)))))
+              rewrite eq″                                                                = acc (go (acc esrec) (erec e⟶) (acc fₗesrec) (acc ⟦e⟧fᵣesrec))
+        ...    | inj₂ ⟦e⟧fᵣ⟶+                                                            = acc (go (acc esrec) (erec e⟶) (acc fₗesrec) (⟦e⟧fᵣesrec (TC.equivalent .to (TC.map (_`++ˢ⟶ es) (TC.equivalent .from ⟦e⟧fᵣ⟶+)))))
 
     ∈sn-commuting-expansion : ∀ {e : Ex Γ (A `+ B)} {fₗ : Ex (A ∷ Γ) C} {fᵣ : Ex (B ∷ Γ) C}
                                 (ee : ExE Γ C D) (es : ExEs Γ D E) →
@@ -469,27 +451,27 @@ module AccessibilitySN where
                                 `++ˢ es ∈sn →
                               -----------------------------------------------------------------
                               e `∷ᵉ `case-`of fₗ `/ fᵣ `∷ᵉ ee `++ˢ es ∈sn
-    ∈sn-commuting-expansion = λ ee es ene$ efₗeefᵣeesn → acc (go ee es ene$ (<-wellFounded _) (TransClosure.accessible _⟵_ efₗeefᵣeesn))
+    ∈sn-commuting-expansion = λ ee es ene$ efₗeefᵣeesn → acc (go {es = es} ene$ (<-wellFounded _) (TransClosure.accessible _⟵_ efₗeefᵣeesn))
       where
         open Function.Equivalence
         module TC = Relation.Binary.Construct.Closure.Transitive
 
-        go : ∀ {e : Ex Γ (A `+ B)} {fₗ : Ex (A ∷ Γ) C} {fᵣ : Ex (B ∷ Γ) C} (ee : ExE Γ C D) (es : ExEs Γ D E) →
+        go : ∀ {e : Ex Γ (A `+ B)} {fₗ : Ex (A ∷ Γ) C} {fᵣ : Ex (B ∷ Γ) C} {ee : ExE Γ C D} {es : ExEs Γ D E} →
              e ∈ne$ →
              Acc _<_ (lengthˢ es) →
              e `∷ᵉ `case-`of (fₗ `∷ᵉ RawAppSub.forExE Wkᵛ ee) `/ (fᵣ `∷ᵉ RawAppSub.forExE Wkᵛ ee) `++ˢ es ∈sn+ →
              WfRec _⟵_ _∈sn (e `∷ᵉ `case-`of fₗ `/ fᵣ `∷ᵉ ee `++ˢ es)
-        go ee es ene$ (acc esrec) (acc efₗeefᵣeerec) efₗfᵣeees⟶
-          with `++ˢ-⟶-cases (_ `∷ᵉ `case-`of _ `/ _ `∷ᵉ _) es efₗfᵣeees⟶
-        ...  | e-step ((e⟶ `∷ᵉ?)                   `∷ᵉ?)           = acc (go ee es (∈ne$-closed ene$ e⟶) (acc esrec) (efₗeefᵣeerec [ (e⟶ `∷ᵉ?) `++ˢ⟶ es ]))
-        ...  | e-step ((  ?`∷ᵉ `case-`of fₗ⟶ `/?)  `∷ᵉ?)           = acc (go ee es ene$ (acc esrec) (efₗeefᵣeerec [ (?`∷ᵉ `case-`of (fₗ⟶ `∷ᵉ?) `/?) `++ˢ⟶ es ]))
-        ...  | e-step ((  ?`∷ᵉ (`case-`of?`/ fᵣ⟶)) `∷ᵉ?)           = acc (go ee es ene$ (acc esrec) (efₗeefᵣeerec [ (?`∷ᵉ `case-`of?`/ (fᵣ⟶ `∷ᵉ?)) `++ˢ⟶ es ]))
-        ...  | e-step (                           ?`∷ᵉ ee⟶)        = acc (go _ es ene$ (acc esrec) (efₗeefᵣeerec (((?`∷ᵉ `case-`of?`/ (?`∷ᵉ (⟦_⟧ᵉ⟶_.forExE Wkᵛ ee⟶))) `++ˢ⟶ es) ∷ [ (?`∷ᵉ `case-`of ?`∷ᵉ (⟦_⟧ᵉ⟶_.forExE Wkᵛ ee⟶) `/?) `++ˢ⟶ es ])))
-        ...  | e-step `+χ                                          = TC.accessible⁻ _⟵_ (acc efₗeefᵣeerec)
+        go {es = es} ene$ (acc esrec) (acc efₗeefᵣeerec) efₗfᵣeees⟶
+          with `++ˢ-⟶-cases _ es efₗfᵣeees⟶
+        ...  | e-step ((e⟶ `∷ᵉ?)                   `∷ᵉ?)            = acc (go (∈ne$-closed ene$ e⟶) (acc esrec) (efₗeefᵣeerec [ (e⟶ `∷ᵉ?) `++ˢ⟶ es ]))
+        ...  | e-step ((  ?`∷ᵉ `case-`of fₗ⟶ `/?)  `∷ᵉ?)            = acc (go ene$ (acc esrec) (efₗeefᵣeerec [ (?`∷ᵉ `case-`of (fₗ⟶ `∷ᵉ?) `/?) `++ˢ⟶ es ]))
+        ...  | e-step ((  ?`∷ᵉ (`case-`of?`/ fᵣ⟶)) `∷ᵉ?)            = acc (go ene$ (acc esrec) (efₗeefᵣeerec [ (?`∷ᵉ `case-`of?`/ (fᵣ⟶ `∷ᵉ?)) `++ˢ⟶ es ]))
+        ...  | e-step (                           ?`∷ᵉ ee⟶)         = acc (go ene$ (acc esrec) (efₗeefᵣeerec (((?`∷ᵉ `case-`of?`/ (?`∷ᵉ (⟦_⟧ᵉ⟶_.forExE Wkᵛ ee⟶))) `++ˢ⟶ es) ∷ [ (?`∷ᵉ `case-`of ?`∷ᵉ (⟦_⟧ᵉ⟶_.forExE Wkᵛ ee⟶) `/?) `++ˢ⟶ es ])))
+        ...  | e-step `+χ                                           = TC.accessible⁻ _⟵_ (acc efₗeefᵣeerec)
         ...  | es-step es′ (≤‴-reflexive eq) es⟶
-            rewrite sym eq                                         = acc (go ee _ ene$ (acc esrec) (efₗeefᵣeerec [ simplify-⟶ˢ es⟶ _ ]))
-        ...  | es-step es′ (≤‴-step <es)     es⟶                   = acc (go ee _ ene$ (esrec (ℕ.≤‴⇒≤ <es)) (efₗeefᵣeerec [ simplify-⟶ˢ es⟶ _ ]))
-        ...  | `+χ-step {A = C} {B = D} {fₗ = gₗ} {gᵣ} {ee′} {es′} = acc (go _ _ ene$ (esrec ℕ.≤-refl) (efₗeefᵣeerec (((?`∷ᵉ `case-`of?`/ `+χ′) `++ˢ⟶ es′) ∷ (?`∷ᵉ `case-`of `+χ′ `/?) `++ˢ⟶ es′ ∷ [ `+χ `++ˢ⟶ es′ ])))
+            rewrite sym eq                                          = acc (go ene$ (acc esrec) (efₗeefᵣeerec [ simplify-⟶ˢ es⟶ _ ]))
+        ...  | es-step es′ (≤‴-step <es)     es⟶                    = acc (go ene$ (esrec (ℕ.≤‴⇒≤ <es)) (efₗeefᵣeerec [ simplify-⟶ˢ es⟶ _ ]))
+        ...  | `+χ-step {A = C} {B = D} {fₗ = gₗ} {gᵣ} {ee′} {es′}  = acc (go ene$ (esrec ℕ.≤-refl) (efₗeefᵣeerec (((?`∷ᵉ `case-`of?`/ `+χ′) `++ˢ⟶ es′) ∷ (?`∷ᵉ `case-`of `+χ′ `/?) `++ˢ⟶ es′ ∷ [ `+χ `++ˢ⟶ es′ ])))
           where
             `+χ′ : ∀ {F} {f : Ex (F ∷ _) _} →
                    f `++ˢ ⟦ Wkᵛ ⟧ᵛ* (`case-`of gₗ `/ gᵣ ∷ ee′ ∷ [])
@@ -686,7 +668,7 @@ module InductiveSN where
                Σ[ eSN′ ∈ e ∈SN⟦ ee ∷ es ⟧ ] size⟦ _ ∈SN⟦ _ ⟧⟧ eSN′ ≤ size⟦ _ ∈SN⟦ _ ⟧⟧ eSN
     `∷ᵉ?-inv ((eSNe$ `∷ᵉ _) `$⁻ appSN)       = eSNe$ `$⁻ `∷ᵉ?-inv appSN .proj₁ , `∷ᵉ?-inv appSN .proj₂
     `∷ᵉ?-inv (`case⁻ eSNe$ `∷ᵉ _ `of caseSN) = eSNe$ `$⁻ `∷ᵉ?-inv caseSN .proj₁ , `∷ᵉ?-inv caseSN .proj₂
-    `∷ᵉ?-inv (eSN `∷ᵉ?)                      = eSN , ℕ.m≤n+m _ _
+    `∷ᵉ?-inv (eSN `∷ᵉ?)                      = eSN , ℕ.n≤1+n _
     `∷ᵉ?-inv (`case eSNe$ `of fₗSN `/ fᵣSN)  = `case⁻ eSNe$ `of (`case eSNe$ `of fₗSN `/ fᵣSN) , ℕ.≤-refl
     `∷ᵉ?-inv (`Ne$ (eSNe$ `∷ᵉ fSN) esSN)     = `Ne$ eSNe$ (fSN ∷ esSN) , z≤n
     `∷ᵉ?-inv (`+χ (eSNe$ `∷ᵉ fSN) eSN)       = eSNe$ `$⁻ `+χ (eSNe$ `∷ᵉ fSN) eSN , ℕ.≤-refl
@@ -789,7 +771,7 @@ module InductiveSN where
                                e ∈SNe$ →
                                es₀ ∈SN$ˢ →
                                e ∈SN⟦ es₀ `++ `+χ-result* fₗ fᵣ es₁ ∷ [] ⟧ →
-                               ------------------------------------------
+                               ----------------------------------------------
                                e ∈SN⟦ es₀ `++ `case-`of fₗ `/ fᵣ ∷ es₁ ⟧
     ∈SN-commuting-expansion* {es₁ = []}        eSNe$ es₀SN eSN = eSN
     ∈SN-commuting-expansion* {es₁ = ee₁ ∷ es₁} eSNe$ es₀SN eSN = ∈SN-commuting-expansion eSNe$ es₀SN (∈SN-commuting-expansion* eSNe$ es₀SN eSN)
@@ -813,73 +795,76 @@ module InductiveSN where
                    n ≡ size⟦ _ ∈SN⟦ _ ⟧⟧ eSN →
                    ------------------------------------------------------
                    e ∈SN⟦ es₀ `++ `case-`of fₗ `/ fᵣ ∷ ee₁ ∷ es₁ ⟧
-          helper                 []                                     (`case⁻ eSNe$ `of caseSN)               eq  = `+χ eSNe$ (`case⁻ eSNe$ `of caseSN)
-          helper                 []                         {ee₁ = ee₁} (`+βₗ {e = e} eSN ⟦e⟧fₗSN fᵣSN)         eq
-            rewrite forExE-!ˢ-forExE-Wkᵛ≡id e ee₁                                                                   = `+βₗ eSN (`∷ᵉ?-inv ⟦e⟧fₗSN .proj₁) (`∷ᵉ?-inv fᵣSN .proj₁)
-          helper                 []                         {ee₁ = ee₁} (`+βᵣ {e = e} eSN ⟦e⟧fᵣSN fₗSN)         eq
-            rewrite forExE-!ˢ-forExE-Wkᵛ≡id e ee₁                                                                   = `+βᵣ eSN (`∷ᵉ?-inv ⟦e⟧fᵣSN .proj₁) (`∷ᵉ?-inv fₗSN .proj₁)
-          helper                 []                                     (`+χ eSNe$ eSN)                         eq  = `+χ eSNe$ (`+χ eSNe$ eSN)
-          helper {B = B} {C = C} (ee₀ ∷ [])                 {ee₁ = ee₁} (`+βₗ {B = H} eSN ⟦e⟧gₗSN gᵣSN)         eq
-            rewrite forExE-qᵉᵉ-forExE-Wkᵛ≡forExE-Wkᵛ-forExE {A = B} (Wkᵛ {A = H}) ee₁
-                  | forExE-qᵉᵉ-forExE-Wkᵛ≡forExE-Wkᵛ-forExE {A = C} (Wkᵛ {A = H}) ee₁                               = `+βₗ eSN
-                                                                                                                      (∈SN-commuting-expansion⁺-gen _
-                                                                                                                        (nrec (subst (_ <_) (sym eq) (s≤s (ℕ.≤-trans (ℕ.m≤n+m _ (size⟦ _ ∈SN⟦ _ ⟧⟧ eSN)) (ℕ.m≤m+n _ _)))))
-                                                                                                                        [] ⟦e⟧gₗSN refl)
-                                                                                                                      (∈SN-commuting-expansion⁺-gen _
-                                                                                                                        (nrec (subst (_ <_) (sym eq) (s≤s (ℕ.m≤n+m _ _))))
-                                                                                                                        [] gᵣSN refl)
-          helper {B = B} {C = C} (ee₀ ∷ [])                 {ee₁ = ee₁} (`+βᵣ {A = G} eSN ⟦e⟧gᵣSN gₗSN)        eq
-            rewrite forExE-qᵉᵉ-forExE-Wkᵛ≡forExE-Wkᵛ-forExE {A = B} (Wkᵛ {A = G}) ee₁
-                  | forExE-qᵉᵉ-forExE-Wkᵛ≡forExE-Wkᵛ-forExE {A = C} (Wkᵛ {A = G}) ee₁                               = `+βᵣ eSN
-                                                                                                                      (∈SN-commuting-expansion⁺-gen _
-                                                                                                                        (nrec (subst (_ <_) (sym eq) (s≤s (ℕ.≤-trans (ℕ.m≤n+m _ (size⟦ _ ∈SN⟦ _ ⟧⟧ eSN)) (ℕ.m≤m+n _ _)))))
-                                                                                                                        [] ⟦e⟧gᵣSN refl)
-                                                                                                                      (∈SN-commuting-expansion⁺-gen _
-                                                                                                                        (nrec (subst (_ <_) (sym eq) (s≤s (ℕ.m≤n+m _ _))))
-                                                                                                                        [] gₗSN refl)
-          helper {B = B} {C = C} (ee₀ ∷ [])                 {ee₁ = ee₁} (`+χ {A = G} {H} {es = es₁} eSNe$ eSN) eq
+          helper             []                                     (`case⁻ eSNe$ `of caseSN)               eq  = `+χ eSNe$ (`case⁻ eSNe$ `of caseSN)
+          helper             []                         {ee₁ = ee₁} (`+βₗ {e = e} eSN ⟦e⟧fₗSN fᵣSN)         eq
+            rewrite forExE-!ˢ-forExE-Wkᵛ≡id e ee₁                                                               = `+βₗ eSN (`∷ᵉ?-inv ⟦e⟧fₗSN .proj₁) (`∷ᵉ?-inv fᵣSN .proj₁)
+          helper             []                         {ee₁ = ee₁} (`+βᵣ {e = e} eSN ⟦e⟧fᵣSN fₗSN)         eq
+            rewrite forExE-!ˢ-forExE-Wkᵛ≡id e ee₁                                                               = `+βᵣ eSN (`∷ᵉ?-inv ⟦e⟧fᵣSN .proj₁) (`∷ᵉ?-inv fₗSN .proj₁)
+          helper             []                                     (`+χ eSNe$ eSN)                         eq  = `+χ eSNe$ (`+χ eSNe$ eSN)
+          helper {B = B} {C} (ee₀ ∷ [])                 {ee₁ = ee₁} (`+βₗ {B = H} eSN ⟦e⟧gₗSN gᵣSN)         eq
+            rewrite eq
+                  | forExE-qᵉᵉ-forExE-Wkᵛ≡forExE-Wkᵛ-forExE {A = B} (Wkᵛ {A = H}) ee₁
+                  | forExE-qᵉᵉ-forExE-Wkᵛ≡forExE-Wkᵛ-forExE {A = C} (Wkᵛ {A = H}) ee₁                           = `+βₗ eSN
+                                                                                                                  (∈SN-commuting-expansion⁺-gen _
+                                                                                                                    (nrec (s≤s (ℕ.≤-trans (ℕ.m≤n+m _ (size⟦ _ ∈SN⟦ _ ⟧⟧ eSN)) (ℕ.m≤m+n _ _))))
+                                                                                                                    [] ⟦e⟧gₗSN refl)
+                                                                                                                  (∈SN-commuting-expansion⁺-gen _
+                                                                                                                    (nrec (s≤s (ℕ.m≤n+m _ _)))
+                                                                                                                    [] gᵣSN refl)
+          helper {B = B} {C} (ee₀ ∷ [])                 {ee₁ = ee₁} (`+βᵣ {A = G} eSN ⟦e⟧gᵣSN gₗSN)        eq
+            rewrite eq
+                  | forExE-qᵉᵉ-forExE-Wkᵛ≡forExE-Wkᵛ-forExE {A = B} (Wkᵛ {A = G}) ee₁
+                  | forExE-qᵉᵉ-forExE-Wkᵛ≡forExE-Wkᵛ-forExE {A = C} (Wkᵛ {A = G}) ee₁                           = `+βᵣ eSN
+                                                                                                                  (∈SN-commuting-expansion⁺-gen _
+                                                                                                                    (nrec (s≤s (ℕ.≤-trans (ℕ.m≤n+m _ (size⟦ _ ∈SN⟦ _ ⟧⟧ eSN)) (ℕ.m≤m+n _ _))))
+                                                                                                                    [] ⟦e⟧gᵣSN refl)
+                                                                                                                  (∈SN-commuting-expansion⁺-gen _
+                                                                                                                    (nrec (s≤s (ℕ.m≤n+m _ _)))
+                                                                                                                    [] gₗSN refl)
+          helper {B = B} {C} (ee₀ ∷ [])                 {ee₁ = ee₁} (`+χ {A = G} {H} {es = es₁} eSNe$ eSN) eq
             with eSN′ , ≤eSN ← `+χ*-inv eSNe$ [] eSN
               with gₗfₗfᵣSN , gᵣfₗfᵣSN , gₗfₗfᵣSN< , gᵣfₗfᵣSN< ← ∈SNe$-`case-inv eSNe$ [] eSN′
-                rewrite forExE-qᵉᵉ-forExE-Wkᵛ≡forExE-Wkᵛ-forExE {A = B} (Wkᵛ {A = G}) ee₁
+                rewrite eq
+                      | forExE-qᵉᵉ-forExE-Wkᵛ≡forExE-Wkᵛ-forExE {A = B} (Wkᵛ {A = G}) ee₁
                       | forExE-qᵉᵉ-forExE-Wkᵛ≡forExE-Wkᵛ-forExE {A = B} (Wkᵛ {A = H}) ee₁
                       | forExE-qᵉᵉ-forExE-Wkᵛ≡forExE-Wkᵛ-forExE {A = C} (Wkᵛ {A = G}) ee₁
                       | forExE-qᵉᵉ-forExE-Wkᵛ≡forExE-Wkᵛ-forExE {A = C} (Wkᵛ {A = H}) ee₁
                 with gₗfₗfᵣSN′ , ≤gₗfₗfᵣSN ← `∷ᵉ?*-inv′ (_ ∷ ⟦ Wkᵛ ⟧ᵛ* es₁) gₗfₗfᵣSN
-                   | gᵣfₗfᵣSN′ , ≤gᵣfₗfᵣSN ← `∷ᵉ?*-inv′ (_ ∷ ⟦ Wkᵛ ⟧ᵛ* es₁) gᵣfₗfᵣSN                                = ∈SN-commuting-expansion* eSNe$ []
-                                                                                                                      (`case⁻ eSNe$ `of
-                                                                                                                        (`case eSNe$ `of `∷ᵉ?*′ _ (∈SN-commuting-expansion⁺-gen _
-                                                                                                                                                    (nrec (subst (_ <_) (sym eq) (ℕ.≤-<-trans ≤gₗfₗfᵣSN (ℕ.<-trans gₗfₗfᵣSN< (s≤s ≤eSN)))))
-                                                                                                                                                    [] gₗfₗfᵣSN′ refl)
-                                                                                                                                      `/ `∷ᵉ?*′ _ (∈SN-commuting-expansion⁺-gen _
-                                                                                                                                                    (nrec (subst (_ <_) (sym eq) (ℕ.≤-<-trans ≤gᵣfₗfᵣSN (ℕ.<-trans gᵣfₗfᵣSN< (s≤s ≤eSN)))))
-                                                                                                                                                    [] gᵣfₗfᵣSN′ refl)))
-          helper                 (ee₀ ∷ ee₀′ ∷ es₀)                     (`+χ eSNe$ eSN)                        refl = `+χ eSNe$ (∈SN-commuting-expansion⁺-gen _ (nrec ℕ.≤-refl) (_ ∷ es₀) eSN refl)
-          helper                 es₀                                    (eSN `∷ᵉ?)                             refl = ∈SN-commuting-expansion⁺-gen _ (nrec ℕ.≤-refl) (_ ∷ es₀) eSN refl `∷ᵉ?
-          helper                 es₀                                    (`Ne$ eSNe$ caseSN)                         with () ← `case-∈SN$ˢ-impossible _ caseSN
-          helper                 (ee₀ ∷ es₀)                            (eSNe$ `$⁻ appSN)                      refl = eSNe$ `$⁻ helper es₀ appSN refl
-          helper                 (ee₀ ∷ es₀)                            (`→β gSN ⟦g⟧eSN)                       refl = `→β gSN (∈SN-commuting-expansion⁺-gen _ (nrec (s≤s (ℕ.m≤n+m _ _))) es₀ ⟦g⟧eSN refl)
-          helper {B = B} {C = C} (ee₀ ∷ es₀) {fₗ = fₗ} {fᵣ} {ee₁} {es₁} (`+βₗ {B = H} eSN ⟦e⟧gₗSN gᵣSN)        eq
-            rewrite `++-⟦-⟧ᵛ-commute (Wkᵛ {A = H}) es₀ (`+χ-result fₗ fᵣ ee₁ ∷ es₁)
+                   | gᵣfₗfᵣSN′ , ≤gᵣfₗfᵣSN ← `∷ᵉ?*-inv′ (_ ∷ ⟦ Wkᵛ ⟧ᵛ* es₁) gᵣfₗfᵣSN                            = ∈SN-commuting-expansion* eSNe$ []
+                                                                                                                  (`case⁻ eSNe$ `of
+                                                                                                                    (`case eSNe$ `of `∷ᵉ?*′ _ (∈SN-commuting-expansion⁺-gen _
+                                                                                                                                                (nrec (ℕ.≤-<-trans ≤gₗfₗfᵣSN (ℕ.<-trans gₗfₗfᵣSN< (s≤s ≤eSN))))
+                                                                                                                                                [] gₗfₗfᵣSN′ refl)
+                                                                                                                                  `/ `∷ᵉ?*′ _ (∈SN-commuting-expansion⁺-gen _
+                                                                                                                                                (nrec (ℕ.≤-<-trans ≤gᵣfₗfᵣSN (ℕ.<-trans gᵣfₗfᵣSN< (s≤s ≤eSN))))
+                                                                                                                                                [] gᵣfₗfᵣSN′ refl)))
+          helper             (ee₀ ∷ ee₀′ ∷ es₀)                     (`+χ eSNe$ eSN)                        refl = `+χ eSNe$ (∈SN-commuting-expansion⁺-gen _ (nrec ℕ.≤-refl) (_ ∷ es₀) eSN refl)
+          helper             es₀                                    (eSN `∷ᵉ?)                             refl = ∈SN-commuting-expansion⁺-gen _ (nrec ℕ.≤-refl) (_ ∷ es₀) eSN refl `∷ᵉ?
+          helper             es₀                                    (`Ne$ eSNe$ caseSN)                         with () ← `case-∈SN$ˢ-impossible _ caseSN
+          helper             (ee₀ ∷ es₀)                            (eSNe$ `$⁻ appSN)                      refl = eSNe$ `$⁻ helper es₀ appSN refl
+          helper             (ee₀ ∷ es₀)                            (`→β gSN ⟦g⟧eSN)                       refl = `→β gSN (∈SN-commuting-expansion⁺-gen _ (nrec (s≤s (ℕ.m≤n+m _ _))) es₀ ⟦g⟧eSN refl)
+          helper {B = B} {C} (ee₀ ∷ es₀) {fₗ = fₗ} {fᵣ} {ee₁} {es₁} (`+βₗ {B = H} eSN ⟦e⟧gₗSN gᵣSN)        eq
+            rewrite eq
+                  | `++-⟦-⟧ᵛ-commute (Wkᵛ {A = H}) es₀ (`+χ-result fₗ fᵣ ee₁ ∷ es₁)
                   | forExE-qᵉᵉ-forExE-Wkᵛ≡forExE-Wkᵛ-forExE {A = B} (Wkᵛ {A = H}) ee₁
-                  | forExE-qᵉᵉ-forExE-Wkᵛ≡forExE-Wkᵛ-forExE {A = C} (Wkᵛ {A = H}) ee₁                               = `+βₗ eSN
-                                                                                                                      (∈SN-commuting-expansion⁺-gen _
-                                                                                                                        (nrec (subst (_ <_) (sym eq) (s≤s (ℕ.≤-trans (ℕ.m≤n+m _ (size⟦ _ ∈SN⟦ _ ⟧⟧ eSN)) (ℕ.m≤m+n _ _)))))
-                                                                                                                        es₀ ⟦e⟧gₗSN refl)
-                                                                                                                      (subst (_ ∈SN⟦_⟧) (sym (`++-⟦-⟧ᵛ-commute Wkᵛ es₀ (`case-`of fₗ `/ fᵣ ∷ ee₁ ∷ es₁)))
-                                                                                                                        (∈SN-commuting-expansion⁺-gen _
-                                                                                                                          (nrec (subst (_ <_) (sym eq) (s≤s (ℕ.m≤n+m _ _))))
-                                                                                                                          (⟦ Wkᵛ ⟧ᵛ* es₀) gᵣSN refl))
-          helper {B = B} {C = C} (ee₀ ∷ es₀) {fₗ = fₗ} {fᵣ} {ee₁} {es₁} (`+βᵣ {A = G} eSN ⟦e⟧gᵣSN gₗSN)        eq
-            rewrite `++-⟦-⟧ᵛ-commute (Wkᵛ {A = G}) es₀ (`+χ-result fₗ fᵣ ee₁ ∷ es₁)
+                  | forExE-qᵉᵉ-forExE-Wkᵛ≡forExE-Wkᵛ-forExE {A = C} (Wkᵛ {A = H}) ee₁
+              with gᵣSN′ ← ∈SN-commuting-expansion⁺-gen _ (nrec (s≤s (ℕ.m≤n+m _ _))) (⟦ Wkᵛ ⟧ᵛ* es₀) gᵣSN refl
+                rewrite sym (`++-⟦-⟧ᵛ-commute (Wkᵛ {A = H}) es₀ (`case-`of fₗ `/ fᵣ ∷ ee₁ ∷ es₁))               = `+βₗ eSN
+                                                                                                                  (∈SN-commuting-expansion⁺-gen _
+                                                                                                                    (nrec (s≤s (ℕ.≤-trans (ℕ.m≤n+m _ (size⟦ _ ∈SN⟦ _ ⟧⟧ eSN)) (ℕ.m≤m+n _ _))))
+                                                                                                                    es₀ ⟦e⟧gₗSN refl)
+                                                                                                                  gᵣSN′
+          helper {B = B} {C} (ee₀ ∷ es₀) {fₗ = fₗ} {fᵣ} {ee₁} {es₁} (`+βᵣ {A = G} eSN ⟦e⟧gᵣSN gₗSN)        eq
+            rewrite eq
+                  | `++-⟦-⟧ᵛ-commute (Wkᵛ {A = G}) es₀ (`+χ-result fₗ fᵣ ee₁ ∷ es₁)
                   | forExE-qᵉᵉ-forExE-Wkᵛ≡forExE-Wkᵛ-forExE {A = B} (Wkᵛ {A = G}) ee₁
-                  | forExE-qᵉᵉ-forExE-Wkᵛ≡forExE-Wkᵛ-forExE {A = C} (Wkᵛ {A = G}) ee₁                               = `+βᵣ eSN
-                                                                                                                      (∈SN-commuting-expansion⁺-gen _
-                                                                                                                        (nrec (subst (_ <_) (sym eq) (s≤s (ℕ.≤-trans (ℕ.m≤n+m _ (size⟦ _ ∈SN⟦ _ ⟧⟧ eSN)) (ℕ.m≤m+n _ _)))))
-                                                                                                                        es₀ ⟦e⟧gᵣSN refl)
-                                                                                                                      (subst (_ ∈SN⟦_⟧) (sym (`++-⟦-⟧ᵛ-commute Wkᵛ es₀ (`case-`of fₗ `/ fᵣ ∷ ee₁ ∷ es₁)))
-                                                                                                                        (∈SN-commuting-expansion⁺-gen _
-                                                                                                                          (nrec (subst (_ <_) (sym eq) (s≤s (ℕ.m≤n+m _ _))))
-                                                                                                                          (⟦ Wkᵛ ⟧ᵛ* es₀) gₗSN refl))
+                  | forExE-qᵉᵉ-forExE-Wkᵛ≡forExE-Wkᵛ-forExE {A = C} (Wkᵛ {A = G}) ee₁
+              with gₗSN′ ← ∈SN-commuting-expansion⁺-gen _ (nrec (s≤s (ℕ.m≤n+m _ _))) (⟦ Wkᵛ ⟧ᵛ* es₀) gₗSN refl
+                rewrite sym (`++-⟦-⟧ᵛ-commute (Wkᵛ {A = G}) es₀ (`case-`of fₗ `/ fᵣ ∷ ee₁ ∷ es₁))               = `+βᵣ eSN
+                                                                                                                  (∈SN-commuting-expansion⁺-gen _
+                                                                                                                    (nrec (s≤s (ℕ.≤-trans (ℕ.m≤n+m _ (size⟦ _ ∈SN⟦ _ ⟧⟧ eSN)) (ℕ.m≤m+n _ _))))
+                                                                                                                    es₀ ⟦e⟧gᵣSN refl)
+                                                                                                                  gₗSN′
 
     ∈SN-commuting-expansion⁺ : ∀ {e : Ex Γ A} (es₀ : ExEs Γ A (B `+ C))
                                  {fₗ : Ex (B ∷ Γ) D} {fᵣ : Ex (C ∷ Γ) D}
