@@ -1,12 +1,12 @@
 {-# OPTIONS --safe #-}
 module Syntax.Church.STLC.WithSum.Alt.Substitution.Base where
 
-open import Agda.Primitive                        using (lzero)
-open import Data.List                             using (_∷_)
-open import Data.List.Membership.Propositional    using (_∈_)
-open import Data.List.Relation.Unary.Any          using (here; there)
-open import Function                              using (flip; id)
-open import Relation.Binary.PropositionalEquality hiding (J)
+open import Agda.Primitive                                        using (lzero)
+open import Data.List                                             using (_∷_)
+open import Data.List.Membership.Propositional                    using (_∈_)
+open import Data.List.Relation.Unary.Any                          using (here; there)
+open import Function                                              using (flip; id)
+open import Relation.Binary.Construct.Closure.ReflexiveTransitive as Star using (ε; _◅_)
 
 open import Syntax.Church.STLC.WithSum.Alt.Base renaming (module Variables to BVariables)
 
@@ -79,5 +79,4 @@ infixr 50 ⟦_⟧ᵛ*_
            ⦃ _ : RawVarSubLift ⦃ varSub ⦄ ⦃ SubVarSub ⦄ ⦄
            ⦃ _ : RawVarSubApp ⦃ ExtVarSub ⦄ ⦃ varSub ⦄ ⦃ varSub ⦄ ⦄ →
          VarSub ⦃ varSub ⦄ Δ Γ → ExEs Γ A B → ExEs Δ A B
-⟦ δ ⟧ᵛ* []        = []
-⟦ δ ⟧ᵛ* (ee ∷ es) = RawAppSub.forExE δ ee ∷ ⟦ δ ⟧ᵛ* es
+⟦_⟧ᵛ*_ δ = Star.map (RawAppSub.forExE δ)

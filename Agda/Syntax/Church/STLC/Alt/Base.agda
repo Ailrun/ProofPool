@@ -1,11 +1,12 @@
 {-# OPTIONS --safe #-}
 module Syntax.Church.STLC.Alt.Base where
 
-open import Agda.Primitive                     using (lzero)
-open import Data.List                          using (_∷_)
-open import Data.List.Membership.Propositional using (_∈_)
-open import Data.Nat                           using (ℕ; zero; suc)
-open import Relation.Binary                    using (REL)
+open import Agda.Primitive                                        using (lzero)
+open import Data.List                                             using (_∷_)
+open import Data.List.Membership.Propositional                    using (_∈_)
+open import Data.Nat                                              using (ℕ; zero; suc)
+open import Relation.Binary                                       using (REL; Rel)
+open import Relation.Binary.Construct.Closure.ReflexiveTransitive using (Star; ε; _◅_)
 
 open import Syntax.Church.STLC.Base renaming (module Variables to BVariables)
 open import Syntax.Church.STLC.Base public using (Tp; `base; _`→_)
@@ -39,30 +40,17 @@ data ExE where
          -----------------
          ExE Γ (A `→ B) B
 
-data ExEs : Ctx → Tp → Tp → Set where
-  []  : ∀ {Γ A} →
-        -----------
-        ExEs Γ A A
-
-  _∷_ : ∀ {Γ A B C} →
-        (ee : ExE Γ A B) →
-        ExEs Γ B C →
-        -------------------
-        ExEs Γ A C
+ExEs : Ctx → Rel Tp lzero
+ExEs Γ = Star (ExE Γ)
 
 lengthˢ : ∀ {Γ A B} → ExEs Γ A B → ℕ
-lengthˢ []       = 0
-lengthˢ (_ ∷ es) = suc (lengthˢ es)
+lengthˢ ε        = 0
+lengthˢ (_ ◅ es) = suc (lengthˢ es)
 
 infixl 5 _`++ˢ_
 _`++ˢ_ : ∀ {Γ A B} → Ex Γ A → ExEs Γ A B → Ex Γ B
-e `++ˢ []        = e
-e `++ˢ (ee ∷ es) = e `∷ᵉ ee `++ˢ es
-
-infixr 5 _`++_
-_`++_ : ∀ {Γ A B C} → ExEs Γ A B → ExEs Γ B C → ExEs Γ A C
-[]        `++ es′ = es′
-(ee ∷ es) `++ es′ = ee ∷ es `++ es′
+e `++ˢ ε         = e
+e `++ˢ (ee ◅ es) = e `∷ᵉ ee `++ˢ es
 
 module Variables where
   open BVariables public

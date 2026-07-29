@@ -1,19 +1,21 @@
 {-# OPTIONS --safe #-}
 module Syntax.Church.STLC.WithSum.Alt.Substitution.Properties where
 
-open import Agda.Primitive                        using (lzero)
-open import Data.List                             using (_∷_)
-open import Data.List.Membership.Propositional    using (_∈_)
-open import Data.List.Relation.Unary.Any          using (here; there)
-open import Function                              using (it; _∘_; _∋_)
-open import Relation.Binary                       using ( IsEquivalence; Reflexive
-                                                        ; REL; Rel; Setoid
-                                                        ; Symmetric; Transitive
-                                                        ; _Preserves_⟶_; _Preserves₂_⟶_⟶_
-                                                        )
-open import Relation.Binary.PropositionalEquality using ( _≡_; refl
-                                                        ; cong; cong₂; sym; trans
-                                                        ; module ≡-Reasoning)
+open import Agda.Primitive                                                   using (lzero)
+open import Data.List                                                        using (_∷_)
+open import Data.List.Membership.Propositional                               using (_∈_)
+open import Data.List.Relation.Unary.Any                                     using (here; there)
+open import Function                                                         using (id; it; _∘_; _∋_)
+open import Relation.Binary                                                  using ( IsEquivalence; Reflexive
+                                                                                   ; REL; Rel; Setoid
+                                                                                   ; Symmetric; Transitive
+                                                                                   ; _Preserves_⟶_; _Preserves₂_⟶_⟶_
+                                                                                   )
+open import Relation.Binary.Construct.Closure.ReflexiveTransitive            using (Star; ε; _◅_; _◅◅_)
+open import Relation.Binary.Construct.Closure.ReflexiveTransitive.Properties using (gmap-cong; gmap-id; gmap-◅◅)
+open import Relation.Binary.PropositionalEquality                            using ( _≡_; refl
+                                                                                   ; cong; cong₂; sym; trans
+                                                                                   ; module ≡-Reasoning)
 
 open import PPLib.Base
 open import PPLib.Membership.Nth
@@ -29,18 +31,17 @@ open Variables
                       ⦃ _ : RawVarSubApp ⦃ ExtVarSub ⦄ ⦃ varSub ⦄ ⦃ varSub ⦄ ⦄
                       (δ : VarSub ⦃ varSub ⦄ Δ Γ) (e : Ex Γ A) (es : ExEs Γ A B) →
                     ⟦ δ ⟧ᵛ (e `++ˢ es) ≡ ⟦ δ ⟧ᵛ e `++ˢ ⟦ δ ⟧ᵛ* es
-`++ˢ-⟦-⟧ᵛ-commute _ _ []       = refl
-`++ˢ-⟦-⟧ᵛ-commute _ _ (_ ∷ es) = `++ˢ-⟦-⟧ᵛ-commute _ (_ `∷ᵉ _) es
+`++ˢ-⟦-⟧ᵛ-commute _ _ ε        = refl
+`++ˢ-⟦-⟧ᵛ-commute _ _ (_ ◅ es) = `++ˢ-⟦-⟧ᵛ-commute _ (_ `∷ᵉ _) es
 
-`++-⟦-⟧ᵛ-commute : ∀ {R}
-                     ⦃ varSub : VarSubBase {lzero} R ⦄
-                     ⦃ _ : RawVarSubOutHead ⦃ varSub ⦄ ⦄
-                     ⦃ _ : RawVarSubLift ⦃ varSub ⦄ ⦃ SubVarSub ⦄ ⦄
-                     ⦃ _ : RawVarSubApp ⦃ ExtVarSub ⦄ ⦃ varSub ⦄ ⦃ varSub ⦄ ⦄
-                     (δ : VarSub ⦃ varSub ⦄ Δ Γ) (es₀ : ExEs Γ A B) (es₁ : ExEs Γ B C) →
-                   ⟦ δ ⟧ᵛ* (es₀ `++ es₁) ≡ ⟦ δ ⟧ᵛ* es₀ `++ ⟦ δ ⟧ᵛ* es₁
-`++-⟦-⟧ᵛ-commute _ []        es₁ = refl
-`++-⟦-⟧ᵛ-commute _ (_ ∷ es₀) es₁ = cong (_ ∷_) (`++-⟦-⟧ᵛ-commute _ es₀ es₁)
+◅◅-⟦-⟧ᵛ-commute : ∀ {R}
+                    ⦃ varSub : VarSubBase {lzero} R ⦄
+                    ⦃ _ : RawVarSubOutHead ⦃ varSub ⦄ ⦄
+                    ⦃ _ : RawVarSubLift ⦃ varSub ⦄ ⦃ SubVarSub ⦄ ⦄
+                    ⦃ _ : RawVarSubApp ⦃ ExtVarSub ⦄ ⦃ varSub ⦄ ⦃ varSub ⦄ ⦄
+                    (δ : VarSub ⦃ varSub ⦄ Δ Γ) (es₀ : ExEs Γ A B) (es₁ : ExEs Γ B C) →
+                  ⟦ δ ⟧ᵛ* (es₀ ◅◅ es₁) ≡ ⟦ δ ⟧ᵛ* es₀ ◅◅ ⟦ δ ⟧ᵛ* es₁
+◅◅-⟦-⟧ᵛ-commute δ = gmap-◅◅ id (RawAppSub.forExE δ)
 
 ----------------------------------------------------------
 -- Useful Properties for Substitutions
@@ -245,8 +246,7 @@ liftᵛ-preserves-forExE δ (`case-`of fₗ `/ fᵣ) = cong₂ `case-`of_`/_
 liftᵛ-preserves-Appᵛ* : (δ : Ext Δ Γ) (es : ExEs Γ A B) →
                         -----------------------------------------------------------
                         ⟦ liftᵛ∘ ⦃ ExtVarSub ⦄ ⦃ SubVarSub ⦄ δ ⟧ᵛ* es ≡ ⟦ δ ⟧ᵛ* es
-liftᵛ-preserves-Appᵛ* δ []        = refl
-liftᵛ-preserves-Appᵛ* δ (ee ∷ es) = cong₂ _∷_ (liftᵛ-preserves-forExE δ ee) (liftᵛ-preserves-Appᵛ* δ es)
+liftᵛ-preserves-Appᵛ* δ = gmap-cong id (RawAppSub.forExE (liftᵛ∘ δ)) (RawAppSub.forExE δ) (liftᵛ-preserves-forExE δ)
 
 forExE-Idᵛ≡id : ∀ {R}
                   ⦃ varSub : VarSubBase {lzero} R ⦄
@@ -289,8 +289,7 @@ forExE-Idᵛ≡id ⦃ varSub ⦄ (`case-`of fₗ `/ fᵣ) = cong₂ `case-`of_`/
              (es : ExEs Γ A B) →
              -------------------------------------------------------------
              ⟦ Idᵛ ⦃ varSub ⦄ ⟧ᵛ* es ≡ es
-⟦Idᵛ⟧ᵛ*≡id []        = refl
-⟦Idᵛ⟧ᵛ*≡id (ee ∷ es) = cong₂ _∷_ (forExE-Idᵛ≡id ee) (⟦Idᵛ⟧ᵛ*≡id es)
+⟦Idᵛ⟧ᵛ*≡id es = trans (gmap-cong id (RawAppSub.forExE Idᵛ) id forExE-Idᵛ≡id es) (gmap-id es)
 
 ⟦qᵉᵉ-⟧ˢ⟦Wkᵛ⟧ˢ≡⟦Wkᵛ⟧ˢ⟦-⟧ˢ : ∀ (δ : Ext Γ Δ) (e : Ex Δ B) →
                            ⟦ qᵉ δ ⟧ᵛ ⟦ Wkᵛ {A = A} ⟧ᵛ e ≡ ⟦ Wkᵛ ⟧ᵛ ⟦ δ ⟧ᵛ e
@@ -319,8 +318,8 @@ forExE-qᵉᵉ-forExE-Wkᵛ≡forExE-Wkᵛ-forExE δ (`case-`of eₗ `/ eᵣ) = 
 
 ⟦qᵉᵉ-⟧ᵛ*⟦Wkᵛ⟧ᵛ*≡⟦Wkᵛ⟧ᵛ*⟦-⟧ᵛ* : ∀ (δ : Ext Γ Δ) (es : ExEs Δ B C) →
                                ⟦ qᵉ δ ⟧ᵛ* ⟦ Wkᵛ {A = A} ⟧ᵛ* es ≡ ⟦ Wkᵛ ⟧ᵛ* ⟦ δ ⟧ᵛ* es
-⟦qᵉᵉ-⟧ᵛ*⟦Wkᵛ⟧ᵛ*≡⟦Wkᵛ⟧ᵛ*⟦-⟧ᵛ* δ []        = refl
-⟦qᵉᵉ-⟧ᵛ*⟦Wkᵛ⟧ᵛ*≡⟦Wkᵛ⟧ᵛ*⟦-⟧ᵛ* δ (ee ∷ es) = cong₂ _∷_ (forExE-qᵉᵉ-forExE-Wkᵛ≡forExE-Wkᵛ-forExE δ ee) (⟦qᵉᵉ-⟧ᵛ*⟦Wkᵛ⟧ᵛ*≡⟦Wkᵛ⟧ᵛ*⟦-⟧ᵛ* δ es)
+⟦qᵉᵉ-⟧ᵛ*⟦Wkᵛ⟧ᵛ*≡⟦Wkᵛ⟧ᵛ*⟦-⟧ᵛ* δ ε         = refl
+⟦qᵉᵉ-⟧ᵛ*⟦Wkᵛ⟧ᵛ*≡⟦Wkᵛ⟧ᵛ*⟦-⟧ᵛ* δ (ee ◅ es) = cong₂ _◅_ (forExE-qᵉᵉ-forExE-Wkᵛ≡forExE-Wkᵛ-forExE δ ee) (⟦qᵉᵉ-⟧ᵛ*⟦Wkᵛ⟧ᵛ*≡⟦Wkᵛ⟧ᵛ*⟦-⟧ᵛ* δ es)
 
 ⟦qᵉˢ-⟧ᵛ⟦Wkᵛ⟧ᵛ≡⟦Wkᵛ⟧ᵛ⟦-⟧ᵛ : ∀ (σ : Sub Γ Δ) (e : Ex Δ B) →
                            ⟦ qᵉ σ ⟧ᵛ ⟦ Wkᵛ {A = A} ⟧ᵛ e ≡ ⟦ Wkᵛ ⟧ᵛ ⟦ σ ⟧ᵛ e
@@ -349,8 +348,8 @@ forExE-qᵉˢ-forExE-Wkᵛ≡forExE-Wkᵛ-forExE σ (`case-`of eₗ `/ eᵣ) = c
 
 ⟦qᵉˢ-⟧ᵛ*⟦Wkᵛ⟧ᵛ*≡⟦Wkᵛ⟧ᵛ*⟦-⟧ᵛ* : ∀ (σ : Sub Γ Δ) (es : ExEs Δ B C) →
                                ⟦ qᵉˢ σ ⟧ᵛ* ⟦ Wkᵛ {A = A} ⟧ᵛ* es ≡ ⟦ Wkᵛ ⟧ᵛ* ⟦ σ ⟧ᵛ* es
-⟦qᵉˢ-⟧ᵛ*⟦Wkᵛ⟧ᵛ*≡⟦Wkᵛ⟧ᵛ*⟦-⟧ᵛ* δ []        = refl
-⟦qᵉˢ-⟧ᵛ*⟦Wkᵛ⟧ᵛ*≡⟦Wkᵛ⟧ᵛ*⟦-⟧ᵛ* δ (ee ∷ es) = cong₂ _∷_ (forExE-qᵉˢ-forExE-Wkᵛ≡forExE-Wkᵛ-forExE δ ee) (⟦qᵉˢ-⟧ᵛ*⟦Wkᵛ⟧ᵛ*≡⟦Wkᵛ⟧ᵛ*⟦-⟧ᵛ* δ es)
+⟦qᵉˢ-⟧ᵛ*⟦Wkᵛ⟧ᵛ*≡⟦Wkᵛ⟧ᵛ*⟦-⟧ᵛ* δ ε         = refl
+⟦qᵉˢ-⟧ᵛ*⟦Wkᵛ⟧ᵛ*≡⟦Wkᵛ⟧ᵛ*⟦-⟧ᵛ* δ (ee ◅ es) = cong₂ _◅_ (forExE-qᵉˢ-forExE-Wkᵛ≡forExE-Wkᵛ-forExE δ ee) (⟦qᵉˢ-⟧ᵛ*⟦Wkᵛ⟧ᵛ*≡⟦Wkᵛ⟧ᵛ*⟦-⟧ᵛ* δ es)
 
 ⟦!ˢ-⟧ᵛ⟦Wkᵛ⟧ᵛ≡id : ∀ (e : Ex Γ A) (f : Ex Γ B) →
                   ⟦ !ˢ e ⟧ᵛ ⟦ Wkᵛ ⟧ᵛ f ≡ f

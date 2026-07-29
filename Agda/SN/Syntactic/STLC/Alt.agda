@@ -1,30 +1,30 @@
 {-# OPTIONS --safe #-}
 module SN.Syntactic.STLC.Alt where
 
-open import Agda.Primitive                                              using (Level; lzero)
-open import Data.Empty                                                  using (⊥)
-open import Data.List                                                   using ([]; _∷_; _++_)
-open import Data.List.Membership.Propositional                          using (_∈_)
-open import Data.List.Relation.Unary.Any                                using (here; there)
+open import Agda.Primitive                                                   using (Level; lzero)
+open import Data.Empty                                                       using (⊥)
+open import Data.List                                                        using ([]; _∷_; _++_)
+open import Data.List.Membership.Propositional                               using (_∈_)
+open import Data.List.Relation.Unary.Any                                     using (here; there)
 open import Data.Nat
 open import Data.Nat.Induction
-import Data.Nat.Properties                                              as ℕ
-open import Data.Product                                                using (_×_; _,_; proj₁; proj₂; ∃-syntax; Σ-syntax)
-open import Data.Sum                                                    as ⊎ using (_⊎_; inj₁; inj₂)
-open import Data.Wrap                                                   using (Wrap; [_]; get)
-open import Function                                                    using (case_of_; flip; id; Morphism; _on_; _∘_; _∋_)
-open import Induction.WellFounded                                       using (Acc; acc; WellFounded; WfRec)
-open import Relation.Binary                                             using (REL; Rel; _=[_]⇒_)
-open import Relation.Binary.Construct.Closure.ReflexiveTransitive       using (Star; ε; _◅_; _◅◅_)
-import Relation.Binary.Construct.Closure.ReflexiveTransitive            as Star
-open import Relation.Binary.Construct.Closure.Transitive                using (TransClosure; [_]; _∷_)
-import Relation.Binary.Construct.Closure.Transitive                     as TransClosure
-open import Relation.Binary.Construct.Union                             using (_∪_)
-open import Relation.Binary.PropositionalEquality                       using (_≡_; refl; cong; subst; sym; trans)
-open import Relation.Unary                                              using (Pred)
+import Data.Nat.Properties                                                   as ℕ
+open import Data.Product                                                     using (_×_; _,_; proj₁; proj₂; ∃-syntax; Σ-syntax)
+open import Data.Sum                                                         as ⊎ using (_⊎_; inj₁; inj₂)
+open import Data.Wrap                                                        using (Wrap; [_]; get)
+open import Function                                                         using (case_of_; flip; id; Morphism; _on_; _∘_; _∋_)
+open import Induction.WellFounded                                            using (Acc; acc; WellFounded; WfRec)
+open import Relation.Binary                                                  using (REL; Rel; _=[_]⇒_)
+open import Relation.Binary.Construct.Closure.ReflexiveTransitive            as Star using (Star; ε; _◅_; _◅◅_)
+open import Relation.Binary.Construct.Closure.ReflexiveTransitive.Properties using (◅◅-assoc)
+open import Relation.Binary.Construct.Closure.Transitive                     using (TransClosure; [_]; _∷_)
+import Relation.Binary.Construct.Closure.Transitive                          as TransClosure
+open import Relation.Binary.Construct.Union                                  using (_∪_)
+open import Relation.Binary.PropositionalEquality                            using (_≡_; refl; cong; subst; sym; trans)
+open import Relation.Unary                                                   using (Pred)
 
+open import PPLib.Base
 open import Syntax.Church.STLC.Alt.Base         hiding (module Variables)
-open import Syntax.Church.STLC.Alt.Properties
 open import Syntax.Church.STLC.Alt.Substitution
 
 variable
@@ -222,8 +222,8 @@ module AccessibilitySN where
     _`++ˢ⟶_ : e ⟶ e′ →
               ∀ (es : ExEs Γ A B) →
               e `++ˢ es ⟶ e′ `++ˢ es
-    e⟶ `++ˢ⟶ []       = e⟶
-    e⟶ `++ˢ⟶ (_ ∷ es) = (e⟶ `∷ᵉ?) `++ˢ⟶ es
+    e⟶ `++ˢ⟶ ε        = e⟶
+    e⟶ `++ˢ⟶ (_ ◅ es) = (e⟶ `∷ᵉ?) `++ˢ⟶ es
 
     private
       data `++ˢ-case : Ex Γ A → ExEs Γ A B → Ex Γ B → Set where
@@ -239,14 +239,14 @@ module AccessibilitySN where
 
         `→β-step : ∀ {e : Ex (A ∷ Γ) B} {f : Ex Γ A} →
                    ----------------------------------------------------
-                   `++ˢ-case (`λ e) (-`$ f ∷ es) (⟦ !ˢ f ⟧ᵛ e `++ˢ es)
+                   `++ˢ-case (`λ e) (-`$ f ◅ es) (⟦ !ˢ f ⟧ᵛ e `++ˢ es)
 
       `++ˢ-⟶-cases : ∀ (e : Ex Γ A) (es : ExEs Γ A B) {ees′} →
                      e `++ˢ es ⟶ ees′ →
                      ------------------------------------------
                      `++ˢ-case e es ees′
-      `++ˢ-⟶-cases e []        e⟶            = e-step e⟶
-      `++ˢ-⟶-cases e (ee ∷ es) ees⟶
+      `++ˢ-⟶-cases e ε         e⟶            = e-step e⟶
+      `++ˢ-⟶-cases e (ee ◅ es) ees⟶
         with `++ˢ-⟶-cases (e `∷ᵉ ee) es ees⟶
       ...  | e-step (e⟶ `∷ᵉ?)                = e-step e⟶
       ...  | e-step (?`∷ᵉ ee⟶)               = es-step _ ≤‴-refl [ (λ σ e′ → (?`∷ᵉ ⟦_⟧ᵛ⟶_.forExE σ ee⟶) `++ˢ⟶ ⟦ σ ⟧ᵛ* es) ]
@@ -290,17 +290,17 @@ module InductiveSN where
   data _∈SN⟦_⟧ : REL (Ex Γ A) (ExEs Γ A B) lzero
 
   _∈SN : Pred (Ex Γ A) lzero
-  A ∈SN = A ∈SN⟦ [] ⟧
+  A ∈SN = A ∈SN⟦ ε ⟧
 
   data _∈SN$ˢ where
-    []            : ∀ {Γ A} →
-                    -------------------------
-                    [] {Γ = Γ} {A = A} ∈SN$ˢ
+    ε   : ∀ {Γ A} →
+          -----------------------
+          (ExEs Γ A A ∋ ε) ∈SN$ˢ
 
-    _∷_           : f ∈SN →
-                    es ∈SN$ˢ →
-                    -----------------
-                    -`$ f ∷ es ∈SN$ˢ
+    _◅_ : f ∈SN →
+          es ∈SN$ˢ →
+          -----------------
+          -`$ f ◅ es ∈SN$ˢ
 
   data _∈SNe$ where
     _`∷ᵉ_ : ∀ {e : Ex Γ (A `→ B)} {f : Ex Γ A} →
@@ -319,11 +319,11 @@ module InductiveSN where
             e ∈SNe$ →
             e `∷ᵉ -`$ f ∈SN⟦ es ⟧ →
             -----------------------------------
-            e ∈SN⟦ -`$ f ∷ es ⟧
+            e ∈SN⟦ -`$ f ◅ es ⟧
 
     _`∷ᵉ? : ∀ {e : Ex Γ A}
               {ee : ExE Γ A B} {es : ExEs Γ B C} →
-            e ∈SN⟦ ee ∷ es ⟧ →
+            e ∈SN⟦ ee ◅ es ⟧ →
             ---------------------------------------
             e `∷ᵉ ee ∈SN⟦ es ⟧
 
@@ -341,7 +341,7 @@ module InductiveSN where
             f ∈SN →
             ⟦ !ˢ f ⟧ᵛ e ∈SN⟦ es ⟧ →
             ----------------------------------
-            `λ e ∈SN⟦ -`$ f ∷ es ⟧
+            `λ e ∈SN⟦ -`$ f ◅ es ⟧
 
   size⟦_∈SN⟦_⟧⟧_ : ∀ (e : Ex Γ A) (es : ExEs Γ A B) →
                    e ∈SN⟦ es ⟧ →
@@ -371,34 +371,34 @@ module InductiveSN where
     ⟦ δ ⟧ᵉ∈SNe$ (`# x)          = `# δ x
     ⟦ δ ⟧ᵉ∈SNe$ (eSNe$ `∷ᵉ fSN) = ⟦ δ ⟧ᵉ∈SNe$ eSNe$ `∷ᵉ ⟦ δ ⟧ᵉ∈SN fSN
 
-    ⟦ δ ⟧ᵉ∈SN$ˢ []           = []
-    ⟦ δ ⟧ᵉ∈SN$ˢ (fSN ∷ esSN) = ⟦ δ ⟧ᵉ∈SN fSN ∷ ⟦ δ ⟧ᵉ∈SN$ˢ esSN
+    ⟦ δ ⟧ᵉ∈SN$ˢ ε            = ε
+    ⟦ δ ⟧ᵉ∈SN$ˢ (fSN ◅ esSN) = ⟦ δ ⟧ᵉ∈SN fSN ◅ ⟦ δ ⟧ᵉ∈SN$ˢ esSN
 
-    `++∈SN$ˢ : es₀ ∈SN$ˢ →
-               es₁ ∈SN$ˢ →
-               es₀ `++ es₁ ∈SN$ˢ
-    `++∈SN$ˢ []             es₁SN = es₁SN
-    `++∈SN$ˢ (f₀SN ∷ es₀SN) es₁SN = f₀SN ∷ `++∈SN$ˢ es₀SN es₁SN
+    ◅◅∈SN$ˢ : es₀ ∈SN$ˢ →
+              es₁ ∈SN$ˢ →
+              es₀ ◅◅ es₁ ∈SN$ˢ
+    ◅◅∈SN$ˢ ε              es₁SN = es₁SN
+    ◅◅∈SN$ˢ (f₀SN ◅ es₀SN) es₁SN = f₀SN ◅ ◅◅∈SN$ˢ es₀SN es₁SN
 
     `Ne$∈SNe$ : e ∈SNe$ →
                 es ∈SN$ˢ →
                 e `++ˢ es ∈SNe$
-    `Ne$∈SNe$ eSNe$ []           = eSNe$
-    `Ne$∈SNe$ eSNe$ (fSN ∷ esSN) = `Ne$∈SNe$ (eSNe$ `∷ᵉ fSN) esSN
+    `Ne$∈SNe$ eSNe$ ε            = eSNe$
+    `Ne$∈SNe$ eSNe$ (fSN ◅ esSN) = `Ne$∈SNe$ (eSNe$ `∷ᵉ fSN) esSN
 
     `∷ᵉ?-inv : (eSN : e `∷ᵉ ee ∈SN⟦ es ⟧) →
                ----------------------------------------------------------------------------
-               Σ[ eSN′ ∈ e ∈SN⟦ ee ∷ es ⟧ ] size⟦ _ ∈SN⟦ _ ⟧⟧ eSN′ ≤ size⟦ _ ∈SN⟦ _ ⟧⟧ eSN
+               Σ[ eSN′ ∈ e ∈SN⟦ ee ◅ es ⟧ ] size⟦ _ ∈SN⟦ _ ⟧⟧ eSN′ ≤ size⟦ _ ∈SN⟦ _ ⟧⟧ eSN
     `∷ᵉ?-inv ((eSNe$ `∷ᵉ _) `$⁻ appSN)   = eSNe$ `$⁻ `∷ᵉ?-inv appSN .proj₁ , `∷ᵉ?-inv appSN .proj₂
     `∷ᵉ?-inv (eSN `∷ᵉ?)                  = eSN , ℕ.m≤n+m _ _
-    `∷ᵉ?-inv (`Ne$ (eSNe$ `∷ᵉ fSN) esSN) = `Ne$ eSNe$ (fSN ∷ esSN) , z≤n
+    `∷ᵉ?-inv (`Ne$ (eSNe$ `∷ᵉ fSN) esSN) = `Ne$ eSNe$ (fSN ◅ esSN) , z≤n
 
     `∷ᵉ?*-inv : ∀ {e : Ex Γ A} (es₀ : ExEs Γ A B) {es₁ : ExEs Γ B C} →
                  (eSN : e `++ˢ es₀ ∈SN⟦ es₁ ⟧) →
-                 --------------------------------------------------------------------------------
-                 Σ[ eSN′ ∈ e ∈SN⟦ es₀ `++ es₁ ⟧ ] size⟦ _ ∈SN⟦ _ ⟧⟧ eSN′ ≤ size⟦ _ ∈SN⟦ _ ⟧⟧ eSN
-    `∷ᵉ?*-inv []          eSN = eSN , ℕ.≤-refl
-    `∷ᵉ?*-inv (ee₀ ∷ es₀) eSN
+                 -------------------------------------------------------------------------------
+                 Σ[ eSN′ ∈ e ∈SN⟦ es₀ ◅◅ es₁ ⟧ ] size⟦ _ ∈SN⟦ _ ⟧⟧ eSN′ ≤ size⟦ _ ∈SN⟦ _ ⟧⟧ eSN
+    `∷ᵉ?*-inv ε           eSN = eSN , ℕ.≤-refl
+    `∷ᵉ?*-inv (ee₀ ◅ es₀) eSN
       with eSN′ , ≤eSN ← `∷ᵉ?*-inv es₀ eSN
         with eSN″ , ≤eSN′ ← `∷ᵉ?-inv eSN′ = eSN″ , ℕ.≤-trans ≤eSN′ ≤eSN
 
@@ -408,20 +408,20 @@ module InductiveSN where
                  Σ[ eSN′ ∈ e ∈SN⟦ es₀ ⟧ ] size⟦ _ ∈SN⟦ _ ⟧⟧ eSN′ ≤ size⟦ _ ∈SN⟦ _ ⟧⟧ eSN
     `∷ᵉ?*-inv′ es₀ eSN
       with eSN′ ← `∷ᵉ?*-inv es₀ eSN
-        rewrite `++-identityʳ es₀ = eSN′
+        rewrite ◅◅-identityʳ es₀ = eSN′
 
     `∷ᵉ?* : ∀ {e : Ex Γ A} (es₀ : ExEs Γ A B) {es₁ : ExEs Γ B C} →
-            (eSN : e ∈SN⟦ es₀ `++ es₁ ⟧) →
+            (eSN : e ∈SN⟦ es₀ ◅◅ es₁ ⟧) →
             -------------------------------------------------------
             e `++ˢ es₀ ∈SN⟦ es₁ ⟧
-    `∷ᵉ?* []        eSN = eSN
-    `∷ᵉ?* (_ ∷ es₀) eSN = `∷ᵉ?* es₀ (eSN `∷ᵉ?)
+    `∷ᵉ?* ε         eSN = eSN
+    `∷ᵉ?* (_ ◅ es₀) eSN = `∷ᵉ?* es₀ (eSN `∷ᵉ?)
 
     `∷ᵉ?*′ : ∀ {e : Ex Γ A} (es₀ : ExEs Γ A B) →
              (eSN : e ∈SN⟦ es₀ ⟧) →
              ------------------------------------
              e `++ˢ es₀ ∈SN
-    `∷ᵉ?*′ es₀ eSN = `∷ᵉ?* es₀ (subst (_ ∈SN⟦_⟧) (sym (`++-identityʳ es₀)) eSN)
+    `∷ᵉ?*′ es₀ eSN = `∷ᵉ?* es₀ (subst (_ ∈SN⟦_⟧) (sym (◅◅-identityʳ es₀)) eSN)
 
     Tp-size : Tp → ℕ
     Tp-size `base    = 0
@@ -446,7 +446,7 @@ module InductiveSN where
                         e ∈SN⟦ es ⟧ →
                         f ∈SN →
                         -------------------------------------------------------
-                        e ∈SN⟦ es `++ (-`$ f ∷ []) ⟧
+                        e ∈SN⟦ es ◅◅ -`$ f ◅ ε ⟧
 
     ⟦!ᵛ-⟧ᵛ-closure-type : Tp → Set
     ⟦!ᵛ-⟧ᵛ-closure-type A = ∀ {Δ Γ B C}
@@ -470,11 +470,11 @@ module InductiveSN where
                   es₁ ∈SN$ˢ →
                   e ∈SN⟦ es₀ ⟧ →
                   Tp-size C ≤ Tp-size A →
-                  e ∈SN⟦ es₀ `++ es₁ ⟧
-        `$-rec* {es₀ = es₀}                   []           eSN ≤A
-          rewrite `++-identityʳ es₀                               = eSN
-        `$-rec* {es₀ = es₀} {es₁ = ee₁ ∷ es₁} (fSN ∷ esSN) eSN <A
-          rewrite `++-assoc es₀ (ee₁ ∷ []) {es₁}                  = `$-rec* esSN (`$-rec (ℕ.≤-<-trans (ℕ.m≤m+n _ _) <A) eSN fSN) (ℕ.≤-trans (ℕ.m≤n+m _ _) <A)
+                  e ∈SN⟦ es₀ ◅◅ es₁ ⟧
+        `$-rec* {es₀ = es₀}                   ε            eSN ≤A
+          rewrite ◅◅-identityʳ es₀                                = eSN
+        `$-rec* {es₀ = es₀} {es₁ = ee₁ ◅ es₁} (fSN ◅ esSN) eSN <A
+          rewrite sym (◅◅-assoc es₀ (ee₁ ◅ ε) es₁)                = `$-rec* esSN (`$-rec (ℕ.≤-<-trans (ℕ.m≤m+n _ _) <A) eSN fSN) (ℕ.≤-trans (ℕ.m≤n+m _ _) <A)
 
       abstract
         `$-closure       : `$-closure-type A
@@ -493,7 +493,7 @@ module InductiveSN where
         `$-closure (eSNe$ `$⁻ appSN) fSN = eSNe$ `$⁻ `$-closure appSN fSN
         `$-closure (eSN `∷ᵉ?)        fSN = `$-closure eSN fSN `∷ᵉ?
         `$-closure (`λ eSN)          fSN = `→β fSN (⟦!ᵛ-⟧ᵛ-closure eSN fSN)
-        `$-closure (`Ne$ eSNe$ esSN) fSN = `Ne$ eSNe$ (`++∈SN$ˢ esSN (fSN ∷ []))
+        `$-closure (`Ne$ eSNe$ esSN) fSN = `Ne$ eSNe$ (◅◅∈SN$ˢ esSN (fSN ◅ ε))
         `$-closure (`→β gSN ⟦g⟧eSN)  fSN = `→β gSN (`$-closure ⟦g⟧eSN fSN)
 
         ⟦!ᵛ-⟧ᵛ-closure                 (eSNe$ `$⁻ appSN)            fSN  = `∷ᵉ?-inv (⟦!ᵛ-⟧ᵛ-closure appSN fSN) .proj₁
@@ -515,8 +515,8 @@ module InductiveSN where
         ...  | inj₂ (inj₁ (⟦f⟧eSN , refl))  = inj₁ ((`$-rec (s≤s (ℕ.m≤m+n _ _)) ⟦f⟧eSN (⟦!ᵛ-⟧ᵛ-closure gSN fSN) `∷ᵉ?) , s≤s (ℕ.m≤n+m _ _))
         ...  | inj₂ (inj₂ (⟦f⟧eSNe$))       = inj₂ (inj₂ (⟦f⟧eSNe$ `∷ᵉ ⟦!ᵛ-⟧ᵛ-closure gSN fSN))
 
-        ⟦!ᵛ-⟧ᵛ-closure$ˢ []           fSN = []
-        ⟦!ᵛ-⟧ᵛ-closure$ˢ (gSN ∷ esSN) fSN = (⟦!ᵛ-⟧ᵛ-closure gSN fSN) ∷ (⟦!ᵛ-⟧ᵛ-closure$ˢ esSN fSN)
+        ⟦!ᵛ-⟧ᵛ-closure$ˢ ε            fSN = ε
+        ⟦!ᵛ-⟧ᵛ-closure$ˢ (gSN ◅ esSN) fSN = ⟦!ᵛ-⟧ᵛ-closure gSN fSN ◅ ⟦!ᵛ-⟧ᵛ-closure$ˢ esSN fSN
 
     `$-closure-acc     : Acc _<_ (Tp-size A) → `$-closure-type A
     ⟦!ᵛ-⟧ᵛ-closure-acc : Acc _<_ (Tp-size A) → ⟦!ᵛ-⟧ᵛ-closure-type A
@@ -532,7 +532,7 @@ module InductiveSN where
 
     ∈SN-fundamental : ∀ (e : Ex Γ A) →
                       e ∈SN
-    ∈SN-fundamental (`# x)        = `Ne$ (`# x) []
+    ∈SN-fundamental (`# x)        = `Ne$ (`# x) ε
     ∈SN-fundamental (`λ e)        = `λ ∈SN-fundamental e
     ∈SN-fundamental (e `∷ᵉ -`$ f) = `$-closure (∈SN-fundamental e) (∈SN-fundamental f) `∷ᵉ?
 
@@ -541,8 +541,8 @@ open InductiveSN.Properties public
 
 module Soundness where
   SN$ˢ-ne$-sound : es ∈SN$ˢ → e ∈ne$ → e `++ˢ es ∈ne$
-  SN$ˢ-ne$-sound []         ene = ene
-  SN$ˢ-ne$-sound (_ ∷ esSN) ene = SN$ˢ-ne$-sound esSN (ene `$-)
+  SN$ˢ-ne$-sound ε          ene = ene
+  SN$ˢ-ne$-sound (_ ◅ esSN) ene = SN$ˢ-ne$-sound esSN (ene `$-)
 
   SNe$-ne$-sound : e ∈SNe$ → e ∈ne$
   SNe$-ne$-sound (`# _)      = `# _
@@ -556,13 +556,13 @@ module Soundness where
   SN-sound               (eSN `∷ᵉ?)        = SN-sound eSN
   SN-sound               (`λ eSN)          = `λ∈sn (SN-sound eSN)
   SN-sound               (`Ne$ eSNe$ esSN) = SN$ˢ-sound esSN (SNe$-ne$-sound eSNe$) (SNe$-sound eSNe$)
-  SN-sound {es = _ ∷ es} (`→β fSN ⟦f⟧eSN)  = ∈sn-weak-head-expansion`→ _ es (SN-sound fSN) (SN-sound ⟦f⟧eSN)
+  SN-sound {es = _ ◅ es} (`→β fSN ⟦f⟧eSN)  = ∈sn-weak-head-expansion`→ _ es (SN-sound fSN) (SN-sound ⟦f⟧eSN)
 
   SNe$-sound (eSNe$ `∷ᵉ fSN) = `$∈sn (SNe$-ne$-sound eSNe$) (SNe$-sound eSNe$) (SN-sound fSN)
   SNe$-sound (`# _)          = `#∈sn _
 
-  SN$ˢ-sound []           ene esn = esn
-  SN$ˢ-sound (fSN ∷ esSN) ene esn = SN$ˢ-sound esSN (ene `$-) (`$∈sn ene esn (SN-sound fSN))
+  SN$ˢ-sound ε            ene esn = esn
+  SN$ˢ-sound (fSN ◅ esSN) ene esn = SN$ˢ-sound esSN (ene `$-) (`$∈sn ene esn (SN-sound fSN))
 
 open Soundness public
 
