@@ -53,7 +53,7 @@ instance
 
   ExtLiftSubApp : VarSubLiftApp ⦃ ExtVarSub ⦄ ⦃ SubVarSub ⦄ ⦃ SubVarSub ⦄ ⦃ SubVarSub ⦄
   ExtLiftSubApp .liftᵛ-preserves-Appᵛ δ (`# x)   = refl
-  ExtLiftSubApp .liftᵛ-preserves-Appᵛ δ (`λ M)   = cong `λ_ (trans (⟦-⟧ᵛ-extensional M (symᵛ (liftᵛ-preserves-qᵛ δ))) (liftᵛ-preserves-Appᵛ (qᵉ δ) M))
+  ExtLiftSubApp .liftᵛ-preserves-Appᵛ δ (`λ M)   = cong `λ_ (trans (sym (⟦-⟧ᵛ-extensional M (liftᵛ-preserves-qᵛ δ))) (liftᵛ-preserves-Appᵛ (qᵉ δ) M))
   ExtLiftSubApp .liftᵛ-preserves-Appᵛ δ (M `$ N) = cong₂ _`$_ (liftᵛ-preserves-Appᵛ δ M) (liftᵛ-preserves-Appᵛ δ N)
 
   SubIdNoOpExtˡ : VarSubIdNoOpˡ ⦃ SubVarSub ⦄ ⦃ ExtVarSub ⦄ ⦃ SubVarSub ⦄

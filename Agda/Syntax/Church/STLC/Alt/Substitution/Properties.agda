@@ -98,7 +98,7 @@ instance
                RawAppSub.forExE (liftᵛ∘ ⦃ _ ⦄ ⦃ SubVarSub ⦄ δ) ee ≡ RawAppSub.forExE δ ee
 
       forEx δ (`# x)     = refl
-      forEx δ (`λ e)     = cong `λ_ (trans (⟦-⟧ᵛ-extensional e (symᵛ (liftᵛ-preserves-qᵛ δ))) (forEx (qᵉ δ) e))
+      forEx δ (`λ e)     = cong `λ_ (trans (sym (⟦-⟧ᵛ-extensional e (liftᵛ-preserves-qᵛ δ))) (forEx (qᵉ δ) e))
       forEx δ (e `∷ᵉ ee) = cong₂ _`∷ᵉ_ (forEx δ e) (forExE δ ee)
 
       forExE δ (-`$ f) = cong -`$_ (forEx δ f)
