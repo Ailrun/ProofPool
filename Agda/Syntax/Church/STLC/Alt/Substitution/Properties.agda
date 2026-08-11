@@ -113,7 +113,7 @@ instance
       forExE : ∀ (ee : ExE Γ A B) → RawAppSub.forExE (Idᵛ ⦃ ExtVarSub ⦄) ee ≡ ee
 
       forEx (`# x)     = refl
-      forEx (`λ e)     = cong `λ_ (trans (⟦-⟧ᵛ-extensional e qᵉᵉ-Idᵉ-id) (forEx e))
+      forEx (`λ e)     = cong `λ_ (trans (⟦-⟧ᵛ-extensional e qᵉᵉ-preserves-Idᵛ) (forEx e))
       forEx (e `∷ᵉ ee) = cong₂ _`∷ᵉ_ (forEx e) (forExE ee)
 
       forExE (-`$ f) = cong -`$_ (forEx f)
@@ -252,18 +252,18 @@ forExE-Idᵛ≡id (-`$ f) = cong -`$_ (⟦Idᵛ⟧ᵛ≡liftᵛ f)
              ⟦ Idᵛ ⦃ varSub ⦄ ⟧ᵛ* es ≡ es
 ⟦Idᵛ⟧ᵛ*≡id es = trans (gmap-cong id (RawAppSub.forExE Idᵛ) id forExE-Idᵛ≡id es) (gmap-id es)
 
-⟦qᵉᵉ-⟧ˢ⟦Wkᵛ⟧ˢ≡⟦Wkᵛ⟧ˢ⟦-⟧ˢ : ∀ (δ : Ext Γ Δ) (e : Ex Δ B) →
+⟦qᵉᵉ-⟧ᵛ⟦Wkᵛ⟧ᵛ≡⟦Wkᵛ⟧ᵛ⟦-⟧ᵛ : ∀ (δ : Ext Γ Δ) (e : Ex Δ B) →
                            ⟦ qᵉ δ ⟧ᵛ ⟦ Wkᵛ {A = A} ⟧ᵛ e ≡ ⟦ Wkᵛ ⟧ᵛ ⟦ δ ⟧ᵛ e
-⟦qᵉᵉ-⟧ˢ⟦Wkᵛ⟧ˢ≡⟦Wkᵛ⟧ˢ⟦-⟧ˢ δ e =
+⟦qᵉᵉ-⟧ᵛ⟦Wkᵛ⟧ᵛ≡⟦Wkᵛ⟧ᵛ⟦-⟧ᵛ δ e =
   begin _ ≡⟨ ⟦-⟧ᵛ-compositional _ (Wkᵛ ⦃ ExtVarSub ⦄) e ⟩
         _ ≡˘⟨ ⟦-⟧ᵛ-compositional _ δ e ⟩
         _ ∎
   where
     open ≡-Reasoning
 
-⟦qᵉᵉqᵉᵉ-⟧ˢ⟦qᵉWkᵛ⟧ˢ≡⟦qᵉWkᵛ⟧ˢ⟦qᵉᵉ-⟧ˢ : ∀ (δ : Ext Γ Δ) (e : Ex (A ∷ Δ) C) →
+⟦qᵉᵉqᵉᵉ-⟧ᵛ⟦qᵉWkᵛ⟧ᵛ≡⟦qᵉWkᵛ⟧ᵛ⟦qᵉᵉ-⟧ᵛ : ∀ (δ : Ext Γ Δ) (e : Ex (A ∷ Δ) C) →
                                      ⟦ qᵉ qᵉ δ ⟧ᵛ ⟦ qᵉᵉ (Wkᵛ {A = B}) ⟧ᵛ e ≡ ⟦ qᵉᵉ Wkᵛ ⟧ᵛ ⟦ qᵉ δ ⟧ᵛ e
-⟦qᵉᵉqᵉᵉ-⟧ˢ⟦qᵉWkᵛ⟧ˢ≡⟦qᵉWkᵛ⟧ˢ⟦qᵉᵉ-⟧ˢ δ e =
+⟦qᵉᵉqᵉᵉ-⟧ᵛ⟦qᵉWkᵛ⟧ᵛ≡⟦qᵉWkᵛ⟧ᵛ⟦qᵉᵉ-⟧ᵛ δ e =
   begin _ ≡⟨ ⟦-⟧ᵛ-compositional _ (qᵉ Wkᵛ) e ⟩
         _ ≡˘⟨ ⟦-⟧ᵛ-extensional e (qᵉ-distrib-∘ᵛ (qᵉ δ) Wkᵛ) ⟩
         _ ≡⟨ ⟦-⟧ᵛ-extensional e (qᵉ-distrib-∘ᵛ Wkᵛ δ) ⟩
@@ -274,7 +274,7 @@ forExE-Idᵛ≡id (-`$ f) = cong -`$_ (⟦Idᵛ⟧ᵛ≡liftᵛ f)
 
 forExE-qᵉᵉ-forExE-Wkᵛ≡forExE-Wkᵛ-forExE : ∀ (δ : Ext Γ Δ) (ee : ExE Δ B C) →
                                           RawAppSub.forExE (qᵉ δ) (RawAppSub.forExE (Wkᵛ {A = A}) ee) ≡ RawAppSub.forExE Wkᵛ (RawAppSub.forExE δ ee)
-forExE-qᵉᵉ-forExE-Wkᵛ≡forExE-Wkᵛ-forExE δ (-`$ e) = cong -`$_ (⟦qᵉᵉ-⟧ˢ⟦Wkᵛ⟧ˢ≡⟦Wkᵛ⟧ˢ⟦-⟧ˢ δ e)
+forExE-qᵉᵉ-forExE-Wkᵛ≡forExE-Wkᵛ-forExE δ (-`$ e) = cong -`$_ (⟦qᵉᵉ-⟧ᵛ⟦Wkᵛ⟧ᵛ≡⟦Wkᵛ⟧ᵛ⟦-⟧ᵛ δ e)
 
 ⟦qᵉᵉ-⟧ᵛ*⟦Wkᵛ⟧ᵛ*≡⟦Wkᵛ⟧ᵛ*⟦-⟧ᵛ* : ∀ (δ : Ext Γ Δ) (es : ExEs Δ B C) →
                                ⟦ qᵉ δ ⟧ᵛ* ⟦ Wkᵛ {A = A} ⟧ᵛ* es ≡ ⟦ Wkᵛ ⟧ᵛ* ⟦ δ ⟧ᵛ* es

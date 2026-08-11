@@ -358,6 +358,10 @@ module _
       qᵛ-congᵛ : qᵛ_ Preserves _≈ᵛ₂_ {Δ = Δ} {Γ} ⟶ _≈ᵛ₂_ {Δ = A ∷ Δ}
       qᵛ-congᵛ equiv = ,ᵛ-congᵛˡ R-headᵛ (∘ᵛ-congᵛʳ Wkᵛ equiv)
 
+      qᵛ⟦_⟧-congᵛ : ∀ Ψ → (qᵛ⟦_⟧_ {Δ = Δ} Ψ) Preserves _≈ᵛ₂_ {Γ = Γ} ⟶ _≈ᵛ₂_
+      qᵛ⟦ []    ⟧-congᵛ equiv = equiv
+      qᵛ⟦ _ ∷ Ψ ⟧-congᵛ equiv = qᵛ-congᵛ (qᵛ⟦ Ψ ⟧-congᵛ equiv)
+
   module _ ⦃ _ : RawVarSubId ⦃ varSub₁ ⦄ ⦄
            ⦃ _ : RawVarSubId ⦃ varSub₂ ⦄ ⦄
            ⦃ _ : RawVarSubWk ⦃ varSub₁ ⦄ ⦄
@@ -374,6 +378,10 @@ module _
       qᵛ-preserves-Idᵛ : qᵛ Idᵛ ≈ᵛ₂ Idᵛ {Γ = A ∷ Γ}
       qᵛ-preserves-Idᵛ (here refl) = trans (sym (⟦Idᵛ⟧ᵛ≡liftᵛ ⦃ varSub₂ ⦄ (R-headᵛ ⦃ varSub₂ ⦄))) (Appᵛ-R-headᵛ ⦃ varSub₂ ⦄ ⦃ varSub₂ ⦄ ⦃ varSub₂ ⦄ (Idᵛ ⦃ varSub₂ ⦄))
       qᵛ-preserves-Idᵛ (there x)   = trans (Idᵛ-idʳ ⦃ varSub₁ ⦄ ⦃ varSub₂ ⦄ (Wkᵛ ⦃ varSub₁ ⦄) x) (Wkᵛ-spec x)
+
+      qᵛ⟦_⟧-preserves-Idᵛ : ∀ Ψ → qᵛ⟦ Ψ ⟧ Idᵛ ≈ᵛ₂ Idᵛ {Γ = Ψ ++ Γ}
+      qᵛ⟦ []    ⟧-preserves-Idᵛ = reflexiveᵛ Idᵛ
+      qᵛ⟦ A ∷ Ψ ⟧-preserves-Idᵛ = transᵛ (qᵛ-congᵛ qᵛ⟦ Ψ ⟧-preserves-Idᵛ) qᵛ-preserves-Idᵛ
 
 module _
   ⦃ varSub₁ : VarSubBase R₁ ⦄

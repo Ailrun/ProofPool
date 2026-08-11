@@ -71,11 +71,15 @@ instance
     where
       helper : ∀ (M : Tm Γ A) → ⟦ Idᵛ ⦃ ExtVarSub ⦄ ⟧ᵛ M ≡ M
       helper (`# x)                 = refl
-      helper (`λ M)                 = cong `λ_ (trans (⟦-⟧ᵛ-extensional M qᵉᵉ-Idᵉ-id) (helper M))
+      helper (`λ M)                 = cong `λ_ (trans (⟦-⟧ᵛ-extensional M qᵉᵉ-preserves-Idᵛ) (helper M))
       helper (M `$ N)               = cong₂ _`$_ (helper M) (helper N)
       helper (`injₗ M)              = cong `injₗ (helper M)
       helper (`injᵣ M)              = cong `injᵣ (helper M)
-      helper (`case M `of Nₗ `/ Nᵣ) = cong₃ `case_`of_`/_ (helper M) (trans (⟦-⟧ᵛ-extensional Nₗ qᵉᵉ-Idᵉ-id) (helper Nₗ)) (trans (⟦-⟧ᵛ-extensional Nᵣ qᵉᵉ-Idᵉ-id) (helper Nᵣ))
+      helper (`case M `of Nₗ `/ Nᵣ) = cong₃
+                                        `case_`of_`/_
+                                        (helper M)
+                                        (trans (⟦-⟧ᵛ-extensional Nₗ qᵉᵉ-preserves-Idᵛ) (helper Nₗ))
+                                        (trans (⟦-⟧ᵛ-extensional Nᵣ qᵉᵉ-preserves-Idᵛ) (helper Nᵣ))
 
   SubIdNoOpSubˡ : VarSubIdNoOpˡ ⦃ SubVarSub ⦄ ⦃ SubVarSub ⦄ ⦃ SubVarSub ⦄
   SubIdNoOpSubˡ .Idᵛ-idˡ = λ σ x → helper (σ x)
@@ -137,18 +141,18 @@ instance
 -- Other Useful Properties for Extensions/Substitutions
 ----------------------------------------------------------
 
-⟦qᵉᵉ-⟧ˢ⟦Wkᵛ⟧ˢ≡⟦Wkᵛ⟧ˢ⟦-⟧ˢ : ∀ (δ : Ext Γ Δ) (M : Tm Δ B) →
+⟦qᵉᵉ-⟧ᵛ⟦Wkᵛ⟧ᵛ≡⟦Wkᵛ⟧ᵛ⟦-⟧ᵛ : ∀ (δ : Ext Γ Δ) (M : Tm Δ B) →
                            ⟦ qᵉ δ ⟧ᵛ ⟦ Wkᵛ {A = A} ⟧ᵛ M ≡ ⟦ Wkᵛ ⟧ᵛ ⟦ δ ⟧ᵛ M
-⟦qᵉᵉ-⟧ˢ⟦Wkᵛ⟧ˢ≡⟦Wkᵛ⟧ˢ⟦-⟧ˢ δ M =
+⟦qᵉᵉ-⟧ᵛ⟦Wkᵛ⟧ᵛ≡⟦Wkᵛ⟧ᵛ⟦-⟧ᵛ δ M =
   begin _ ≡⟨ ⟦-⟧ᵛ-compositional _ (Wkᵛ ⦃ ExtVarSub ⦄) M ⟩
         _ ≡˘⟨ ⟦-⟧ᵛ-compositional _ δ M ⟩
         _ ∎
   where
     open ≡-Reasoning
 
-⟦qᵉᵉqᵉᵉ-⟧ˢ⟦qᵉWkᵛ⟧ˢ≡⟦qᵉWkᵛ⟧ˢ⟦qᵉᵉ-⟧ˢ : ∀ (δ : Ext Γ Δ) (M : Tm (A ∷ Δ) C) →
+⟦qᵉᵉqᵉᵉ-⟧ᵛ⟦qᵉWkᵛ⟧ᵛ≡⟦qᵉWkᵛ⟧ᵛ⟦qᵉᵉ-⟧ᵛ : ∀ (δ : Ext Γ Δ) (M : Tm (A ∷ Δ) C) →
                                      ⟦ qᵉ qᵉ δ ⟧ᵛ ⟦ qᵉᵉ (Wkᵛ {A = B}) ⟧ᵛ M ≡ ⟦ qᵉᵉ Wkᵛ ⟧ᵛ ⟦ qᵉ δ ⟧ᵛ M
-⟦qᵉᵉqᵉᵉ-⟧ˢ⟦qᵉWkᵛ⟧ˢ≡⟦qᵉWkᵛ⟧ˢ⟦qᵉᵉ-⟧ˢ δ M =
+⟦qᵉᵉqᵉᵉ-⟧ᵛ⟦qᵉWkᵛ⟧ᵛ≡⟦qᵉWkᵛ⟧ᵛ⟦qᵉᵉ-⟧ᵛ δ M =
   begin _ ≡⟨ ⟦-⟧ᵛ-compositional _ (qᵉ Wkᵛ) M ⟩
         _ ≡˘⟨ ⟦-⟧ᵛ-extensional M (qᵉ-distrib-∘ᵛ (qᵉ δ) Wkᵛ) ⟩
         _ ≡⟨ ⟦-⟧ᵛ-extensional M (qᵉ-distrib-∘ᵛ Wkᵛ δ) ⟩

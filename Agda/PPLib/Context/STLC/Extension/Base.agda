@@ -1,7 +1,7 @@
 {-# OPTIONS --safe --without-K #-}
 module PPLib.Context.STLC.Extension.Base {ℓ₀} (Tp : Set ℓ₀) where
 
-open import Data.List                             using (_∷_)
+open import Data.List                             using (_∷_; _++_)
 open import Data.List.Relation.Unary.Any          using (here; there)
 open import Data.List.Membership.Propositional    using (_∈_)
 open import Data.Nat                              using (ℕ)
@@ -48,9 +48,21 @@ qᵉ_ : ∀ {R}
       VarSub ⦃ varSub ⦄ Δ Γ → VarSub ⦃ varSub ⦄ (A ∷ Δ) (A ∷ Γ)
 qᵉ_ ⦃ varSub ⦄ = qᵛ_ ⦃ ExtVarSub ⦄ ⦃ varSub ⦄
 
+infixr 7 qᵉ⟦_⟧_
+qᵉ⟦_⟧_ : ∀ {R}
+           ⦃ varSub : VarSubBase {ℓ₀} R ⦄
+           ⦃ _ : RawVarSubOutHead ⦃ varSub ⦄ ⦄
+           ⦃ _ : RawVarSubApp ⦃ ExtVarSub ⦄ ⦃ varSub ⦄ ⦃ varSub ⦄ ⦄ →
+         ∀ Ψ → VarSub ⦃ varSub ⦄ Δ Γ → VarSub ⦃ varSub ⦄ (Ψ ++ Δ) (Ψ ++ Γ)
+qᵉ⟦_⟧_ ⦃ varSub ⦄ = qᵛ⟦_⟧_ ⦃ ExtVarSub ⦄ ⦃ varSub ⦄
+
 infixr 7 qᵉᵉ_
 qᵉᵉ_ : Ext Δ Γ → Ext (A ∷ Δ) (A ∷ Γ)
 qᵉᵉ_ = qᵉ_ ⦃ ExtVarSub ⦄
+
+infixr 7 qᵉᵉ⟦_⟧_
+qᵉᵉ⟦_⟧_ : ∀ Ψ → Ext Δ Γ → Ext (Ψ ++ Δ) (Ψ ++ Γ)
+qᵉᵉ⟦_⟧_ = qᵉ⟦_⟧_ ⦃ ExtVarSub ⦄
 
 module Variables where
   variable

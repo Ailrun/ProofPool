@@ -298,7 +298,7 @@ module LogRelProp where
   ⟦Idᵛ⟧ᵉᶜ≡id : ∀ (K : Cont× Γ A B) →
                ⟦ Idᵛ ⟧ᵉᶜ K ≡ K
   ⟦Idᵛ⟧ᵉᶜ≡id []      = refl
-  ⟦Idᵛ⟧ᵉᶜ≡id (N ∷ K) = cong₂ _∷_ (trans (⟦-⟧ᵛ-extensional N (transᵛ (qᵛ-congᵛ qᵉᵉ-Idᵉ-id) qᵉᵉ-Idᵉ-id)) (⟦Idᵛ⟧ᵛ≡liftᵛ N)) (⟦Idᵛ⟧ᵉᶜ≡id K)
+  ⟦Idᵛ⟧ᵉᶜ≡id (N ∷ K) = cong₂ _∷_ (trans (⟦-⟧ᵛ-extensional N qᵛ⟦ _ ∷ _ ∷ [] ⟧-preserves-Idᵛ) (⟦Idᵛ⟧ᵛ≡liftᵛ N)) (⟦Idᵛ⟧ᵉᶜ≡id K)
 
   ⟦-⟧ᵉᶜ-compositional : ∀ (δ : Ext Ψ Δ) (γ : Ext Δ Γ) (K : Cont× Γ A B) →
                         ⟦ δ ⟧ᵉᶜ ⟦ γ ⟧ᵉᶜ K ≡ ⟦ δ ∘ᵛ γ ⟧ᵉᶜ K

@@ -64,7 +64,7 @@ instance
     where
       helper : ∀ (M : Tm Γ A) → ⟦ Idᵛ ⦃ ExtVarSub ⦄ ⟧ᵛ M ≡ M
       helper (`# x)   = refl
-      helper (`λ M)   = cong `λ_ (trans (⟦-⟧ᵛ-extensional M qᵉᵉ-Idᵉ-id) (helper M))
+      helper (`λ M)   = cong `λ_ (trans (⟦-⟧ᵛ-extensional M qᵉᵉ-preserves-Idᵛ) (helper M))
       helper (M `$ N) = cong₂ _`$_ (helper M) (helper N)
 
   SubIdNoOpSubˡ : VarSubIdNoOpˡ ⦃ SubVarSub ⦄ ⦃ SubVarSub ⦄ ⦃ SubVarSub ⦄

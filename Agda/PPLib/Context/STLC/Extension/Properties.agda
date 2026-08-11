@@ -2,7 +2,7 @@
 module PPLib.Context.STLC.Extension.Properties {ℓ₀} (Tp : Set ℓ₀) where
 
 open import Agda.Primitive                        using (lzero)
-open import Data.List                             using (_∷_)
+open import Data.List                             using (_∷_; _++_)
 open import Data.List.Membership.Propositional    using (_∈_)
 open import Data.List.Relation.Unary.Any          using (here; there)
 open import Function                              using (_∘_)
@@ -18,10 +18,6 @@ open EVariables
 ----------------------------------------------------------
 -- Useful Properties for Extensions
 ----------------------------------------------------------
-
-qᵉᵉ-Idᵉ-id : qᵉᵉ Idᵛ ≈ᵛ Idᵛ {Γ = A ∷ Γ}
-qᵉᵉ-Idᵉ-id (here refl) = refl
-qᵉᵉ-Idᵉ-id (there _)   = refl
 
 instance
   ExtWkSpec : VarSubWkSpec ⦃ ExtVarSub ⦄
@@ -44,5 +40,11 @@ instance
   AppExtCompositionalExt : ∀ {R} ⦃ varSub : VarSubBase {ℓ₀} R ⦄ →
                            VarSubAppCompositional ⦃ varSub ⦄ ⦃ ExtVarSub ⦄ ⦃ ExtVarSub ⦄
   AppExtCompositionalExt .⟦-⟧ᵛ-compositional _ _ M = refl
+
+qᵉᵉ-preserves-Idᵛ : qᵉᵉ Idᵛ ≈ᵛ Idᵛ {Γ = A ∷ Γ}
+qᵉᵉ-preserves-Idᵛ = qᵛ-preserves-Idᵛ
+
+qᵉᵉ⟦_⟧-preserves-Idᵛ : ∀ Ψ → qᵉᵉ⟦ Ψ ⟧ Idᵛ ≈ᵛ Idᵛ {Γ = Ψ ++ Γ}
+qᵉᵉ⟦_⟧-preserves-Idᵛ = qᵛ⟦_⟧-preserves-Idᵛ
 
 qᵉ-distrib-∘ᵛ = qᵛ-distrib-∘ᵛ ⦃ ExtVarSub ⦄ ⦃ ExtVarSub ⦄ ⦃ ExtVarSub ⦄ ⦃ ExtVarSub ⦄

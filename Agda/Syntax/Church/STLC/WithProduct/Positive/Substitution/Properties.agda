@@ -2,7 +2,7 @@
 module Syntax.Church.STLC.WithProduct.Positive.Substitution.Properties where
 
 open import Agda.Primitive                        using (lzero)
-open import Data.List                             using (_∷_)
+open import Data.List                             using ([]; _∷_)
 open import Data.List.Membership.Propositional    using (_∈_)
 open import Data.List.Relation.Unary.Any          using (here; there)
 open import Function                              using (_∘_)
@@ -69,10 +69,10 @@ instance
     where
       helper : ∀ (M : Tm Γ A) → ⟦ Idᵛ ⦃ ExtVarSub ⦄ ⟧ᵛ M ≡ M
       helper (`# x)         = refl
-      helper (`λ M)         = cong `λ_ (trans (⟦-⟧ᵛ-extensional M qᵉᵉ-Idᵉ-id) (helper M))
+      helper (`λ M)         = cong `λ_ (trans (⟦-⟧ᵛ-extensional M qᵉᵉ-preserves-Idᵛ) (helper M))
       helper (M `$ N)       = cong₂ _`$_ (helper M) (helper N)
       helper (M `, N)       = cong₂ _`,_ (helper M) (helper N)
-      helper (`let M `in N) = cong₂ `let_`in_ (helper M) (trans (⟦-⟧ᵛ-extensional N (transᵛ (qᵛ-congᵛ qᵉᵉ-Idᵉ-id) qᵉᵉ-Idᵉ-id)) (helper N))
+      helper (`let M `in N) = cong₂ `let_`in_ (helper M) (trans (⟦-⟧ᵛ-extensional N qᵉᵉ⟦ _ ∷ _ ∷ [] ⟧-preserves-Idᵛ) (helper N))
 
   SubIdNoOpSubˡ : VarSubIdNoOpˡ ⦃ SubVarSub ⦄ ⦃ SubVarSub ⦄ ⦃ SubVarSub ⦄
   SubIdNoOpSubˡ .Idᵛ-idˡ = λ σ x → helper (σ x)
