@@ -130,22 +130,31 @@ instance
 -- Other Useful Properties for Extensions/Substitutions
 ----------------------------------------------------------
 
-⟦qᵉᵉ-⟧ˢ⟦Wkᵛ⟧ˢ≡⟦Wkᵛ⟧ˢ⟦-⟧ˢ : ∀ (δ : Ext Γ Δ) (M : Tm Δ B) →
+⟦qᵉᵉ-⟧ᵛ⟦Wkᵛ⟧ᵛ≡⟦Wkᵛ⟧ᵛ⟦-⟧ᵛ : ∀ (δ : Ext Γ Δ) (M : Tm Δ B) →
                            ⟦ qᵉ δ ⟧ᵛ ⟦ Wkᵛ {A = A} ⟧ᵛ M ≡ ⟦ Wkᵛ ⟧ᵛ ⟦ δ ⟧ᵛ M
-⟦qᵉᵉ-⟧ˢ⟦Wkᵛ⟧ˢ≡⟦Wkᵛ⟧ˢ⟦-⟧ˢ δ M =
+⟦qᵉᵉ-⟧ᵛ⟦Wkᵛ⟧ᵛ≡⟦Wkᵛ⟧ᵛ⟦-⟧ᵛ δ M =
   begin _ ≡⟨ ⟦-⟧ᵛ-compositional _ (Wkᵛ ⦃ ExtVarSub ⦄) M ⟩
         _ ≡˘⟨ ⟦-⟧ᵛ-compositional _ δ M ⟩
         _ ∎
   where
     open ≡-Reasoning
 
-⟦qᵉᵉqᵉᵉ-⟧ˢ⟦qᵉWkᵛ⟧ˢ≡⟦qᵉWkᵛ⟧ˢ⟦qᵉᵉ-⟧ˢ : ∀ (δ : Ext Γ Δ) (M : Tm (A ∷ Δ) C) →
+⟦qᵉᵉqᵉᵉ-⟧ᵛ⟦qᵉWkᵛ⟧ᵛ≡⟦qᵉWkᵛ⟧ᵛ⟦qᵉᵉ-⟧ᵛ : ∀ (δ : Ext Γ Δ) (M : Tm (A ∷ Δ) C) →
                                      ⟦ qᵉ qᵉ δ ⟧ᵛ ⟦ qᵉᵉ (Wkᵛ {A = B}) ⟧ᵛ M ≡ ⟦ qᵉᵉ Wkᵛ ⟧ᵛ ⟦ qᵉ δ ⟧ᵛ M
-⟦qᵉᵉqᵉᵉ-⟧ˢ⟦qᵉWkᵛ⟧ˢ≡⟦qᵉWkᵛ⟧ˢ⟦qᵉᵉ-⟧ˢ δ M =
+⟦qᵉᵉqᵉᵉ-⟧ᵛ⟦qᵉWkᵛ⟧ᵛ≡⟦qᵉWkᵛ⟧ᵛ⟦qᵉᵉ-⟧ᵛ δ M =
   begin _ ≡⟨ ⟦-⟧ᵛ-compositional _ (qᵉ Wkᵛ) M ⟩
         _ ≡˘⟨ ⟦-⟧ᵛ-extensional M (qᵉ-distrib-∘ᵛ (qᵉ δ) Wkᵛ) ⟩
         _ ≡⟨ ⟦-⟧ᵛ-extensional M (qᵉ-distrib-∘ᵛ Wkᵛ δ) ⟩
         _ ≡˘⟨ ⟦-⟧ᵛ-compositional _ (qᵉ δ) M ⟩
+        _ ∎
+  where
+    open ≡-Reasoning
+
+⟦qᵉᵉqᵉᵉ-⟧ᵛ⟦Wkᵛ-∘ᵛ-Wkᵛ⟧ᵛ≡⟦Wkᵛ-∘ᵛ-Wkᵛ⟧ᵛ⟦-⟧ᵛ : ∀ (δ : Ext Γ Δ) (M : Tm Δ C) →
+                                            ⟦ qᵉ qᵉ δ ⟧ᵛ ⟦ Wkᵛ {A = B} ∘ᵛ Wkᵛ {A = A} ⟧ᵛ M ≡ ⟦ Wkᵛ {A = B} ∘ᵛ Wkᵛ {A = A} ⟧ᵛ ⟦ δ ⟧ᵛ M
+⟦qᵉᵉqᵉᵉ-⟧ᵛ⟦Wkᵛ-∘ᵛ-Wkᵛ⟧ᵛ≡⟦Wkᵛ-∘ᵛ-Wkᵛ⟧ᵛ⟦-⟧ᵛ δ M =
+  begin _ ≡⟨ ⟦-⟧ᵛ-compositional _ (Wkᵛ ∘ᵛ Wkᵛ) M ⟩
+        _ ≡˘⟨ ⟦-⟧ᵛ-compositional _ δ M ⟩
         _ ∎
   where
     open ≡-Reasoning
@@ -166,6 +175,16 @@ instance
         _ ≡˘⟨ ⟦-⟧ᵛ-extensional M (qᵉ-distrib-∘ˢᵉ (qᵉ σ) Wkᵛ) ⟩
         _ ≡⟨ ⟦-⟧ᵛ-extensional M (qᵉ-distrib-∘ᵉˢ Wkᵛ σ) ⟩
         _ ≡˘⟨ ⟦-⟧ᵛ-compositional _ (qᵉ σ) M ⟩
+        _ ∎
+  where
+    open ≡-Reasoning
+
+⟦qᵉˢqᵉˢ-⟧ᵛ⟦Wkᵛ-∘ᵛ-Wkᵛ⟧ᵛ≡⟦Wkᵛ-∘ᵛ-Wkᵛ⟧ᵛ⟦-⟧ᵛ : ∀ (σ : Sub Γ Δ) (M : Tm Δ C) →
+                                            ⟦ qᵉ qᵉ σ ⟧ᵛ ⟦ Wkᵛ {A = B} ∘ᵛ Wkᵛ {A = A} ⟧ᵛ M ≡ ⟦ Wkᵛ {A = B} ∘ᵛ Wkᵛ {A = A} ⟧ᵛ ⟦ σ ⟧ᵛ M
+⟦qᵉˢqᵉˢ-⟧ᵛ⟦Wkᵛ-∘ᵛ-Wkᵛ⟧ᵛ≡⟦Wkᵛ-∘ᵛ-Wkᵛ⟧ᵛ⟦-⟧ᵛ σ M =
+  begin _ ≡⟨ ⟦-⟧ᵛ-compositional _ (Wkᵛ ∘ᵛ Wkᵛ) M ⟩
+        _ ≡⟨ ⟦-⟧ᵛ-extensional M (⟦-⟧ᵛ-compositional _ Wkᵛ ∘ σ) ⟩
+        _ ≡˘⟨ ⟦-⟧ᵛ-compositional _ σ M ⟩
         _ ∎
   where
     open ≡-Reasoning
