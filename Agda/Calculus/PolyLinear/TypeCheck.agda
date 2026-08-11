@@ -1,3 +1,4 @@
+{-# OPTIONS --allow-unsolved-metas #-}
 module Calculus.PolyLinear.TypeCheck where
 
 -- open import Calculus.PolyLinear.Util

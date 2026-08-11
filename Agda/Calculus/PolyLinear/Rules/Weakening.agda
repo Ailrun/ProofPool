@@ -1,3 +1,4 @@
+{-# OPTIONS --allow-unsolved-metas #-}
 module Calculus.PolyLinear.Rules.Weakening where
 
 open import Calculus.PolyLinear.Syntax

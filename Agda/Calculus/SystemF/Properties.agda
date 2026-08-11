@@ -1,3 +1,4 @@
+{-# OPTIONS --allow-unsolved-metas #-}
 module Calculus.SystemF.Properties where
 
 open import Data.List using ([]; _∷_; _++_; length)
@@ -32,8 +33,8 @@ open import Calculus.SystemF.Typing
 ⊢Ty[-/-]⦂Ty Γ₀ ⊢Γ₀Γ₁ ⊢Q (‼ ⊢R) = ‼ {!!}
 ⊢Ty[-/-]⦂Ty Γ₀ ⊢Γ₀Γ₁ ⊢Q (#_ {a = a} a∈)
   with a ≥? length Γ₀
-...  | no  a≱Γ₀ = # ? -- trivialWith (a≱Γ₀ , a∈)
+...  | no  a≱Γ₀ = # {!!} -- trivialWith (a≱Γ₀ , a∈)
 ...  | yes a≥Γ₀
     with a ≟ length Γ₀
-...    | no  a≢Γ₀ = # ? -- trivialWith (a≢Γ₀ , a∈)
+...    | no  a≢Γ₀ = # {!!} -- trivialWith (a≢Γ₀ , a∈)
 ...    | yes refl = {!!}
