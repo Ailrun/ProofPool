@@ -284,6 +284,25 @@ forExE-Idᵛ≡id ⦃ varSub ⦄ (`let-`in f) = cong `let-`in_ (trans (⟦-⟧�
   where
     open ≡-Reasoning
 
+⟦qᵉ²-⟧ᵛ⟦Wkᵛ²⟧ᵛ≡⟦Wkᵛ²⟧ᵛ⟦-⟧ᵛ : ∀ {R}
+                               ⦃ varSub : VarSubBase {lzero} R ⦄
+                               ⦃ _ : RawVarSubOutHead ⦃ varSub ⦄ ⦄
+                               ⦃ _ : RawVarSubLift ⦃ varSub ⦄ ⦃ SubVarSub ⦄ ⦄
+                               ⦃ _ : RawVarSubApp ⦃ ExtVarSub ⦄ ⦃ varSub ⦄ ⦃ varSub ⦄ ⦄
+                               ⦃ _ : VarSubAppExtensional ⦃ ExtVarSub ⦄ ⦃ varSub ⦄ ⦃ varSub ⦄ ⦄
+                               ⦃ _ : VarSubAppCompositional ⦃ ExtVarSub ⦄ ⦃ ExtVarSub ⦄ ⦃ varSub ⦄ ⦄
+                               ⦃ _ : VarSubAppCompositional ⦃ ExtVarSub ⦄ ⦃ varSub ⦄ ⦃ SubVarSub ⦄ ⦄
+                               ⦃ _ : VarSubAppCompositional ⦃ varSub ⦄ ⦃ ExtVarSub ⦄ ⦃ SubVarSub ⦄ ⦄
+                               (δ : VarSub ⦃ varSub ⦄ Γ Δ) (e : Ex Δ C) →
+                             ⟦ qᵉ qᵉ δ ⟧ᵛ ⟦ Wkᵛ {A = B} ∘ᵛ Wkᵛ {A = A} ⟧ᵛ e ≡ ⟦ Wkᵛ {A = B} ∘ᵛ Wkᵛ {A = A} ⟧ᵛ ⟦ δ ⟧ᵛ e
+⟦qᵉ²-⟧ᵛ⟦Wkᵛ²⟧ᵛ≡⟦Wkᵛ²⟧ᵛ⟦-⟧ᵛ δ e =
+  begin _ ≡⟨ ⟦-⟧ᵛ-compositional (qᵉ qᵉ δ) (Wkᵛ ∘ᵛ Wkᵛ) e ⟩
+        _ ≡⟨ ⟦-⟧ᵛ-extensional e (⟦-⟧ᵛ-compositional Wkᵛ Wkᵛ ∘ δ) ⟩
+        _ ≡˘⟨ ⟦-⟧ᵛ-compositional (Wkᵛ ∘ᵛ Wkᵛ) δ e ⟩
+        _ ∎
+  where
+    open ≡-Reasoning
+
 ⟦qᵉ³-⟧ᵛ⟦qᵉ²Wkᵛ⟧ᵛ≡⟦qᵉ²Wkᵛ⟧ᵛ⟦qᵉ²-⟧ᵛ : ∀ {R}
                                       ⦃ varSub : VarSubBase {lzero} R ⦄
                                       ⦃ _ : RawVarSubId ⦃ varSub ⦄ ⦄
@@ -310,6 +329,34 @@ forExE-Idᵛ≡id ⦃ varSub ⦄ (`let-`in f) = cong `let-`in_ (trans (⟦-⟧�
   where
     open ≡-Reasoning
 
+⟦qᵉ⁴-⟧ᵛ⟦qᵉ²Wkᵛ²⟧ᵛ≡⟦qᵉ²Wkᵛ²⟧ᵛ⟦qᵉ²-⟧ᵛ : ∀ {R}
+                                        ⦃ varSub : VarSubBase {lzero} R ⦄
+                                        ⦃ _ : RawVarSubId ⦃ varSub ⦄ ⦄
+                                        ⦃ _ : RawVarSubOutHead ⦃ varSub ⦄ ⦄
+                                        ⦃ _ : RawVarSubLift ⦃ ExtVarSub ⦄ ⦃ varSub ⦄ ⦄
+                                        ⦃ _ : RawVarSubLift ⦃ varSub ⦄ ⦃ SubVarSub ⦄ ⦄
+                                        ⦃ _ : RawVarSubApp ⦃ ExtVarSub ⦄ ⦃ varSub ⦄ ⦃ varSub ⦄ ⦄
+                                        ⦃ _ : VarSubOutHeadSpec ⦃ varSub ⦄ ⦄
+                                        ⦃ _ : VarSubLiftId ⦃ ExtVarSub ⦄ ⦃ varSub ⦄ ⦄
+                                        ⦃ _ : VarSubIdNoOpʳ ⦃ ExtVarSub ⦄ ⦃ varSub ⦄ ⦃ varSub ⦄ ⦄
+                                        ⦃ _ : VarSubAppExtensional ⦃ ExtVarSub ⦄ ⦃ varSub ⦄ ⦃ varSub ⦄ ⦄
+                                        ⦃ _ : VarSubAppCompositional ⦃ ExtVarSub ⦄ ⦃ ExtVarSub ⦄ ⦃ varSub ⦄ ⦄
+                                        ⦃ _ : VarSubAppCompositional ⦃ ExtVarSub ⦄ ⦃ varSub ⦄ ⦃ ExtVarSub ⦄ ⦄
+                                        ⦃ _ : VarSubAppCompositional ⦃ varSub ⦄ ⦃ ExtVarSub ⦄ ⦃ SubVarSub ⦄ ⦄
+                                        ⦃ _ : VarSubAppCompositional ⦃ ExtVarSub ⦄ ⦃ varSub ⦄ ⦃ SubVarSub ⦄ ⦄
+                                        (δ : VarSub ⦃ varSub ⦄ Γ Δ) (e : Ex (B ∷ A ∷ Δ) E) →
+                                      ⟦ qᵉ qᵉ qᵉ qᵉ δ ⟧ᵛ ⟦ qᵉ qᵉ (Wkᵛ {A = D} ∘ᵛ Wkᵛ {A = C}) ⟧ᵛ e
+                                        ≡ ⟦ qᵉ qᵉ (Wkᵛ {A = D} ∘ᵛ Wkᵛ {A = C}) ⟧ᵛ ⟦ qᵉ qᵉ δ ⟧ᵛ e
+⟦qᵉ⁴-⟧ᵛ⟦qᵉ²Wkᵛ²⟧ᵛ≡⟦qᵉ²Wkᵛ²⟧ᵛ⟦qᵉ²-⟧ᵛ δ e =
+  begin _ ≡⟨ ⟦-⟧ᵛ-compositional (qᵉ qᵉ qᵉ qᵉ δ) (qᵉ qᵉ (Wkᵛ ∘ᵛ Wkᵛ)) e ⟩
+        _ ≡˘⟨ ⟦-⟧ᵛ-extensional e (qᵛ⟦ _ ∷ _ ∷ [] ⟧-distrib-∘ᵛ (qᵉ qᵉ δ) (Wkᵛ ∘ᵛ Wkᵛ)) ⟩
+        _ ≡⟨ ⟦-⟧ᵛ-extensional e (qᵛ⟦ _ ∷ _ ∷ [] ⟧-congᵛ (⟦-⟧ᵛ-compositional Wkᵛ Wkᵛ ∘ δ)) ⟩
+        _ ≡⟨ ⟦-⟧ᵛ-extensional e (qᵛ⟦ _ ∷ _ ∷ [] ⟧-distrib-∘ᵛ(Wkᵛ ∘ᵛ Wkᵛ) δ) ⟩
+        _ ≡˘⟨ ⟦-⟧ᵛ-compositional (qᵉ qᵉ (Wkᵛ ∘ᵛ Wkᵛ)) (qᵉ qᵉ δ) e ⟩
+        _ ∎
+  where
+    open ≡-Reasoning
+
 forExE-qᵉ-forExE-Wkᵛ≡forExE-Wkᵛ-forExE : ∀ {R}
                                            ⦃ varSub : VarSubBase {lzero} R ⦄
                                            ⦃ _ : RawVarSubId ⦃ varSub ⦄ ⦄
@@ -329,6 +376,26 @@ forExE-qᵉ-forExE-Wkᵛ≡forExE-Wkᵛ-forExE : ∀ {R}
                                          RawAppSub.forExE (qᵉ δ) (RawAppSub.forExE (Wkᵛ {A = A}) ee) ≡ RawAppSub.forExE Wkᵛ (RawAppSub.forExE δ ee)
 forExE-qᵉ-forExE-Wkᵛ≡forExE-Wkᵛ-forExE δ (-`$ e)      = cong -`$_ (⟦qᵉ-⟧ᵛ⟦Wkᵛ⟧ᵛ≡⟦Wkᵛ⟧ᵛ⟦-⟧ᵛ δ e)
 forExE-qᵉ-forExE-Wkᵛ≡forExE-Wkᵛ-forExE δ (`let-`in e) = cong `let-`in_ (⟦qᵉ³-⟧ᵛ⟦qᵉ²Wkᵛ⟧ᵛ≡⟦qᵉ²Wkᵛ⟧ᵛ⟦qᵉ²-⟧ᵛ δ e)
+
+forExE-qᵉ²-forExE-Wkᵛ²≡forExE-Wkᵛ²-forExE : ∀ {R}
+                                              ⦃ varSub : VarSubBase {lzero} R ⦄
+                                              ⦃ _ : RawVarSubId ⦃ varSub ⦄ ⦄
+                                              ⦃ _ : RawVarSubOutHead ⦃ varSub ⦄ ⦄
+                                              ⦃ _ : RawVarSubLift ⦃ ExtVarSub ⦄ ⦃ varSub ⦄ ⦄
+                                              ⦃ _ : RawVarSubLift ⦃ varSub ⦄ ⦃ SubVarSub ⦄ ⦄
+                                              ⦃ _ : RawVarSubApp ⦃ ExtVarSub ⦄ ⦃ varSub ⦄ ⦃ varSub ⦄ ⦄
+                                              ⦃ _ : VarSubOutHeadSpec ⦃ varSub ⦄ ⦄
+                                              ⦃ _ : VarSubLiftId ⦃ ExtVarSub ⦄ ⦃ varSub ⦄ ⦄
+                                              ⦃ _ : VarSubIdNoOpʳ ⦃ ExtVarSub ⦄ ⦃ varSub ⦄ ⦃ varSub ⦄ ⦄
+                                              ⦃ _ : VarSubAppExtensional ⦃ ExtVarSub ⦄ ⦃ varSub ⦄ ⦃ varSub ⦄ ⦄
+                                              ⦃ _ : VarSubAppCompositional ⦃ ExtVarSub ⦄ ⦃ ExtVarSub ⦄ ⦃ varSub ⦄ ⦄
+                                              ⦃ _ : VarSubAppCompositional ⦃ ExtVarSub ⦄ ⦃ varSub ⦄ ⦃ ExtVarSub ⦄ ⦄
+                                              ⦃ _ : VarSubAppCompositional ⦃ ExtVarSub ⦄ ⦃ varSub ⦄ ⦃ SubVarSub ⦄ ⦄
+                                              ⦃ _ : VarSubAppCompositional ⦃ varSub ⦄ ⦃ ExtVarSub ⦄ ⦃ SubVarSub ⦄ ⦄
+                                              (δ : VarSub ⦃ varSub ⦄ Γ Δ) (ee : ExE Δ C D) →
+                                            RawAppSub.forExE (qᵉ qᵉ δ) (RawAppSub.forExE (Wkᵛ {A = B} ∘ᵛ Wkᵛ {A = A}) ee) ≡ RawAppSub.forExE (Wkᵛ ∘ᵛ Wkᵛ) (RawAppSub.forExE δ ee)
+forExE-qᵉ²-forExE-Wkᵛ²≡forExE-Wkᵛ²-forExE δ (-`$ e)      = cong -`$_ (⟦qᵉ²-⟧ᵛ⟦Wkᵛ²⟧ᵛ≡⟦Wkᵛ²⟧ᵛ⟦-⟧ᵛ δ e)
+forExE-qᵉ²-forExE-Wkᵛ²≡forExE-Wkᵛ²-forExE δ (`let-`in e) = cong `let-`in_ (⟦qᵉ⁴-⟧ᵛ⟦qᵉ²Wkᵛ²⟧ᵛ≡⟦qᵉ²Wkᵛ²⟧ᵛ⟦qᵉ²-⟧ᵛ δ e)
 
 ⟦qᵉ-⟧ᵛ*⟦Wkᵛ⟧ᵛ*≡⟦Wkᵛ⟧ᵛ*⟦-⟧ᵛ* : ∀ {R}
                                 ⦃ varSub : VarSubBase {lzero} R ⦄

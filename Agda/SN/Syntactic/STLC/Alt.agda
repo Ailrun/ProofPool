@@ -148,29 +148,26 @@ module OpSem where
     -- Helpers for multi-step parallel reduction
     ------------------------------------------------------------
 
-    [!ᵛ⟶_]_ : ∀ {g g′ : Ex Δ B} → g ⟶ g′ → (x : A ∈ _) → (!ᵛ g) x ⟶* (!ᵛ g′) x
-    [!ᵛ⟶ g⟶ ] here refl = g⟶ ◅ ε
-    [!ᵛ⟶ g⟶ ] there x   = ε
+    ⟦!ᵛ⟶_⟧_ : ∀ {g g′ : Ex Δ B} → g ⟶ g′ → (x : A ∈ _) → (!ᵛ g) x ⟶* (!ᵛ g′) x
+    ⟦!ᵛ⟶ g⟶ ⟧ here refl = g⟶ ◅ ε
+    ⟦!ᵛ⟶ g⟶ ⟧ there x   = ε
 
-    infixr  7 qᵉˢ⟦_⟧_
-    qᵉˢ⟦_⟧_ = qᵛ⟦_⟧_ ⦃ ExtVarSub ⦄ ⦃ SubVarSub ⦄
+    ⟦qᵉ⟦_⟧!ᵛ⟶_⟧_ : ∀ {g g′ : Ex Δ B} Ψ → g ⟶ g′ → (x : A ∈ _) → (qᵉ⟦ Ψ ⟧ (!ᵛ g)) x ⟶* (qᵉ⟦ Ψ ⟧ (!ᵛ g′)) x
+    ⟦qᵉ⟦ []    ⟧!ᵛ⟶ g⟶ ⟧ x         = ⟦!ᵛ⟶ g⟶ ⟧ x
+    ⟦qᵉ⟦ _ ∷ Ψ ⟧!ᵛ⟶ g⟶ ⟧ here refl = ε
+    ⟦qᵉ⟦ _ ∷ Ψ ⟧!ᵛ⟶ g⟶ ⟧ there x   = ⟦ Wkᵛ ⟧ᵉ⟶* (⟦qᵉ⟦ Ψ ⟧!ᵛ⟶ g⟶ ⟧ x) 
 
-    [qᵉ⟦_⟧!ᵛ⟶_]_ : ∀ {g g′ : Ex Δ B} Ψ → g ⟶ g′ → (x : A ∈ _) → (qᵉˢ⟦ Ψ ⟧ (!ᵛ g)) x ⟶* (qᵉˢ⟦ Ψ ⟧ (!ᵛ g′)) x
-    [qᵉ⟦ []    ⟧!ᵛ⟶ g⟶ ] x         = [!ᵛ⟶ g⟶ ] x
-    [qᵉ⟦ _ ∷ Ψ ⟧!ᵛ⟶ g⟶ ] here refl = ε
-    [qᵉ⟦ _ ∷ Ψ ⟧!ᵛ⟶ g⟶ ] there x   = ⟦ Wkᵛ ⟧ᵉ⟶* ([qᵉ⟦ Ψ ⟧!ᵛ⟶ g⟶ ] x) 
-
-    ⟦qᵉ⟦_⟧!ᵛ⟶_⟧ˣ_ : ∀ {g g′ : Ex Δ B} Ψ → g ⟶ g′ → (e : Ex _ A) → ⟦ qᵉˢ⟦ Ψ ⟧ !ᵛ g ⟧ᵛ e ⟶* ⟦ qᵉˢ⟦ Ψ ⟧ !ᵛ g′ ⟧ᵛ e
-    ⟦qᵉ⟦ Ψ ⟧!ᵛ⟶ g⟶ ⟧ˣ `# x       = [qᵉ⟦ Ψ ⟧!ᵛ⟶ g⟶ ] x
-    ⟦qᵉ⟦ Ψ ⟧!ᵛ⟶ g⟶ ⟧ˣ (`λ e)     = Star.gmap _ `λ_ (⟦qᵉ⟦ _ ∷ Ψ ⟧!ᵛ⟶ g⟶ ⟧ˣ e)
-    ⟦qᵉ⟦ Ψ ⟧!ᵛ⟶ g⟶ ⟧ˣ (e `∷ᵉ ee) = Star.gmap _ _`∷ᵉ? (⟦qᵉ⟦ Ψ ⟧!ᵛ⟶ g⟶ ⟧ˣ e) ◅◅ Star.gmap _ ?`∷ᵉ_ (forExE ee)
+    ⟦qᵉ⟦_⟧!ᵛ⟶_⟧ᵛ_ : ∀ {g g′ : Ex Δ B} Ψ → g ⟶ g′ → (e : Ex _ A) → ⟦ qᵉ⟦ Ψ ⟧ !ᵛ g ⟧ᵛ e ⟶* ⟦ qᵉ⟦ Ψ ⟧ !ᵛ g′ ⟧ᵛ e
+    ⟦qᵉ⟦ Ψ ⟧!ᵛ⟶ g⟶ ⟧ᵛ `# x       = ⟦qᵉ⟦ Ψ ⟧!ᵛ⟶ g⟶ ⟧ x
+    ⟦qᵉ⟦ Ψ ⟧!ᵛ⟶ g⟶ ⟧ᵛ (`λ e)     = Star.gmap _ `λ_ (⟦qᵉ⟦ _ ∷ Ψ ⟧!ᵛ⟶ g⟶ ⟧ᵛ e)
+    ⟦qᵉ⟦ Ψ ⟧!ᵛ⟶ g⟶ ⟧ᵛ (e `∷ᵉ ee) = Star.gmap _ _`∷ᵉ? (⟦qᵉ⟦ Ψ ⟧!ᵛ⟶ g⟶ ⟧ᵛ e) ◅◅ Star.gmap _ ?`∷ᵉ_ (forExE ee)
       where
         forExE : (ee : ExE _ A B) →
-                 RawAppSub.forExE (qᵉˢ⟦ Ψ ⟧ !ᵛ _) ee ⟶ᵉ* RawAppSub.forExE (qᵉˢ⟦ Ψ ⟧ !ᵛ _) ee
-        forExE (-`$ e) = Star.gmap _ -`$_ (⟦qᵉ⟦ Ψ ⟧!ᵛ⟶ g⟶ ⟧ˣ e)
+                 RawAppSub.forExE (qᵉ⟦ Ψ ⟧ !ᵛ _) ee ⟶ᵉ* RawAppSub.forExE (qᵉ⟦ Ψ ⟧ !ᵛ _) ee
+        forExE (-`$ e) = Star.gmap _ -`$_ (⟦qᵉ⟦ Ψ ⟧!ᵛ⟶ g⟶ ⟧ᵛ e)
 
-    ⟦!ᵛ⟶_⟧ˣ_ : ∀ {g g′ : Ex Δ B} → g ⟶ g′ → (e : Ex _ A) → ⟦ !ˢ g ⟧ᵛ e ⟶* ⟦ !ˢ g′ ⟧ᵛ e
-    ⟦!ᵛ⟶_⟧ˣ_ = ⟦qᵉ⟦ [] ⟧!ᵛ⟶_⟧ˣ_
+    ⟦!ᵛ⟶_⟧ᵛ_ : ∀ {g g′ : Ex Δ B} → g ⟶ g′ → (e : Ex _ A) → ⟦ !ˢ g ⟧ᵛ e ⟶* ⟦ !ˢ g′ ⟧ᵛ e
+    ⟦!ᵛ⟶_⟧ᵛ_ = ⟦qᵉ⟦ [] ⟧!ᵛ⟶_⟧ᵛ_
 
     ⟶*-cases : e ⟶* e′ → e ≡ e′ ⊎ e′ +⟵ e
     ⟶*-cases =
@@ -268,14 +265,14 @@ module AccessibilitySN where
              WfRec _⟵_ _∈sn ((`λ e) `∷ᵉ -`$ f `++ˢ es)
         go e es (acc frec) (acc ⟦f⟧eesrec) efes⟶
           with `++ˢ-⟶-cases (`λ _ `∷ᵉ -`$ _) es efes⟶
-        ...  | es-step es′ _ es⟶                         = acc (go _ es′ (acc frec) (⟦f⟧eesrec [ simplify-⟶ˢ es⟶ _ ]))
-        ...  | e-step `→β                                = TC.accessible⁻ _⟵_ (acc ⟦f⟧eesrec)
-        ...  | e-step ((`λ e⟶) `∷ᵉ?)                     = acc (go _ es (acc frec) (⟦f⟧eesrec [ (⟦ !ᵛ _ ⟧ᵛ⟶ e⟶) `++ˢ⟶ es ]))
+        ...  | es-step es′ _ es⟶                 = acc (go _ es′ (acc frec) (⟦f⟧eesrec [ simplify-⟶ˢ es⟶ _ ]))
+        ...  | e-step `→β                        = TC.accessible⁻ _⟵_ (acc ⟦f⟧eesrec)
+        ...  | e-step ((`λ e⟶) `∷ᵉ?)             = acc (go _ es (acc frec) (⟦f⟧eesrec [ (⟦ !ᵛ _ ⟧ᵛ⟶ e⟶) `++ˢ⟶ es ]))
         ...  | e-step (       ?`∷ᵉ (-`$ f⟶))
-            with ⟶*-cases (⟦!ᵛ⟶ f⟶ ⟧ˣ e)
+            with ⟶*-cases (⟦!ᵛ⟶ f⟶ ⟧ᵛ e)
         ...    | inj₁ eq″
-              rewrite eq″                                = acc (go _ es (frec f⟶) (acc ⟦f⟧eesrec))
-        ...    | inj₂ ⟦f⟧e⟶+                             = acc (go _ es (frec f⟶) (⟦f⟧eesrec (TC.equivalent .to (TC.map (_`++ˢ⟶ es) (TC.equivalent .from ⟦f⟧e⟶+)))))
+              rewrite eq″                        = acc (go _ es (frec f⟶) (acc ⟦f⟧eesrec))
+        ...    | inj₂ ⟦f⟧e⟶+                     = acc (go _ es (frec f⟶) (⟦f⟧eesrec (TC.equivalent .to (TC.map (_`++ˢ⟶ es) (TC.equivalent .from ⟦f⟧e⟶+)))))
 
 open AccessibilitySN            hiding (module Properties) public
 open AccessibilitySN.Properties public
