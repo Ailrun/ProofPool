@@ -1,5 +1,5 @@
 {-# OPTIONS --safe #-}
-module SN.Syntactic.STLC.WithCC.Alt where
+module SN.Syntactic.STLC.SumCC.Alt where
 
 open import Agda.Primitive                                                   using (Level; lzero)
 open import Data.Empty                                                       using (⊥)
@@ -146,20 +146,20 @@ module OpSem where
       forEx  : (δ : Ext Γ Δ) → ∀ {e e′ : Ex Δ A} → e ⟶ e′ → ⟦ δ ⟧ᵛ e ⟶ ⟦ δ ⟧ᵛ e′
       forExE : (δ : Ext Γ Δ) → ∀ {ee ee′ : ExE Δ A B} → ee ⟶ᵉ ee′ → RawAppSub.forExE δ ee ⟶ᵉ RawAppSub.forExE δ ee′
 
-      forEx δ (e⟶ `∷ᵉ?)                                              = (forEx δ e⟶) `∷ᵉ?
-      forEx δ (  ?`∷ᵉ_ {Γ = Δ} {A = A} {B = B} ee⟶)                  = ?`∷ᵉ forExE δ ee⟶
-      forEx δ (`λ e⟶)                                                = `λ (forEx (qᵉ δ) e⟶)
+      forEx δ (e⟶ `∷ᵉ?)                                             = (forEx δ e⟶) `∷ᵉ?
+      forEx δ (  ?`∷ᵉ_ {Γ = Δ} {A = A} {B = B} ee⟶)                 = ?`∷ᵉ forExE δ ee⟶
+      forEx δ (`λ e⟶)                                               = `λ (forEx (qᵉ δ) e⟶)
       forEx δ (`→β {e = e} {f})
-        rewrite sym (⟦!ᵛ⟦-⟧ᵛ-⟧ᵛ⟦qᵛ-⟧ᵛ≡⟦-⟧ᵛ⟦!ᵛ-⟧ᵛ δ f e)              = `→β
-      forEx δ (`injₗ e⟶)                                             = `injₗ (forEx δ e⟶)
-      forEx δ (`injᵣ e⟶)                                             = `injᵣ (forEx δ e⟶)
+        rewrite sym (⟦!ᵛ⟦-⟧ᵛ-⟧ᵛ⟦qᵛ-⟧ᵛ≡⟦-⟧ᵛ⟦!ᵛ-⟧ᵛ δ f e)             = `→β
+      forEx δ (`injₗ e⟶)                                            = `injₗ (forEx δ e⟶)
+      forEx δ (`injᵣ e⟶)                                            = `injᵣ (forEx δ e⟶)
       forEx δ (`+βₗ {e = e} {fₗ = fₗ})
-        rewrite sym (⟦!ᵛ⟦-⟧ᵛ-⟧ᵛ⟦qᵛ-⟧ᵛ≡⟦-⟧ᵛ⟦!ᵛ-⟧ᵛ δ e fₗ)             = `+βₗ
+        rewrite sym (⟦!ᵛ⟦-⟧ᵛ-⟧ᵛ⟦qᵛ-⟧ᵛ≡⟦-⟧ᵛ⟦!ᵛ-⟧ᵛ δ e fₗ)            = `+βₗ
       forEx δ (`+βᵣ {e = e} {fᵣ = fᵣ})
-        rewrite sym (⟦!ᵛ⟦-⟧ᵛ-⟧ᵛ⟦qᵛ-⟧ᵛ≡⟦-⟧ᵛ⟦!ᵛ-⟧ᵛ δ e fᵣ)             = `+βᵣ
+        rewrite sym (⟦!ᵛ⟦-⟧ᵛ-⟧ᵛ⟦qᵛ-⟧ᵛ≡⟦-⟧ᵛ⟦!ᵛ-⟧ᵛ δ e fᵣ)            = `+βᵣ
       forEx δ (`+χ {A = A} {B = B} {ee = ee})
-        rewrite forExE-qᵉᵉ-forExE-Wkᵛ≡forExE-Wkᵛ-forExE {A = A} δ ee
-              | forExE-qᵉᵉ-forExE-Wkᵛ≡forExE-Wkᵛ-forExE {A = B} δ ee = `+χ
+        rewrite forExE-qᵉ-forExE-Wkᵛ≡forExE-Wkᵛ-forExE {A = A} δ ee
+              | forExE-qᵉ-forExE-Wkᵛ≡forExE-Wkᵛ-forExE {A = B} δ ee = `+χ
 
       forExE δ (-`$ e⟶)           = -`$ (forEx δ e⟶)
       forExE δ `case-`of eₗ⟶ `/?  = `case-`of (forEx (qᵉ δ) eₗ⟶) `/?
@@ -188,8 +188,8 @@ module OpSem where
       forEx σ (`+βᵣ {e = e} {fᵣ = fᵣ})
         rewrite sym (⟦!ᵛ⟦-⟧ᵛ-⟧ᵛ⟦qᵛ-⟧ᵛ≡⟦-⟧ᵛ⟦!ᵛ-⟧ᵛ ⦃ varSub₄ = SubVarSub ⦄ σ e fᵣ) = `+βᵣ
       forEx σ (`+χ {A = A} {B = B} {ee = ee})
-        rewrite forExE-qᵉˢ-forExE-Wkᵛ≡forExE-Wkᵛ-forExE {A = A} σ ee
-              | forExE-qᵉˢ-forExE-Wkᵛ≡forExE-Wkᵛ-forExE {A = B} σ ee             = `+χ
+        rewrite forExE-qᵉ-forExE-Wkᵛ≡forExE-Wkᵛ-forExE {A = A} σ ee
+              | forExE-qᵉ-forExE-Wkᵛ≡forExE-Wkᵛ-forExE {A = B} σ ee              = `+χ
 
       forExE σ (-`$ e⟶)           = -`$ (forEx σ e⟶)
       forExE σ `case-`of eₗ⟶ `/?  = `case-`of (forEx (qᵉ σ) eₗ⟶) `/?
@@ -350,8 +350,8 @@ module AccessibilitySN where
                    e′ `++ˢ ⟦ δ ⟧ᵛ* (`case-`of fₗ `/ fᵣ ◅ ee₀ ◅ es₀)
                    ⟶ e′ `++ˢ ⟦ δ ⟧ᵛ* (`+χ-result fₗ fᵣ ee₀ ◅ es₀)
           helper δ e′
-            rewrite forExE-qᵉᵉ-forExE-Wkᵛ≡forExE-Wkᵛ-forExE {A = A} δ ee₀
-                  | forExE-qᵉᵉ-forExE-Wkᵛ≡forExE-Wkᵛ-forExE {A = B} δ ee₀ = `+χ `++ˢ⟶ ⟦ δ ⟧ᵛ* es₀
+            rewrite forExE-qᵉ-forExE-Wkᵛ≡forExE-Wkᵛ-forExE {A = A} δ ee₀
+                  | forExE-qᵉ-forExE-Wkᵛ≡forExE-Wkᵛ-forExE {A = B} δ ee₀ = `+χ `++ˢ⟶ ⟦ δ ⟧ᵛ* es₀
 
     ∈sn-weak-head-expansion`→ : ∀ (e : Ex (A ∷ Γ) B) {f : Ex Γ A} (es : ExEs Γ B C) →
                                 f ∈sn →
@@ -477,8 +477,8 @@ module AccessibilitySN where
                    f `++ˢ ⟦ Wkᵛ ⟧ᵛ* (`case-`of gₗ `/ gᵣ ◅ ee′ ◅ ε)
                    ⟶ f `∷ᵉ RawAppSub.forExE Wkᵛ (`+χ-result gₗ gᵣ ee′)
             `+χ′ {F = F}
-              rewrite forExE-qᵉᵉ-forExE-Wkᵛ≡forExE-Wkᵛ-forExE {A = C} (Wkᵛ {A = F}) ee′
-                    | forExE-qᵉᵉ-forExE-Wkᵛ≡forExE-Wkᵛ-forExE {A = D} (Wkᵛ {A = F}) ee′ = `+χ
+              rewrite forExE-qᵉ-forExE-Wkᵛ≡forExE-Wkᵛ-forExE {A = C} (Wkᵛ {A = F}) ee′
+                    | forExE-qᵉ-forExE-Wkᵛ≡forExE-Wkᵛ-forExE {A = D} (Wkᵛ {A = F}) ee′ = `+χ
 
 open AccessibilitySN            hiding (module Properties) public
 open AccessibilitySN.Properties public
@@ -619,31 +619,31 @@ module InductiveSN where
     ⟦_⟧ᵉ∈SNe$_ : ∀ {e : Ex Γ A} (δ : Ext Δ Γ) → e ∈SNe$ → ⟦ δ ⟧ᵛ e ∈SNe$
     ⟦_⟧ᵉ∈SN$ˢ_ : ∀ {es : ExEs Γ A B} (δ : Ext Δ Γ) → es ∈SN$ˢ → ⟦ δ ⟧ᵛ* es ∈SN$ˢ
 
-    ⟦ δ ⟧ᵉ∈SN (eSN `∷ᵉ?)                                             = (⟦ δ ⟧ᵉ∈SN eSN) `∷ᵉ?
-    ⟦ δ ⟧ᵉ∈SN (`λ eSN)                                               = `λ (⟦ qᵉ δ ⟧ᵉ∈SN eSN)
-    ⟦ δ ⟧ᵉ∈SN (`injₗ eSN)                                            = `injₗ (⟦ δ ⟧ᵉ∈SN eSN)
-    ⟦ δ ⟧ᵉ∈SN (`injᵣ eSN)                                            = `injᵣ (⟦ δ ⟧ᵉ∈SN eSN)
-    ⟦ δ ⟧ᵉ∈SN `Ne$ eSNe$ esSN                                        = `Ne$ (⟦ δ ⟧ᵉ∈SNe$ eSNe$) (⟦ δ ⟧ᵉ∈SN$ˢ esSN)
+    ⟦ δ ⟧ᵉ∈SN (eSN `∷ᵉ?)                                            = (⟦ δ ⟧ᵉ∈SN eSN) `∷ᵉ?
+    ⟦ δ ⟧ᵉ∈SN (`λ eSN)                                              = `λ (⟦ qᵉ δ ⟧ᵉ∈SN eSN)
+    ⟦ δ ⟧ᵉ∈SN (`injₗ eSN)                                           = `injₗ (⟦ δ ⟧ᵉ∈SN eSN)
+    ⟦ δ ⟧ᵉ∈SN (`injᵣ eSN)                                           = `injᵣ (⟦ δ ⟧ᵉ∈SN eSN)
+    ⟦ δ ⟧ᵉ∈SN `Ne$ eSNe$ esSN                                       = `Ne$ (⟦ δ ⟧ᵉ∈SNe$ eSNe$) (⟦ δ ⟧ᵉ∈SN$ˢ esSN)
     ⟦ δ ⟧ᵉ∈SN `→β {e = e} {f} fSN ⟦f⟧eSN
       with ⟦δ⟧⟦f⟧eSN ← ⟦ δ ⟧ᵉ∈SN ⟦f⟧eSN
-        rewrite sym (⟦!ᵛ⟦-⟧ᵛ-⟧ᵛ⟦qᵛ-⟧ᵛ≡⟦-⟧ᵛ⟦!ᵛ-⟧ᵛ δ f e)              = `→β (⟦ δ ⟧ᵉ∈SN fSN) ⟦δ⟧⟦f⟧eSN
+        rewrite sym (⟦!ᵛ⟦-⟧ᵛ-⟧ᵛ⟦qᵛ-⟧ᵛ≡⟦-⟧ᵛ⟦!ᵛ-⟧ᵛ δ f e)             = `→β (⟦ δ ⟧ᵉ∈SN fSN) ⟦δ⟧⟦f⟧eSN
     ⟦ δ ⟧ᵉ∈SN `+βₗ {B = B} {e = e} {fₗ} {fᵣ} {es} eSN ⟦e⟧fₗSN fᵣSN
       with ⟦δ⟧⟦e⟧fₗSN ← ⟦ δ ⟧ᵉ∈SN ⟦e⟧fₗSN
          | ⟦qδ⟧fᵣSN ← ⟦ qᵉ δ ⟧ᵉ∈SN fᵣSN
         rewrite sym (⟦!ᵛ⟦-⟧ᵛ-⟧ᵛ⟦qᵛ-⟧ᵛ≡⟦-⟧ᵛ⟦!ᵛ-⟧ᵛ δ e fₗ)
-              | ⟦qᵉᵉ-⟧ᵛ*⟦Wkᵛ⟧ᵛ*≡⟦Wkᵛ⟧ᵛ*⟦-⟧ᵛ* {A = B} δ es            = `+βₗ (⟦ δ ⟧ᵉ∈SN eSN) ⟦δ⟧⟦e⟧fₗSN ⟦qδ⟧fᵣSN
+              | ⟦qᵉ-⟧ᵛ*⟦Wkᵛ⟧ᵛ*≡⟦Wkᵛ⟧ᵛ*⟦-⟧ᵛ* {A = B} δ es            = `+βₗ (⟦ δ ⟧ᵉ∈SN eSN) ⟦δ⟧⟦e⟧fₗSN ⟦qδ⟧fᵣSN
     ⟦ δ ⟧ᵉ∈SN `+βᵣ {A = A} {e = e} {fₗ} {fᵣ} {es} eSN ⟦e⟧fᵣSN fₗSN
       with ⟦δ⟧⟦e⟧fᵣSN ← ⟦ δ ⟧ᵉ∈SN ⟦e⟧fᵣSN
          | ⟦qδ⟧fₗSN ← ⟦ qᵉ δ ⟧ᵉ∈SN fₗSN
         rewrite sym (⟦!ᵛ⟦-⟧ᵛ-⟧ᵛ⟦qᵛ-⟧ᵛ≡⟦-⟧ᵛ⟦!ᵛ-⟧ᵛ δ e fᵣ)
-              | ⟦qᵉᵉ-⟧ᵛ*⟦Wkᵛ⟧ᵛ*≡⟦Wkᵛ⟧ᵛ*⟦-⟧ᵛ* {A = A} δ es            = `+βᵣ (⟦ δ ⟧ᵉ∈SN eSN) ⟦δ⟧⟦e⟧fᵣSN ⟦qδ⟧fₗSN
+              | ⟦qᵉ-⟧ᵛ*⟦Wkᵛ⟧ᵛ*≡⟦Wkᵛ⟧ᵛ*⟦-⟧ᵛ* {A = A} δ es            = `+βᵣ (⟦ δ ⟧ᵉ∈SN eSN) ⟦δ⟧⟦e⟧fᵣSN ⟦qδ⟧fₗSN
     ⟦ δ ⟧ᵉ∈SN `+χ {A = A} {B = B} {ee = ee} eSNe$ efₗeefᵣeeSN
       with ⟦δ⟧efₗeefᵣeeSN ← ⟦ δ ⟧ᵉ∈SN efₗeefᵣeeSN
-        rewrite forExE-qᵉᵉ-forExE-Wkᵛ≡forExE-Wkᵛ-forExE {A = A} δ ee
-              | forExE-qᵉᵉ-forExE-Wkᵛ≡forExE-Wkᵛ-forExE {A = B} δ ee = `+χ (⟦ δ ⟧ᵉ∈SNe$ eSNe$) ⟦δ⟧efₗeefᵣeeSN
-    ⟦ δ ⟧ᵉ∈SN (eSNe$ `$⁻ appSN)                                      = ⟦ δ ⟧ᵉ∈SNe$ eSNe$ `$⁻ ⟦ δ ⟧ᵉ∈SN appSN
-    ⟦ δ ⟧ᵉ∈SN (`case⁻ eSNe$ `of caseSN)                              = `case⁻ ⟦ δ ⟧ᵉ∈SNe$ eSNe$ `of ⟦ δ ⟧ᵉ∈SN caseSN
-    ⟦ δ ⟧ᵉ∈SN (`case eSNe$ `of fₗSN `/ fᵣSN)                         = `case ⟦ δ ⟧ᵉ∈SNe$ eSNe$ `of ⟦ qᵉ δ ⟧ᵉ∈SN fₗSN `/ ⟦ qᵉ δ ⟧ᵉ∈SN fᵣSN
+        rewrite forExE-qᵉ-forExE-Wkᵛ≡forExE-Wkᵛ-forExE {A = A} δ ee
+              | forExE-qᵉ-forExE-Wkᵛ≡forExE-Wkᵛ-forExE {A = B} δ ee = `+χ (⟦ δ ⟧ᵉ∈SNe$ eSNe$) ⟦δ⟧efₗeefᵣeeSN
+    ⟦ δ ⟧ᵉ∈SN (eSNe$ `$⁻ appSN)                                     = ⟦ δ ⟧ᵉ∈SNe$ eSNe$ `$⁻ ⟦ δ ⟧ᵉ∈SN appSN
+    ⟦ δ ⟧ᵉ∈SN (`case⁻ eSNe$ `of caseSN)                             = `case⁻ ⟦ δ ⟧ᵉ∈SNe$ eSNe$ `of ⟦ δ ⟧ᵉ∈SN caseSN
+    ⟦ δ ⟧ᵉ∈SN (`case eSNe$ `of fₗSN `/ fᵣSN)                        = `case ⟦ δ ⟧ᵉ∈SNe$ eSNe$ `of ⟦ qᵉ δ ⟧ᵉ∈SN fₗSN `/ ⟦ qᵉ δ ⟧ᵉ∈SN fᵣSN
 
     ⟦ δ ⟧ᵉ∈SNe$ (`# x)          = `# δ x
     ⟦ δ ⟧ᵉ∈SNe$ (eSNe$ `∷ᵉ fSN) = ⟦ δ ⟧ᵉ∈SNe$ eSNe$ `∷ᵉ ⟦ δ ⟧ᵉ∈SN fSN
@@ -802,8 +802,8 @@ module InductiveSN where
             rewrite forExE-!ˢ-forExE-Wkᵛ≡id e ee₁                                                                   = `+βᵣ eSN (`∷ᵉ?-inv ⟦e⟧fᵣSN .proj₁) (`∷ᵉ?-inv fₗSN .proj₁)
           helper                 ε                                      (`+χ eSNe$ eSN)                         eq  = `+χ eSNe$ (`+χ eSNe$ eSN)
           helper {B = B} {C = C} (ee₀ ◅ ε)                  {ee₁ = ee₁} (`+βₗ {B = H} eSN ⟦e⟧gₗSN gᵣSN)         eq
-            rewrite forExE-qᵉᵉ-forExE-Wkᵛ≡forExE-Wkᵛ-forExE {A = B} (Wkᵛ {A = H}) ee₁
-                  | forExE-qᵉᵉ-forExE-Wkᵛ≡forExE-Wkᵛ-forExE {A = C} (Wkᵛ {A = H}) ee₁                               = `+βₗ eSN
+            rewrite forExE-qᵉ-forExE-Wkᵛ≡forExE-Wkᵛ-forExE {A = B} (Wkᵛ {A = H}) ee₁
+                  | forExE-qᵉ-forExE-Wkᵛ≡forExE-Wkᵛ-forExE {A = C} (Wkᵛ {A = H}) ee₁                                = `+βₗ eSN
                                                                                                                       (∈SN-commuting-expansion⁺-gen _
                                                                                                                         (nrec (subst (_ <_) (sym eq) (s≤s (ℕ.≤-trans (ℕ.m≤n+m _ (size⟦ _ ∈SN⟦ _ ⟧⟧ eSN)) (ℕ.m≤m+n _ _)))))
                                                                                                                         ε ⟦e⟧gₗSN refl)
@@ -811,8 +811,8 @@ module InductiveSN where
                                                                                                                         (nrec (subst (_ <_) (sym eq) (s≤s (ℕ.m≤n+m _ _))))
                                                                                                                         ε gᵣSN refl)
           helper {B = B} {C = C} (ee₀ ◅ ε)                  {ee₁ = ee₁} (`+βᵣ {A = G} eSN ⟦e⟧gᵣSN gₗSN)        eq
-            rewrite forExE-qᵉᵉ-forExE-Wkᵛ≡forExE-Wkᵛ-forExE {A = B} (Wkᵛ {A = G}) ee₁
-                  | forExE-qᵉᵉ-forExE-Wkᵛ≡forExE-Wkᵛ-forExE {A = C} (Wkᵛ {A = G}) ee₁                               = `+βᵣ eSN
+            rewrite forExE-qᵉ-forExE-Wkᵛ≡forExE-Wkᵛ-forExE {A = B} (Wkᵛ {A = G}) ee₁
+                  | forExE-qᵉ-forExE-Wkᵛ≡forExE-Wkᵛ-forExE {A = C} (Wkᵛ {A = G}) ee₁                                = `+βᵣ eSN
                                                                                                                       (∈SN-commuting-expansion⁺-gen _
                                                                                                                         (nrec (subst (_ <_) (sym eq) (s≤s (ℕ.≤-trans (ℕ.m≤n+m _ (size⟦ _ ∈SN⟦ _ ⟧⟧ eSN)) (ℕ.m≤m+n _ _)))))
                                                                                                                         ε ⟦e⟧gᵣSN refl)
@@ -822,10 +822,10 @@ module InductiveSN where
           helper {B = B} {C = C} (ee₀ ◅ ε)                  {ee₁ = ee₁} (`+χ {A = G} {H} {es = es₁} eSNe$ eSN) eq
             with eSN′ , ≤eSN ← `+χ*-inv eSNe$ ε eSN
               with gₗfₗfᵣSN , gᵣfₗfᵣSN , gₗfₗfᵣSN< , gᵣfₗfᵣSN< ← ∈SNe$-`case-inv eSNe$ ε eSN′
-                rewrite forExE-qᵉᵉ-forExE-Wkᵛ≡forExE-Wkᵛ-forExE {A = B} (Wkᵛ {A = G}) ee₁
-                      | forExE-qᵉᵉ-forExE-Wkᵛ≡forExE-Wkᵛ-forExE {A = B} (Wkᵛ {A = H}) ee₁
-                      | forExE-qᵉᵉ-forExE-Wkᵛ≡forExE-Wkᵛ-forExE {A = C} (Wkᵛ {A = G}) ee₁
-                      | forExE-qᵉᵉ-forExE-Wkᵛ≡forExE-Wkᵛ-forExE {A = C} (Wkᵛ {A = H}) ee₁
+                rewrite forExE-qᵉ-forExE-Wkᵛ≡forExE-Wkᵛ-forExE {A = B} (Wkᵛ {A = G}) ee₁
+                      | forExE-qᵉ-forExE-Wkᵛ≡forExE-Wkᵛ-forExE {A = B} (Wkᵛ {A = H}) ee₁
+                      | forExE-qᵉ-forExE-Wkᵛ≡forExE-Wkᵛ-forExE {A = C} (Wkᵛ {A = G}) ee₁
+                      | forExE-qᵉ-forExE-Wkᵛ≡forExE-Wkᵛ-forExE {A = C} (Wkᵛ {A = H}) ee₁
                 with gₗfₗfᵣSN′ , ≤gₗfₗfᵣSN ← `∷ᵉ?*-inv′ (_ ◅ ⟦ Wkᵛ ⟧ᵛ* es₁) gₗfₗfᵣSN
                    | gᵣfₗfᵣSN′ , ≤gᵣfₗfᵣSN ← `∷ᵉ?*-inv′ (_ ◅ ⟦ Wkᵛ ⟧ᵛ* es₁) gᵣfₗfᵣSN                                = ∈SN-commuting-expansion* eSNe$ ε
                                                                                                                       (`case⁻ eSNe$ `of
@@ -842,8 +842,8 @@ module InductiveSN where
           helper                 (ee₀ ◅ es₀)                            (`→β gSN ⟦g⟧eSN)                       refl = `→β gSN (∈SN-commuting-expansion⁺-gen _ (nrec (s≤s (ℕ.m≤n+m _ _))) es₀ ⟦g⟧eSN refl)
           helper {B = B} {C = C} (ee₀ ◅ es₀) {fₗ = fₗ} {fᵣ} {ee₁} {es₁} (`+βₗ {B = H} eSN ⟦e⟧gₗSN gᵣSN)        eq
             rewrite ◅◅-⟦-⟧ᵛ-commute (Wkᵛ {A = H}) es₀ (`+χ-result fₗ fᵣ ee₁ ◅ es₁)
-                  | forExE-qᵉᵉ-forExE-Wkᵛ≡forExE-Wkᵛ-forExE {A = B} (Wkᵛ {A = H}) ee₁
-                  | forExE-qᵉᵉ-forExE-Wkᵛ≡forExE-Wkᵛ-forExE {A = C} (Wkᵛ {A = H}) ee₁                               = `+βₗ eSN
+                  | forExE-qᵉ-forExE-Wkᵛ≡forExE-Wkᵛ-forExE {A = B} (Wkᵛ {A = H}) ee₁
+                  | forExE-qᵉ-forExE-Wkᵛ≡forExE-Wkᵛ-forExE {A = C} (Wkᵛ {A = H}) ee₁                                = `+βₗ eSN
                                                                                                                       (∈SN-commuting-expansion⁺-gen _
                                                                                                                         (nrec (subst (_ <_) (sym eq) (s≤s (ℕ.≤-trans (ℕ.m≤n+m _ (size⟦ _ ∈SN⟦ _ ⟧⟧ eSN)) (ℕ.m≤m+n _ _)))))
                                                                                                                         es₀ ⟦e⟧gₗSN refl)
@@ -853,8 +853,8 @@ module InductiveSN where
                                                                                                                           (⟦ Wkᵛ ⟧ᵛ* es₀) gᵣSN refl))
           helper {B = B} {C = C} (ee₀ ◅ es₀) {fₗ = fₗ} {fᵣ} {ee₁} {es₁} (`+βᵣ {A = G} eSN ⟦e⟧gᵣSN gₗSN)        eq
             rewrite ◅◅-⟦-⟧ᵛ-commute (Wkᵛ {A = G}) es₀ (`+χ-result fₗ fᵣ ee₁ ◅ es₁)
-                  | forExE-qᵉᵉ-forExE-Wkᵛ≡forExE-Wkᵛ-forExE {A = B} (Wkᵛ {A = G}) ee₁
-                  | forExE-qᵉᵉ-forExE-Wkᵛ≡forExE-Wkᵛ-forExE {A = C} (Wkᵛ {A = G}) ee₁                               = `+βᵣ eSN
+                  | forExE-qᵉ-forExE-Wkᵛ≡forExE-Wkᵛ-forExE {A = B} (Wkᵛ {A = G}) ee₁
+                  | forExE-qᵉ-forExE-Wkᵛ≡forExE-Wkᵛ-forExE {A = C} (Wkᵛ {A = G}) ee₁                                = `+βᵣ eSN
                                                                                                                       (∈SN-commuting-expansion⁺-gen _
                                                                                                                         (nrec (subst (_ <_) (sym eq) (s≤s (ℕ.≤-trans (ℕ.m≤n+m _ (size⟦ _ ∈SN⟦ _ ⟧⟧ eSN)) (ℕ.m≤m+n _ _)))))
                                                                                                                         es₀ ⟦e⟧gᵣSN refl)
@@ -1015,16 +1015,16 @@ module InductiveSN where
           with ⟦f⟧⟦e⟧gₗSN ← ⟦!ᵛ-⟧ᵛ-closure ⟦e⟧gₗSN fSN
              | ⟦f⟧gᵣSN ← ⟦!ᵛ-⟧ᵛ-closure {Δ = _ ∷ _} gᵣSN fSN
             rewrite sym (⟦!ᵛ⟦-⟧ᵛ-⟧ᵛ⟦qᵛ-⟧ᵛ≡⟦-⟧ᵛ⟦!ᵛ-⟧ᵛ (qᵛ⟦ Δ ⟧ !ˢ f) e gₗ)
-                  | ⟦qᵉˢ-⟧ᵛ*⟦Wkᵛ⟧ᵛ*≡⟦Wkᵛ⟧ᵛ*⟦-⟧ᵛ* {A = E} (qᵛ⟦ Δ ⟧ !ˢ f) es                                = `+βₗ (⟦!ᵛ-⟧ᵛ-closure eSN fSN) ⟦f⟧⟦e⟧gₗSN ⟦f⟧gᵣSN
+                  | ⟦qᵉ-⟧ᵛ*⟦Wkᵛ⟧ᵛ*≡⟦Wkᵛ⟧ᵛ*⟦-⟧ᵛ* {A = E} (qᵛ⟦ Δ ⟧ !ˢ f) es                                 = `+βₗ (⟦!ᵛ-⟧ᵛ-closure eSN fSN) ⟦f⟧⟦e⟧gₗSN ⟦f⟧gᵣSN
         ⟦!ᵛ-⟧ᵛ-closure {Δ = Δ} {es = _ ◅ es} {f}     (`+βᵣ {A = D} {e = e} {_} {gᵣ} eSN ⟦e⟧gᵣSN gₗSN) fSN
           with ⟦f⟧⟦e⟧gᵣSN ← ⟦!ᵛ-⟧ᵛ-closure ⟦e⟧gᵣSN fSN
              | ⟦f⟧gₗSN ← ⟦!ᵛ-⟧ᵛ-closure {Δ = _ ∷ _} gₗSN fSN
             rewrite sym (⟦!ᵛ⟦-⟧ᵛ-⟧ᵛ⟦qᵛ-⟧ᵛ≡⟦-⟧ᵛ⟦!ᵛ-⟧ᵛ (qᵛ⟦ Δ ⟧ !ˢ f) e gᵣ)
-                  | ⟦qᵉˢ-⟧ᵛ*⟦Wkᵛ⟧ᵛ*≡⟦Wkᵛ⟧ᵛ*⟦-⟧ᵛ* {A = D} (qᵛ⟦ Δ ⟧ !ˢ f) es                                = `+βᵣ (⟦!ᵛ-⟧ᵛ-closure eSN fSN) ⟦f⟧⟦e⟧gᵣSN ⟦f⟧gₗSN
+                  | ⟦qᵉ-⟧ᵛ*⟦Wkᵛ⟧ᵛ*≡⟦Wkᵛ⟧ᵛ*⟦-⟧ᵛ* {A = D} (qᵛ⟦ Δ ⟧ !ˢ f) es                                 = `+βᵣ (⟦!ᵛ-⟧ᵛ-closure eSN fSN) ⟦f⟧⟦e⟧gᵣSN ⟦f⟧gₗSN
         ⟦!ᵛ-⟧ᵛ-closure {Δ = Δ}               {f = f} (`+χ {A = D} {E} {ee = ee} eSNe$ eSN)            fSN
           with ⟦f⟧e∈SN ← ⟦!ᵛ-⟧ᵛ-closure eSN fSN
-            rewrite forExE-qᵉˢ-forExE-Wkᵛ≡forExE-Wkᵛ-forExE {A = D} (qᵛ⟦ Δ ⟧ !ˢ f) ee
-                  | forExE-qᵉˢ-forExE-Wkᵛ≡forExE-Wkᵛ-forExE {A = E} (qᵛ⟦ Δ ⟧ !ˢ f) ee                     = ∈SN-commuting-expansion⁺ ε ⟦f⟧e∈SN
+            rewrite forExE-qᵉ-forExE-Wkᵛ≡forExE-Wkᵛ-forExE {A = D} (qᵛ⟦ Δ ⟧ !ˢ f) ee
+                  | forExE-qᵉ-forExE-Wkᵛ≡forExE-Wkᵛ-forExE {A = E} (qᵛ⟦ Δ ⟧ !ˢ f) ee                      = ∈SN-commuting-expansion⁺ ε ⟦f⟧e∈SN
 
         ⟦!ᵛ-⟧ᵛ-closure$ (`# x)          fSN = inj₂ (!ᵛ-closure∈ x fSN)
         ⟦!ᵛ-⟧ᵛ-closure$ (eSNe$ `∷ᵉ gSN) fSN

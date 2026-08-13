@@ -478,9 +478,9 @@ module _
     ⦃ _ : VarSubAppExtensional ⦃ varSub₃ ⦄ ⦃ varSub₂ ⦄ ⦃ varSub₃ ⦄ ⦄
     ⦃ _ : VarSubAppCompositional ⦃ varSub₃ ⦄ ⦃ varSub₁ ⦄ ⦃ varSub₂ ⦄ ⦄ where
     opaque
-      !ᵛ-,ᵛ-∘ᵛ-qᵛqᵛ : ∀ (σ : VarSub₂ Γ Δ) (M₁ : R₃ Γ A₁) (M₂ : R₃ Γ A₂) →
-                      !ᵛ M₁ ,ᵛ M₂ ∘ᵛ qᵛ qᵛ σ ≈ᵛ₃ liftᵛ∘ σ ,ᵛ M₁ ,ᵛ M₂
-      !ᵛ-,ᵛ-∘ᵛ-qᵛqᵛ σ M₁ M₂ =
+      !ᵛ-,ᵛ-∘ᵛ-qᵛ² : ∀ (σ : VarSub₂ Γ Δ) (M₁ : R₃ Γ A₁) (M₂ : R₃ Γ A₂) →
+                     !ᵛ M₁ ,ᵛ M₂ ∘ᵛ qᵛ qᵛ σ ≈ᵛ₃ liftᵛ∘ σ ,ᵛ M₁ ,ᵛ M₂
+      !ᵛ-,ᵛ-∘ᵛ-qᵛ² σ M₁ M₂ =
         begin !ᵛ M₁ ,ᵛ M₂ ∘ᵛ qᵛ qᵛ σ ≈⟨ ,ᵛ-∘ᵛ-qᵛ (!ᵛ M₁) M₂ (qᵛ σ) ⟩
               (!ᵛ M₁ ∘ᵛ qᵛ σ) ,ᵛ M₂  ≈⟨ ,ᵛ-congᵛˡ M₂ (!ᵛ-∘ᵛ-qᵛ σ M₁) ⟩
               liftᵛ∘ σ ,ᵛ M₁ ,ᵛ M₂   ∎
@@ -540,6 +540,12 @@ module _
           R-headᵛ₃ = R-headᵛ ⦃ varSub₃ ⦄
           open VarSub-Reasoning ⦃ varSub₄ ⦄ _ _
 
+    opaque
+      qᵛ⟦_⟧-distrib-∘ᵛ : ∀ Φ (σ : VarSub₂ Ψ Δ) (τ : VarSub₃ Δ Γ) →
+                         qᵛ⟦ Φ ⟧ (σ ∘ᵛ τ) ≈ᵛ₄ qᵛ⟦ Φ ⟧ σ ∘ᵛ qᵛ⟦ Φ ⟧ τ
+      qᵛ⟦ []    ⟧-distrib-∘ᵛ σ τ = reflexiveᵛ (σ ∘ᵛ τ)
+      qᵛ⟦ _ ∷ Φ ⟧-distrib-∘ᵛ σ τ = transᵛ (qᵛ-congᵛ (qᵛ⟦ Φ ⟧-distrib-∘ᵛ σ τ)) (qᵛ-distrib-∘ᵛ (qᵛ⟦ Φ ⟧ σ) (qᵛ⟦ Φ ⟧ τ))
+
   module _
     ⦃ _ : RawVarSubId ⦃ varSub₁ ⦄ ⦄
     ⦃ _ : RawVarSubId ⦃ varSub₂ ⦄ ⦄
@@ -592,10 +598,10 @@ module _
     ⦃ _ : VarSubAppExtensional ⦃ varSub₄ ⦄ ⦃ varSub₂ ⦄ ⦃ varSub₄ ⦄ ⦄
     ⦃ _ : VarSubAppCompositional ⦃ varSub₄ ⦄ ⦃ varSub₁ ⦄ ⦃ varSub₂ ⦄ ⦄ where
     opaque
-      !ᵛ⟦-⟧ᵛ-,ᵛ-⟦-⟧ᵛ-∘ᵛ-qᵛqᵛ : ∀ (σ : VarSub₂ Γ Δ) (M₁ : R₃ Δ A₁) (M₂ : R₃ Δ A₂) →
-                               !ᵛ ⟦ σ ⟧ᵛ M₁ ,ᵛ ⟦ σ ⟧ᵛ M₂ ∘ᵛ qᵛ qᵛ σ ≈ᵛ₄ σ ∘ᵛ (!ᵛ M₁ ,ᵛ M₂)
-      !ᵛ⟦-⟧ᵛ-,ᵛ-⟦-⟧ᵛ-∘ᵛ-qᵛqᵛ σ M₁ M₂ =
-        begin !ᵛ ⟦ σ ⟧ᵛ M₁ ,ᵛ ⟦ σ ⟧ᵛ M₂ ∘ᵛ qᵛ qᵛ σ ≈⟨ !ᵛ-,ᵛ-∘ᵛ-qᵛqᵛ σ (⟦ σ ⟧ᵛ M₁) (⟦ σ ⟧ᵛ M₂) ⟩
+      !ᵛ⟦-⟧ᵛ-,ᵛ-⟦-⟧ᵛ-∘ᵛ-qᵛ² : ∀ (σ : VarSub₂ Γ Δ) (M₁ : R₃ Δ A₁) (M₂ : R₃ Δ A₂) →
+                              !ᵛ ⟦ σ ⟧ᵛ M₁ ,ᵛ ⟦ σ ⟧ᵛ M₂ ∘ᵛ qᵛ qᵛ σ ≈ᵛ₄ σ ∘ᵛ (!ᵛ M₁ ,ᵛ M₂)
+      !ᵛ⟦-⟧ᵛ-,ᵛ-⟦-⟧ᵛ-∘ᵛ-qᵛ² σ M₁ M₂ =
+        begin !ᵛ ⟦ σ ⟧ᵛ M₁ ,ᵛ ⟦ σ ⟧ᵛ M₂ ∘ᵛ qᵛ qᵛ σ ≈⟨ !ᵛ-,ᵛ-∘ᵛ-qᵛ² σ (⟦ σ ⟧ᵛ M₁) (⟦ σ ⟧ᵛ M₂) ⟩
               liftᵛ∘ σ ,ᵛ ⟦ σ ⟧ᵛ M₁ ,ᵛ ⟦ σ ⟧ᵛ M₂   ≈˘⟨ ,ᵛ-congᵛˡ (⟦ σ ⟧ᵛ M₂) (,ᵛ-congᵛˡ (⟦ σ ⟧ᵛ M₁) (Idᵛ-idʳ σ)) ⟩
               (σ ∘ᵛ Idᵛ) ,ᵛ ⟦ σ ⟧ᵛ M₁ ,ᵛ ⟦ σ ⟧ᵛ M₂ ≈˘⟨ ,ᵛ-congᵛˡ (⟦ σ ⟧ᵛ M₂) (∘ᵛ-distrib-,ᵛ M₁) ⟩
               (σ ∘ᵛ !ᵛ M₁) ,ᵛ ⟦ σ ⟧ᵛ M₂            ≈˘⟨ ∘ᵛ-distrib-,ᵛ M₂ ⟩
@@ -667,11 +673,11 @@ module _
     ⦃ _ : VarSubAppCompositional ⦃ varSub₄ ⦄ ⦃ varSub₁ ⦄ ⦃ varSub₂ ⦄ ⦄
     ⦃ _ : VarSubAppCompositional ⦃ varSub₄ ⦄ ⦃ varSub₂ ⦄ ⦃ varSub₃ ⦄ ⦄ where
     opaque
-      ⟦!ᵛ⟦-⟧ᵛ-,ᵛ-⟦-⟧ᵛ⟧ᵛ⟦qᵛqᵛ-⟧ᵛ≡⟦-⟧ᵛ⟦!ᵛ-,ᵛ-⟧ᵛ : ∀ (δ : VarSub₂ Γ Δ) (N₁ : R₃ Δ A₁) (N₂ : R₃ Δ A₂) (M : R₃ (A₂ ∷ A₁ ∷ Δ) B) →
-                                                ⟦ !ᵛ ⟦ δ ⟧ᵛ N₁ ,ᵛ ⟦ δ ⟧ᵛ N₂ ⟧ᵛ ⟦ qᵛ qᵛ δ ⟧ᵛ M ≡ ⟦ δ ⟧ᵛ ⟦ !ᵛ N₁ ,ᵛ N₂ ⟧ᵛ M
-      ⟦!ᵛ⟦-⟧ᵛ-,ᵛ-⟦-⟧ᵛ⟧ᵛ⟦qᵛqᵛ-⟧ᵛ≡⟦-⟧ᵛ⟦!ᵛ-,ᵛ-⟧ᵛ δ N₁ N₂ M =
+      ⟦!ᵛ⟦-⟧ᵛ-,ᵛ-⟦-⟧ᵛ⟧ᵛ⟦qᵛ²-⟧ᵛ≡⟦-⟧ᵛ⟦!ᵛ-,ᵛ-⟧ᵛ : ∀ (δ : VarSub₂ Γ Δ) (N₁ : R₃ Δ A₁) (N₂ : R₃ Δ A₂) (M : R₃ (A₂ ∷ A₁ ∷ Δ) B) →
+                                               ⟦ !ᵛ ⟦ δ ⟧ᵛ N₁ ,ᵛ ⟦ δ ⟧ᵛ N₂ ⟧ᵛ ⟦ qᵛ qᵛ δ ⟧ᵛ M ≡ ⟦ δ ⟧ᵛ ⟦ !ᵛ N₁ ,ᵛ N₂ ⟧ᵛ M
+      ⟦!ᵛ⟦-⟧ᵛ-,ᵛ-⟦-⟧ᵛ⟧ᵛ⟦qᵛ²-⟧ᵛ≡⟦-⟧ᵛ⟦!ᵛ-,ᵛ-⟧ᵛ δ N₁ N₂ M =
         begin _ ≡⟨ ⟦-⟧ᵛ-compositional (!ᵛ ⟦ δ ⟧ᵛ N₁ ,ᵛ ⟦ δ ⟧ᵛ N₂) (qᵛ qᵛ δ) M ⟩
-              _ ≡⟨ ⟦-⟧ᵛ-extensional M (!ᵛ⟦-⟧ᵛ-,ᵛ-⟦-⟧ᵛ-∘ᵛ-qᵛqᵛ δ N₁ N₂) ⟩
+              _ ≡⟨ ⟦-⟧ᵛ-extensional M (!ᵛ⟦-⟧ᵛ-,ᵛ-⟦-⟧ᵛ-∘ᵛ-qᵛ² δ N₁ N₂) ⟩
               _ ≡˘⟨ ⟦-⟧ᵛ-compositional _ (!ᵛ N₁ ,ᵛ N₂) M ⟩
               _ ∎
         where

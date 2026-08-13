@@ -162,27 +162,22 @@ module OpSemProp where
 
   infixr 30 ⟦_⟧ᵉ↠_
   ⟦_⟧ᵉ↠_ : ∀ {M M′ : Tm Δ A} (δ : Ext Γ Δ) → M ↠ M′ → ⟦ δ ⟧ᵛ M ↠ ⟦ δ ⟧ᵛ M′
-  ⟦ δ ⟧ᵉ↠ (`# x)                                                                      = ↠-refl
-  ⟦ δ ⟧ᵉ↠ (`λ M↠M′)                                                                   = `λ (⟦ qᵉ δ ⟧ᵉ↠ M↠M′)
-  ⟦ δ ⟧ᵉ↠ (M↠M′ `$ N↠N′)                                                              = (⟦ δ ⟧ᵉ↠ M↠M′) `$ (⟦ δ ⟧ᵉ↠ N↠N′)
+  ⟦ δ ⟧ᵉ↠ (`# x)                                                      = ↠-refl
+  ⟦ δ ⟧ᵉ↠ (`λ M↠M′)                                                   = `λ (⟦ qᵉ δ ⟧ᵉ↠ M↠M′)
+  ⟦ δ ⟧ᵉ↠ (M↠M′ `$ N↠N′)                                              = (⟦ δ ⟧ᵉ↠ M↠M′) `$ (⟦ δ ⟧ᵉ↠ N↠N′)
   ⟦ δ ⟧ᵉ↠ (`→β {M′ = M′} {N′ = N′} M↠M′ N↠N′)
-    rewrite sym (⟦!ᵛ⟦-⟧ᵛ-⟧ᵛ⟦qᵛ-⟧ᵛ≡⟦-⟧ᵛ⟦!ᵛ-⟧ᵛ δ N′ M′)                                 = `→β (⟦ qᵉ δ ⟧ᵉ↠ M↠M′) (⟦ δ ⟧ᵉ↠ N↠N′)
+    rewrite sym (⟦!ᵛ⟦-⟧ᵛ-⟧ᵛ⟦qᵛ-⟧ᵛ≡⟦-⟧ᵛ⟦!ᵛ-⟧ᵛ δ N′ M′)                 = `→β (⟦ qᵉ δ ⟧ᵉ↠ M↠M′) (⟦ δ ⟧ᵉ↠ N↠N′)
   ⟦ δ ⟧ᵉ↠ (`→η {A = A} {M′ = M′} M↠M′)
-    rewrite ⟦qᵉᵉ-⟧ᵛ⟦Wkᵛ⟧ᵛ≡⟦Wkᵛ⟧ᵛ⟦-⟧ᵛ {A = A} δ M′                                     = `→η (⟦ δ ⟧ᵉ↠ M↠M′)
-  ⟦ δ ⟧ᵉ↠ (M₁↠M′₁ `, M₂↠M′₂)                                                          = ⟦ δ ⟧ᵉ↠ M₁↠M′₁ `, ⟦ δ ⟧ᵉ↠ M₂↠M′₂
-  ⟦ δ ⟧ᵉ↠ (`let M↠M′ `in N↠N′)                                                        = `let ⟦ δ ⟧ᵉ↠ M↠M′ `in ⟦ qᵉ qᵉ δ ⟧ᵉ↠ N↠N′
+    rewrite ⟦qᵉ-⟧ᵛ⟦Wkᵛ⟧ᵛ≡⟦Wkᵛ⟧ᵛ⟦-⟧ᵛ {A = A} δ M′                      = `→η (⟦ δ ⟧ᵉ↠ M↠M′)
+  ⟦ δ ⟧ᵉ↠ (M₁↠M′₁ `, M₂↠M′₂)                                          = ⟦ δ ⟧ᵉ↠ M₁↠M′₁ `, ⟦ δ ⟧ᵉ↠ M₂↠M′₂
+  ⟦ δ ⟧ᵉ↠ (`let M↠M′ `in N↠N′)                                        = `let ⟦ δ ⟧ᵉ↠ M↠M′ `in ⟦ qᵉ qᵉ δ ⟧ᵉ↠ N↠N′
   ⟦ δ ⟧ᵉ↠ (`×β {M′₁ = M′₁} {M′₂ = M′₂} {N′ = N′} M₁↠M′₁ M₂↠M′₂ N↠N′)
-    rewrite sym (⟦!ᵛ⟦-⟧ᵛ-,ᵛ-⟦-⟧ᵛ⟧ᵛ⟦qᵛqᵛ-⟧ᵛ≡⟦-⟧ᵛ⟦!ᵛ-,ᵛ-⟧ᵛ δ M′₁ M′₂ N′)                = `×β (⟦ δ ⟧ᵉ↠ M₁↠M′₁) (⟦ δ ⟧ᵉ↠ M₂↠M′₂) (⟦ qᵉ qᵉ δ ⟧ᵉ↠ N↠N′)
-  ⟦ δ ⟧ᵉ↠ (`×η M↠M′)                                                                  = `×η (⟦ δ ⟧ᵉ↠ M↠M′)
-  ⟦ δ ⟧ᵉ↠ (`→c {A = A} {B = B} {M = M} {L = L})
-    rewrite ⟦qᵉᵉqᵉᵉ-⟧ᵛ⟦Wkᵛ-∘ᵛ-Wkᵛ⟧ᵛ≡⟦Wkᵛ-∘ᵛ-Wkᵛ⟧ᵛ⟦-⟧ᵛ {B = B} {A = A} δ L             = `→c
-  ⟦ δ ⟧ᵉ↠ (`×c {A = A} {B = B} {M = M} {L = L})
-    rewrite ⟦-⟧ᵛ-compositional (qᵉ qᵉ qᵉ qᵉ δ) (qᵉ qᵉ (Wkᵛ {A = B} ∘ᵛ Wkᵛ {A = A})) L
-          | sym (⟦-⟧ᵛ-extensional L (qᵛ-distrib-∘ᵛ (qᵉ qᵉ qᵉ δ) (qᵉ (Wkᵛ {A = B} ∘ᵛ Wkᵛ {A = A}))))
-          | sym (⟦-⟧ᵛ-extensional L (qᵛ-congᵛ (qᵛ-distrib-∘ᵛ (qᵉ qᵉ δ) (Wkᵛ {A = B} ∘ᵛ Wkᵛ {A = A}))))
-          | ⟦-⟧ᵛ-extensional L (qᵛ-congᵛ (qᵛ-distrib-∘ᵛ (Wkᵛ {A = B} ∘ᵛ Wkᵛ {A = A}) δ))
-          | ⟦-⟧ᵛ-extensional L (qᵛ-distrib-∘ᵛ (qᵉ (Wkᵛ {A = B} ∘ᵛ Wkᵛ {A = A})) (qᵉ δ))
-          | sym (⟦-⟧ᵛ-compositional (qᵉ qᵉ (Wkᵛ {A = B} ∘ᵛ Wkᵛ {A = A})) (qᵉ qᵉ δ) L) = `×c
+    rewrite sym (⟦!ᵛ⟦-⟧ᵛ-,ᵛ-⟦-⟧ᵛ⟧ᵛ⟦qᵛ²-⟧ᵛ≡⟦-⟧ᵛ⟦!ᵛ-,ᵛ-⟧ᵛ δ M′₁ M′₂ N′) = `×β (⟦ δ ⟧ᵉ↠ M₁↠M′₁) (⟦ δ ⟧ᵉ↠ M₂↠M′₂) (⟦ qᵉ qᵉ δ ⟧ᵉ↠ N↠N′)
+  ⟦ δ ⟧ᵉ↠ (`×η M↠M′)                                                  = `×η (⟦ δ ⟧ᵉ↠ M↠M′)
+  ⟦ δ ⟧ᵉ↠ (`→c {A = A} {B = B} {L = L})
+    rewrite ⟦qᵉ²-⟧ᵛ⟦Wkᵛ²⟧ᵛ≡⟦Wkᵛ²⟧ᵛ⟦-⟧ᵛ {B = B} {A = A} δ L            = `→c
+  ⟦ δ ⟧ᵉ↠ (`×c {A = A} {B = B} {L = L})
+    rewrite ⟦qᵉ⁴-⟧ᵛ⟦qᵉ²Wkᵛ²⟧ᵛ≡⟦qᵉ²Wkᵛ²⟧ᵛ⟦qᵉ²-⟧ᵛ {D = B} {C = A} δ L   = `×c
 
   infixr 30 ⟦_⟧ᵉ↠*_
   ⟦_⟧ᵉ↠*_ : ∀ {M M′ : Tm Δ A} (δ : Ext Γ Δ) → M ↠* M′ → ⟦ δ ⟧ᵛ M ↠* ⟦ δ ⟧ᵛ M′
@@ -191,28 +186,22 @@ module OpSemProp where
 
   infixr 30 ⟦_⟧ˢ↠_
   ⟦_⟧ˢ↠_ : ∀ {M M′ : Tm Δ A} (σ : Sub Γ Δ) → M ↠ M′ → ⟦ σ ⟧ᵛ M ↠ ⟦ σ ⟧ᵛ M′
-  ⟦ σ ⟧ˢ↠ (`# x)                                                                      = ↠-refl
-  ⟦ σ ⟧ˢ↠ (`λ M↠M′)                                                                   = `λ (⟦ qᵉ σ ⟧ˢ↠ M↠M′)
-  ⟦ σ ⟧ˢ↠ (M↠M′ `$ N↠N′)                                                              = (⟦ σ ⟧ˢ↠ M↠M′) `$ (⟦ σ ⟧ˢ↠ N↠N′)
+  ⟦ σ ⟧ˢ↠ (`# x)                                                      = ↠-refl
+  ⟦ σ ⟧ˢ↠ (`λ M↠M′)                                                   = `λ (⟦ qᵉ σ ⟧ˢ↠ M↠M′)
+  ⟦ σ ⟧ˢ↠ (M↠M′ `$ N↠N′)                                              = (⟦ σ ⟧ˢ↠ M↠M′) `$ (⟦ σ ⟧ˢ↠ N↠N′)
   ⟦ σ ⟧ˢ↠ (`→β {M′ = M′} {N′ = N′} M↠M′ N↠N′)
-    rewrite sym (⟦!ᵛ⟦-⟧ᵛ-⟧ᵛ⟦qᵛ-⟧ᵛ≡⟦-⟧ᵛ⟦!ᵛ-⟧ᵛ σ N′ M′)                                 = `→β (⟦ qᵉ σ ⟧ˢ↠ M↠M′) (⟦ σ ⟧ˢ↠ N↠N′)
+    rewrite sym (⟦!ᵛ⟦-⟧ᵛ-⟧ᵛ⟦qᵛ-⟧ᵛ≡⟦-⟧ᵛ⟦!ᵛ-⟧ᵛ σ N′ M′)                 = `→β (⟦ qᵉ σ ⟧ˢ↠ M↠M′) (⟦ σ ⟧ˢ↠ N↠N′)
   ⟦ σ ⟧ˢ↠ (`→η {A = A} {M′ = M′} M↠M′)
-    rewrite ⟦qᵉˢ-⟧ᵛ⟦Wkᵛ⟧ᵛ≡⟦Wkᵛ⟧ᵛ⟦-⟧ᵛ {A = A} σ M′                                     = `→η (⟦ σ ⟧ˢ↠ M↠M′)
-  ⟦ σ ⟧ˢ↠ (M₁↠M′₁ `, M₂↠M′₂)                                                          = ⟦ σ ⟧ˢ↠ M₁↠M′₁ `, ⟦ σ ⟧ˢ↠ M₂↠M′₂
-  ⟦ σ ⟧ˢ↠ (`let M↠M′ `in N↠N′)                                                        = `let ⟦ σ ⟧ˢ↠ M↠M′ `in ⟦ qᵉ qᵉ σ ⟧ˢ↠ N↠N′
+    rewrite ⟦qᵉ-⟧ᵛ⟦Wkᵛ⟧ᵛ≡⟦Wkᵛ⟧ᵛ⟦-⟧ᵛ {A = A} σ M′                      = `→η (⟦ σ ⟧ˢ↠ M↠M′)
+  ⟦ σ ⟧ˢ↠ (M₁↠M′₁ `, M₂↠M′₂)                                          = ⟦ σ ⟧ˢ↠ M₁↠M′₁ `, ⟦ σ ⟧ˢ↠ M₂↠M′₂
+  ⟦ σ ⟧ˢ↠ (`let M↠M′ `in N↠N′)                                        = `let ⟦ σ ⟧ˢ↠ M↠M′ `in ⟦ qᵉ qᵉ σ ⟧ˢ↠ N↠N′
   ⟦ σ ⟧ˢ↠ (`×β {M′₁ = M′₁} {M′₂ = M′₂} {N′ = N′} M₁↠M′₁ M₂↠M′₂ N↠N′)
-    rewrite sym (⟦!ᵛ⟦-⟧ᵛ-,ᵛ-⟦-⟧ᵛ⟧ᵛ⟦qᵛqᵛ-⟧ᵛ≡⟦-⟧ᵛ⟦!ᵛ-,ᵛ-⟧ᵛ σ M′₁ M′₂ N′)                = `×β (⟦ σ ⟧ˢ↠ M₁↠M′₁) (⟦ σ ⟧ˢ↠ M₂↠M′₂) (⟦ qᵉ qᵉ σ ⟧ˢ↠ N↠N′)
+    rewrite sym (⟦!ᵛ⟦-⟧ᵛ-,ᵛ-⟦-⟧ᵛ⟧ᵛ⟦qᵛ²-⟧ᵛ≡⟦-⟧ᵛ⟦!ᵛ-,ᵛ-⟧ᵛ σ M′₁ M′₂ N′) = `×β (⟦ σ ⟧ˢ↠ M₁↠M′₁) (⟦ σ ⟧ˢ↠ M₂↠M′₂) (⟦ qᵉ qᵉ σ ⟧ˢ↠ N↠N′)
   ⟦ σ ⟧ˢ↠ (`×η M↠M′) = `×η (⟦ σ ⟧ˢ↠ M↠M′)
-  ⟦ σ ⟧ˢ↠ (`→c {A = A} {B = B} {M = M} {L = L})
-    rewrite ⟦qᵉˢqᵉˢ-⟧ᵛ⟦Wkᵛ-∘ᵛ-Wkᵛ⟧ᵛ≡⟦Wkᵛ-∘ᵛ-Wkᵛ⟧ᵛ⟦-⟧ᵛ {B = B} {A = A} σ L             = `→c
-  ⟦ σ ⟧ˢ↠ (`×c {A = A} {B = B} {M = M} {L = L})
-    rewrite ⟦-⟧ᵛ-compositional (qᵉ qᵉ qᵉ qᵉ σ) (qᵉ qᵉ (Wkᵛ {A = B} ∘ᵛ Wkᵛ {A = A})) L
-          | sym (⟦-⟧ᵛ-extensional L (qᵛ-distrib-∘ᵛ (qᵉ qᵉ qᵉ σ) (qᵉ (Wkᵛ {A = B} ∘ᵛ Wkᵛ {A = A}))))
-          | sym (⟦-⟧ᵛ-extensional L (qᵛ-congᵛ (qᵛ-distrib-∘ᵛ (qᵉ qᵉ σ) (Wkᵛ {A = B} ∘ᵛ Wkᵛ {A = A}))))
-          | ⟦-⟧ᵛ-extensional L (qᵛ-congᵛ (qᵛ-congᵛ (⟦-⟧ᵛ-compositional (Wkᵛ {A = B}) (Wkᵛ {A = A}) ∘ σ)))
-          | ⟦-⟧ᵛ-extensional L (qᵛ-congᵛ (qᵛ-distrib-∘ᵛ (Wkᵛ {A = B} ∘ᵛ Wkᵛ {A = A}) σ))
-          | ⟦-⟧ᵛ-extensional L (qᵛ-distrib-∘ᵛ (qᵉ (Wkᵛ {A = B} ∘ᵛ Wkᵛ {A = A})) (qᵉ σ))
-          | sym (⟦-⟧ᵛ-compositional (qᵉ qᵉ (Wkᵛ {A = B} ∘ᵛ Wkᵛ {A = A})) (qᵉ qᵉ σ) L) = `×c
+  ⟦ σ ⟧ˢ↠ (`→c {A = A} {B = B} {L = L})
+    rewrite ⟦qᵉ²-⟧ᵛ⟦Wkᵛ²⟧ᵛ≡⟦Wkᵛ²⟧ᵛ⟦-⟧ᵛ {B = B} {A = A} σ L            = `→c
+  ⟦ σ ⟧ˢ↠ (`×c {A = A} {B = B} {L = L})
+    rewrite ⟦qᵉ⁴-⟧ᵛ⟦qᵉ²Wkᵛ²⟧ᵛ≡⟦qᵉ²Wkᵛ²⟧ᵛ⟦qᵉ²-⟧ᵛ {D = B} {C = A} σ L   = `×c
 
 open OpSemProp
 
@@ -305,7 +294,7 @@ module LogRelProp where
   ⟦-⟧ᵉᶜ-compositional δ γ []          = refl
   ⟦-⟧ᵉᶜ-compositional δ γ (N ∷ K)
     rewrite ⟦-⟧ᵛ-compositional (qᵉ qᵉ δ) (qᵉ qᵉ γ) N
-          | ⟦-⟧ᵛ-extensional N (transᵛ (qᵛ-congᵛ (qᵛ-distrib-∘ᵛ δ γ)) (qᵛ-distrib-∘ᵛ (qᵉ δ) (qᵉ γ)))
+          | ⟦-⟧ᵛ-extensional N (qᵛ⟦ _ ∷ _ ∷ [] ⟧-distrib-∘ᵛ  δ γ)
           | ⟦-⟧ᵉᶜ-compositional δ γ K = refl
 
   ℜ-→-Idᵛ : ℜ[ A `→ B ] M →
@@ -349,12 +338,12 @@ module LogRelProp where
     rewrite ⟦-⟧ᵛ-compositional γ δ M                  = rM (γ ∘ᵛ δ) K rK
 
   ⟦-⟧ᵉᶜ-preserves-ℜᶜ : ∀ (δ : Ext Γ Δ) → ℜᶜ[ A₁ & A₂ ] K → ℜᶜ[ A₁ & A₂ ] (⟦ δ ⟧ᵉᶜ K)
-  ⟦-⟧ᵉᶜ-preserves-ℜᶜ {K = []}    δ rK γ                                                                = rK (γ ∘ δ)
+  ⟦-⟧ᵉᶜ-preserves-ℜᶜ {K = []}    δ rK γ                             = rK (γ ∘ δ)
   ⟦-⟧ᵉᶜ-preserves-ℜᶜ {K = N ∷ K} δ rK γ
     with rK′ ← rK (γ ∘ᵛ δ)
       rewrite ⟦-⟧ᵉᶜ-compositional γ δ K
             | ⟦-⟧ᵛ-compositional (qᵉ qᵉ γ) (qᵉ qᵉ δ) N
-            | ⟦-⟧ᵛ-extensional N (transᵛ (qᵛ-congᵛ (qᵛ-distrib-∘ᵛ γ δ)) (qᵛ-distrib-∘ᵛ (qᵉ γ) (qᵉ δ))) = rK′
+            | ⟦-⟧ᵛ-extensional N (qᵛ⟦ _ ∷ _ ∷ [] ⟧-distrib-∘ᵛ  γ δ) = rK′
 
   ∘ᵛ-preserves-ℜˢ : ∀ (δ : Ext Γ Δ) → ℜˢ[ Ψ ] σ → ℜˢ[ Ψ ] (δ ∘ᵛ σ)
   ∘ᵛ-preserves-ℜˢ {Ψ = []}    δ tt        = tt
@@ -419,12 +408,12 @@ module LogRelProp where
               _`$_
               (cong (Appᵛ (!ᵛ M₁ ,ᵛ M₂))
                 (trans
-                  (⟦-⟧ᵛ-extensional N (transᵛ (qᵛ-congᵛ (qᵛ-distrib-∘ᵛ γ δ)) (qᵛ-distrib-∘ᵛ (qᵉ γ) (qᵉ δ))))
+                  (⟦-⟧ᵛ-extensional N (qᵛ⟦ _ ∷ _ ∷ [] ⟧-distrib-∘ᵛ  γ δ))
                   (sym (⟦-⟧ᵛ-compositional (qᵉ qᵉ γ) (qᵉ qᵉ δ) N))
                   ))
               (begin _ ≡˘⟨ liftᵛ-preserves-Appᵛ γ L ⟩
                      _ ≡˘⟨ ⟦-⟧ᵛ-compositional (liftᵛ∘ γ ,ᵛ M₁ ,ᵛ M₂) (Wkᵛ ∘ᵛ Wkᵛ) L ⟩
-                     _ ≡˘⟨ ⟦-⟧ᵛ-extensional (⟦ Wkᵛ ∘ᵛ Wkᵛ ⟧ᵛ L) (!ᵛ-,ᵛ-∘ᵛ-qᵛqᵛ γ M₁ M₂) ⟩
+                     _ ≡˘⟨ ⟦-⟧ᵛ-extensional (⟦ Wkᵛ ∘ᵛ Wkᵛ ⟧ᵛ L) (!ᵛ-,ᵛ-∘ᵛ-qᵛ² γ M₁ M₂) ⟩
                      _ ≡˘⟨ ⟦-⟧ᵛ-compositional (!ᵛ M₁ ,ᵛ M₂) (qᵉ qᵉ γ) (⟦ Wkᵛ ∘ᵛ Wkᵛ ⟧ᵛ L) ⟩
                      _ ∎))
             (ℜ-→-Idᵛ {M = ⟦ !ᵛ M₁ ,ᵛ M₂ ⟧ᵛ ⟦ qᵉ qᵉ (γ ∘ᵛ δ) ⟧ᵛ N} (rN (γ ∘ᵛ δ) rM₁ rM₂) (⟦-⟧ᵉ-preserves-ℜ γ rL)))
@@ -441,7 +430,7 @@ module LogRelProp where
             (λ L → (⟦ γ ⟧ᵉᶜ K `$$ᶜ L) halts)
             (cong (Appᵛ (!ᵛ M₁ ,ᵛ M₂))
               (trans
-                (⟦-⟧ᵛ-extensional N (transᵛ (qᵛ-congᵛ (qᵛ-distrib-∘ᵛ γ δ)) (qᵛ-distrib-∘ᵛ (qᵉ γ) (qᵉ δ))))
+                (⟦-⟧ᵛ-extensional N (qᵛ⟦ _ ∷ _ ∷ [] ⟧-distrib-∘ᵛ  γ δ))
                 (sym (⟦-⟧ᵛ-compositional (qᵉ qᵉ γ) (qᵉ qᵉ δ) N))))
             (ℜ-×-Idᵛ {M = ⟦ !ᵛ M₁ ,ᵛ M₂ ⟧ᵛ ⟦ qᵉ qᵉ (γ ∘ᵛ δ) ⟧ᵛ N} (rN (γ ∘ᵛ δ) rM₁ rM₂) (⟦ γ ⟧ᵉᶜ K) (⟦-⟧ᵉᶜ-preserves-ℜᶜ {K = K} γ rK)))
           (⟦ γ ⟧ᵉᶜ K `$$ᶜ↠ `×β ↠-refl ↠-refl ↠-refl)
@@ -467,9 +456,9 @@ module LogRelProp where
       λ δ {M₁ = M₁} {M₂ = M₂} rM₁ rM₂ →
         subst
           ℜ[ _ ]_
-          (begin _ ≡˘⟨ ⟦-⟧ᵛ-extensional N (!ᵛ-,ᵛ-∘ᵛ-qᵛqᵛ (δ ∘ᵛ σ) M₁ M₂) ⟩
+          (begin _ ≡˘⟨ ⟦-⟧ᵛ-extensional N (!ᵛ-,ᵛ-∘ᵛ-qᵛ² (δ ∘ᵛ σ) M₁ M₂) ⟩
                  _ ≡˘⟨ ⟦-⟧ᵛ-compositional (!ᵛ M₁ ,ᵛ M₂) (qᵉ qᵉ (δ ∘ᵛ σ)) N ⟩
-                 _ ≡⟨ cong (Appᵛ (!ᵛ M₁ ,ᵛ M₂)) (⟦-⟧ᵛ-extensional N (transᵛ (qᵛ-congᵛ (qᵛ-distrib-∘ᵛ δ σ)) (qᵛ-distrib-∘ᵛ (qᵉ δ) (qᵉ σ)))) ⟩
+                 _ ≡⟨ cong (Appᵛ (!ᵛ M₁ ,ᵛ M₂)) (⟦-⟧ᵛ-extensional N (qᵛ⟦ _ ∷ _ ∷ [] ⟧-distrib-∘ᵛ δ σ)) ⟩
                  _ ≡˘⟨ cong (Appᵛ (!ᵛ M₁ ,ᵛ M₂)) (⟦-⟧ᵛ-compositional (qᵉ qᵉ δ) (qᵉ qᵉ σ) N) ⟩
                  _ ∎)
           (eval {σ = (δ ∘ᵛ σ) ,ᵛ M₁ ,ᵛ M₂} ((∘ᵛ-preserves-ℜˢ δ rσ , rM₁) , rM₂) N)

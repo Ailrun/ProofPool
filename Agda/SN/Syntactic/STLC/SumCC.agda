@@ -1,5 +1,5 @@
 {-# OPTIONS --safe #-}
-module SN.Syntactic.STLC.WithCC where
+module SN.Syntactic.STLC.SumCC where
 
 open import Agda.Primitive        using (Level; lzero)
 open import Data.List             using (_∷_)
@@ -12,7 +12,7 @@ open import Syntax.Church.STLC.WithSum.Base         hiding (module Variables)
 open import Syntax.Church.STLC.WithSum.Substitution
 import Syntax.Church.STLC.WithSum.Alt.Base          as 𝒜
 import Syntax.Church.STLC.WithSum.Alt.Conversion    as 𝒜
-import SN.Syntactic.STLC.WithCC.Alt                 as 𝒜
+import SN.Syntactic.STLC.SumCC.Alt                  as 𝒜
 
 variable
   ℓ ℓ′ ℓ″ ℓ‴ : Level

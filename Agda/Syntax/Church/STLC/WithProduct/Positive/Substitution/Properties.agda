@@ -130,61 +130,65 @@ instance
 -- Other Useful Properties for Extensions/Substitutions
 ----------------------------------------------------------
 
-⟦qᵉᵉ-⟧ᵛ⟦Wkᵛ⟧ᵛ≡⟦Wkᵛ⟧ᵛ⟦-⟧ᵛ : ∀ (δ : Ext Γ Δ) (M : Tm Δ B) →
-                           ⟦ qᵉ δ ⟧ᵛ ⟦ Wkᵛ {A = A} ⟧ᵛ M ≡ ⟦ Wkᵛ ⟧ᵛ ⟦ δ ⟧ᵛ M
-⟦qᵉᵉ-⟧ᵛ⟦Wkᵛ⟧ᵛ≡⟦Wkᵛ⟧ᵛ⟦-⟧ᵛ δ M =
+⟦qᵉ-⟧ᵛ⟦Wkᵛ⟧ᵛ≡⟦Wkᵛ⟧ᵛ⟦-⟧ᵛ : ∀ {R}
+                            ⦃ varSub : VarSubBase {lzero} R ⦄
+                            ⦃ _ : RawVarSubOutHead ⦃ varSub ⦄ ⦄
+                            ⦃ _ : RawVarSubLift ⦃ varSub ⦄ ⦃ SubVarSub ⦄ ⦄
+                            ⦃ _ : RawVarSubApp ⦃ ExtVarSub ⦄ ⦃ varSub ⦄ ⦃ varSub ⦄ ⦄
+                            ⦃ _ : VarSubAppCompositional ⦃ ExtVarSub ⦄ ⦃ varSub ⦄ ⦃ SubVarSub ⦄ ⦄
+                            ⦃ _ : VarSubAppCompositional ⦃ varSub ⦄ ⦃ ExtVarSub ⦄ ⦃ SubVarSub ⦄ ⦄
+                            (δ : VarSub ⦃ varSub ⦄ Γ Δ) (M : Tm Δ B) →
+                          ⟦ qᵉ δ ⟧ᵛ ⟦ Wkᵛ {A = A} ⟧ᵛ M ≡ ⟦ Wkᵛ ⟧ᵛ ⟦ δ ⟧ᵛ M
+⟦qᵉ-⟧ᵛ⟦Wkᵛ⟧ᵛ≡⟦Wkᵛ⟧ᵛ⟦-⟧ᵛ δ M =
   begin _ ≡⟨ ⟦-⟧ᵛ-compositional _ (Wkᵛ ⦃ ExtVarSub ⦄) M ⟩
         _ ≡˘⟨ ⟦-⟧ᵛ-compositional _ δ M ⟩
         _ ∎
   where
     open ≡-Reasoning
 
-⟦qᵉᵉqᵉᵉ-⟧ᵛ⟦qᵉWkᵛ⟧ᵛ≡⟦qᵉWkᵛ⟧ᵛ⟦qᵉᵉ-⟧ᵛ : ∀ (δ : Ext Γ Δ) (M : Tm (A ∷ Δ) C) →
-                                     ⟦ qᵉ qᵉ δ ⟧ᵛ ⟦ qᵉᵉ (Wkᵛ {A = B}) ⟧ᵛ M ≡ ⟦ qᵉᵉ Wkᵛ ⟧ᵛ ⟦ qᵉ δ ⟧ᵛ M
-⟦qᵉᵉqᵉᵉ-⟧ᵛ⟦qᵉWkᵛ⟧ᵛ≡⟦qᵉWkᵛ⟧ᵛ⟦qᵉᵉ-⟧ᵛ δ M =
-  begin _ ≡⟨ ⟦-⟧ᵛ-compositional _ (qᵉ Wkᵛ) M ⟩
-        _ ≡˘⟨ ⟦-⟧ᵛ-extensional M (qᵉ-distrib-∘ᵛ (qᵉ δ) Wkᵛ) ⟩
-        _ ≡⟨ ⟦-⟧ᵛ-extensional M (qᵉ-distrib-∘ᵛ Wkᵛ δ) ⟩
-        _ ≡˘⟨ ⟦-⟧ᵛ-compositional _ (qᵉ δ) M ⟩
+⟦qᵉ²-⟧ᵛ⟦Wkᵛ²⟧ᵛ≡⟦Wkᵛ²⟧ᵛ⟦-⟧ᵛ : ∀ {R}
+                               ⦃ varSub : VarSubBase {lzero} R ⦄
+                               ⦃ _ : RawVarSubOutHead ⦃ varSub ⦄ ⦄
+                               ⦃ _ : RawVarSubLift ⦃ varSub ⦄ ⦃ SubVarSub ⦄ ⦄
+                               ⦃ _ : RawVarSubApp ⦃ ExtVarSub ⦄ ⦃ varSub ⦄ ⦃ varSub ⦄ ⦄
+                               ⦃ _ : VarSubAppExtensional ⦃ ExtVarSub ⦄ ⦃ varSub ⦄ ⦃ varSub ⦄ ⦄
+                               ⦃ _ : VarSubAppCompositional ⦃ ExtVarSub ⦄ ⦃ ExtVarSub ⦄ ⦃ varSub ⦄ ⦄
+                               ⦃ _ : VarSubAppCompositional ⦃ ExtVarSub ⦄ ⦃ varSub ⦄ ⦃ SubVarSub ⦄ ⦄
+                               ⦃ _ : VarSubAppCompositional ⦃ varSub ⦄ ⦃ ExtVarSub ⦄ ⦃ SubVarSub ⦄ ⦄
+                               (δ : VarSub ⦃ varSub ⦄ Γ Δ) (M : Tm Δ C) →
+                             ⟦ qᵉ qᵉ δ ⟧ᵛ ⟦ Wkᵛ {A = B} ∘ᵛ Wkᵛ {A = A} ⟧ᵛ M ≡ ⟦ Wkᵛ {A = B} ∘ᵛ Wkᵛ {A = A} ⟧ᵛ ⟦ δ ⟧ᵛ M
+⟦qᵉ²-⟧ᵛ⟦Wkᵛ²⟧ᵛ≡⟦Wkᵛ²⟧ᵛ⟦-⟧ᵛ δ M =
+  begin _ ≡⟨ ⟦-⟧ᵛ-compositional (qᵉ qᵉ δ) (Wkᵛ ∘ᵛ Wkᵛ) M ⟩
+        _ ≡⟨ ⟦-⟧ᵛ-extensional M (⟦-⟧ᵛ-compositional Wkᵛ Wkᵛ ∘ δ) ⟩
+        _ ≡˘⟨ ⟦-⟧ᵛ-compositional (Wkᵛ ∘ᵛ Wkᵛ) δ M ⟩
         _ ∎
   where
     open ≡-Reasoning
 
-⟦qᵉᵉqᵉᵉ-⟧ᵛ⟦Wkᵛ-∘ᵛ-Wkᵛ⟧ᵛ≡⟦Wkᵛ-∘ᵛ-Wkᵛ⟧ᵛ⟦-⟧ᵛ : ∀ (δ : Ext Γ Δ) (M : Tm Δ C) →
-                                            ⟦ qᵉ qᵉ δ ⟧ᵛ ⟦ Wkᵛ {A = B} ∘ᵛ Wkᵛ {A = A} ⟧ᵛ M ≡ ⟦ Wkᵛ {A = B} ∘ᵛ Wkᵛ {A = A} ⟧ᵛ ⟦ δ ⟧ᵛ M
-⟦qᵉᵉqᵉᵉ-⟧ᵛ⟦Wkᵛ-∘ᵛ-Wkᵛ⟧ᵛ≡⟦Wkᵛ-∘ᵛ-Wkᵛ⟧ᵛ⟦-⟧ᵛ δ M =
-  begin _ ≡⟨ ⟦-⟧ᵛ-compositional _ (Wkᵛ ∘ᵛ Wkᵛ) M ⟩
-        _ ≡˘⟨ ⟦-⟧ᵛ-compositional _ δ M ⟩
-        _ ∎
-  where
-    open ≡-Reasoning
-
-⟦qᵉˢ-⟧ᵛ⟦Wkᵛ⟧ᵛ≡⟦Wkᵛ⟧ᵛ⟦-⟧ᵛ : ∀ (σ : Sub Γ Δ) (M : Tm Δ B) →
-                           ⟦ qᵉ σ ⟧ᵛ ⟦ Wkᵛ {A = A} ⟧ᵛ M ≡ ⟦ Wkᵛ ⟧ᵛ ⟦ σ ⟧ᵛ M
-⟦qᵉˢ-⟧ᵛ⟦Wkᵛ⟧ᵛ≡⟦Wkᵛ⟧ᵛ⟦-⟧ᵛ σ M =
-  begin _ ≡⟨ ⟦-⟧ᵛ-compositional _ (Wkᵛ ⦃ ExtVarSub ⦄) M ⟩
-        _ ≡˘⟨ ⟦-⟧ᵛ-compositional _ σ M ⟩
-        _ ∎
-  where
-    open ≡-Reasoning
-
-⟦qᵉˢqᵉˢ-⟧ᵛ⟦qᵉWkᵛ⟧ᵛ≡⟦qᵉWkᵛ⟧ᵛ⟦qᵉˢ-⟧ᵛ : ∀ (σ : Sub Γ Δ) (M : Tm (A ∷ Δ) C) →
-                                     ⟦ qᵉ qᵉˢ σ ⟧ᵛ ⟦ qᵉᵉ (Wkᵛ {A = B}) ⟧ᵛ M ≡ ⟦ qᵉᵉ Wkᵛ ⟧ᵛ ⟦ qᵉ σ ⟧ᵛ M
-⟦qᵉˢqᵉˢ-⟧ᵛ⟦qᵉWkᵛ⟧ᵛ≡⟦qᵉWkᵛ⟧ᵛ⟦qᵉˢ-⟧ᵛ σ M =
-  begin _ ≡⟨ ⟦-⟧ᵛ-compositional _ (qᵉ Wkᵛ) M ⟩
-        _ ≡˘⟨ ⟦-⟧ᵛ-extensional M (qᵉ-distrib-∘ˢᵉ (qᵉ σ) Wkᵛ) ⟩
-        _ ≡⟨ ⟦-⟧ᵛ-extensional M (qᵉ-distrib-∘ᵉˢ Wkᵛ σ) ⟩
-        _ ≡˘⟨ ⟦-⟧ᵛ-compositional _ (qᵉ σ) M ⟩
-        _ ∎
-  where
-    open ≡-Reasoning
-
-⟦qᵉˢqᵉˢ-⟧ᵛ⟦Wkᵛ-∘ᵛ-Wkᵛ⟧ᵛ≡⟦Wkᵛ-∘ᵛ-Wkᵛ⟧ᵛ⟦-⟧ᵛ : ∀ (σ : Sub Γ Δ) (M : Tm Δ C) →
-                                            ⟦ qᵉ qᵉ σ ⟧ᵛ ⟦ Wkᵛ {A = B} ∘ᵛ Wkᵛ {A = A} ⟧ᵛ M ≡ ⟦ Wkᵛ {A = B} ∘ᵛ Wkᵛ {A = A} ⟧ᵛ ⟦ σ ⟧ᵛ M
-⟦qᵉˢqᵉˢ-⟧ᵛ⟦Wkᵛ-∘ᵛ-Wkᵛ⟧ᵛ≡⟦Wkᵛ-∘ᵛ-Wkᵛ⟧ᵛ⟦-⟧ᵛ σ M =
-  begin _ ≡⟨ ⟦-⟧ᵛ-compositional _ (Wkᵛ ∘ᵛ Wkᵛ) M ⟩
-        _ ≡⟨ ⟦-⟧ᵛ-extensional M (⟦-⟧ᵛ-compositional _ Wkᵛ ∘ σ) ⟩
-        _ ≡˘⟨ ⟦-⟧ᵛ-compositional _ σ M ⟩
+⟦qᵉ⁴-⟧ᵛ⟦qᵉ²Wkᵛ²⟧ᵛ≡⟦qᵉ²Wkᵛ²⟧ᵛ⟦qᵉ²-⟧ᵛ : ∀ {R}
+                                        ⦃ varSub : VarSubBase {lzero} R ⦄
+                                        ⦃ _ : RawVarSubId ⦃ varSub ⦄ ⦄
+                                        ⦃ _ : RawVarSubOutHead ⦃ varSub ⦄ ⦄
+                                        ⦃ _ : RawVarSubLift ⦃ ExtVarSub ⦄ ⦃ varSub ⦄ ⦄
+                                        ⦃ _ : RawVarSubLift ⦃ varSub ⦄ ⦃ SubVarSub ⦄ ⦄
+                                        ⦃ _ : RawVarSubApp ⦃ ExtVarSub ⦄ ⦃ varSub ⦄ ⦃ varSub ⦄ ⦄
+                                        ⦃ _ : VarSubOutHeadSpec ⦃ varSub ⦄ ⦄
+                                        ⦃ _ : VarSubLiftId ⦃ ExtVarSub ⦄ ⦃ varSub ⦄ ⦄
+                                        ⦃ _ : VarSubIdNoOpʳ ⦃ ExtVarSub ⦄ ⦃ varSub ⦄ ⦃ varSub ⦄ ⦄
+                                        ⦃ _ : VarSubAppExtensional ⦃ ExtVarSub ⦄ ⦃ varSub ⦄ ⦃ varSub ⦄ ⦄
+                                        ⦃ _ : VarSubAppCompositional ⦃ ExtVarSub ⦄ ⦃ ExtVarSub ⦄ ⦃ varSub ⦄ ⦄
+                                        ⦃ _ : VarSubAppCompositional ⦃ ExtVarSub ⦄ ⦃ varSub ⦄ ⦃ ExtVarSub ⦄ ⦄
+                                        ⦃ _ : VarSubAppCompositional ⦃ varSub ⦄ ⦃ ExtVarSub ⦄ ⦃ SubVarSub ⦄ ⦄
+                                        ⦃ _ : VarSubAppCompositional ⦃ ExtVarSub ⦄ ⦃ varSub ⦄ ⦃ SubVarSub ⦄ ⦄
+                                        (δ : VarSub ⦃ varSub ⦄ Γ Δ) (M : Tm (B ∷ A ∷ Δ) E) →
+                                      ⟦ qᵉ qᵉ qᵉ qᵉ δ ⟧ᵛ ⟦ qᵉ qᵉ (Wkᵛ {A = D} ∘ᵛ Wkᵛ {A = C}) ⟧ᵛ M
+                                        ≡ ⟦ qᵉ qᵉ (Wkᵛ {A = D} ∘ᵛ Wkᵛ {A = C}) ⟧ᵛ ⟦ qᵉ qᵉ δ ⟧ᵛ M
+⟦qᵉ⁴-⟧ᵛ⟦qᵉ²Wkᵛ²⟧ᵛ≡⟦qᵉ²Wkᵛ²⟧ᵛ⟦qᵉ²-⟧ᵛ δ M =
+  begin _ ≡⟨ ⟦-⟧ᵛ-compositional (qᵉ qᵉ qᵉ qᵉ δ) (qᵉ qᵉ (Wkᵛ ∘ᵛ Wkᵛ)) M ⟩
+        _ ≡˘⟨ ⟦-⟧ᵛ-extensional M (qᵛ⟦ _ ∷ _ ∷ [] ⟧-distrib-∘ᵛ (qᵉ qᵉ δ) (Wkᵛ ∘ᵛ Wkᵛ)) ⟩
+        _ ≡⟨ ⟦-⟧ᵛ-extensional M (qᵛ⟦ _ ∷ _ ∷ [] ⟧-congᵛ (⟦-⟧ᵛ-compositional Wkᵛ Wkᵛ ∘ δ)) ⟩
+        _ ≡⟨ ⟦-⟧ᵛ-extensional M (qᵛ⟦ _ ∷ _ ∷ [] ⟧-distrib-∘ᵛ(Wkᵛ ∘ᵛ Wkᵛ) δ) ⟩
+        _ ≡˘⟨ ⟦-⟧ᵛ-compositional (qᵉ qᵉ (Wkᵛ ∘ᵛ Wkᵛ)) (qᵉ qᵉ δ) M ⟩
         _ ∎
   where
     open ≡-Reasoning
