@@ -60,6 +60,10 @@ convEx-preserves-⟦!ˢ-⟧ˢ : ∀ (e : Ex (A ∷ Γ) B) (f : Ex Γ A) →
                           convEx (⟦ !ˢ f ⟧ᵛ e) ≡ ⟦ 𝒪.!ˢ convEx f ⟧ᵛ (convEx e)
 convEx-preserves-⟦!ˢ-⟧ˢ e f = trans (convEx-preserves-⟦-⟧ˢ (!ˢ f) e) (⟦-⟧ᵛ-extensional (convEx e) λ{ (here refl) → refl ; (there x) → refl })
 
+convEx-preserves-⟦!ˢ-,ᵛ-⟧ˢ : ∀ (e : Ex (B ∷ A ∷ Γ) C) (f : Ex Γ A) (g : Ex Γ B) →
+                             convEx (⟦ !ˢ f ,ᵛ g ⟧ᵛ e) ≡ ⟦ 𝒪.!ˢ convEx f ,ᵛ convEx g ⟧ᵛ (convEx e)
+convEx-preserves-⟦!ˢ-,ᵛ-⟧ˢ e f g = trans (convEx-preserves-⟦-⟧ˢ (!ˢ f ,ᵛ g) e) (⟦-⟧ᵛ-extensional (convEx e) λ{ (here refl) → refl ; (there (here refl)) → refl ; (there (there x)) → refl })
+
 convTm-preserves-⟦-⟧ᵉ : ∀ (δ : Ext Δ Γ) (M : 𝒪.Tm Γ A) →
                         convTm (⟦ δ ⟧ᵛ M) ≡ ⟦ δ ⟧ᵛ (convTm M)
 convTm-preserves-⟦-⟧ᵉ δ (𝒪.`# x)         = refl
@@ -87,3 +91,7 @@ convTm-preserves-⟦-⟧ˢ σ (𝒪.`let M `in N)
 convTm-preserves-⟦!ˢ-⟧ˢ : ∀ (M : 𝒪.Tm (A ∷ Γ) B) (N : 𝒪.Tm Γ A) →
                           convTm (⟦ 𝒪.!ˢ N ⟧ᵛ M) ≡ ⟦ !ˢ convTm N ⟧ᵛ (convTm M)
 convTm-preserves-⟦!ˢ-⟧ˢ M N = trans (convTm-preserves-⟦-⟧ˢ (𝒪.!ˢ N) M) (⟦-⟧ᵛ-extensional (convTm M) λ{ (here refl) → refl ; (there x) → refl })
+
+convTm-preserves-⟦!ˢ-,ᵛ-⟧ˢ : ∀ (M : 𝒪.Tm (B ∷ A ∷ Γ) C) (N : 𝒪.Tm Γ A) (L : 𝒪.Tm Γ B) →
+                             convTm (⟦ 𝒪.!ˢ N ,ᵛ L ⟧ᵛ M) ≡ ⟦ !ˢ convTm N ,ᵛ convTm L ⟧ᵛ (convTm M)
+convTm-preserves-⟦!ˢ-,ᵛ-⟧ˢ M N L = trans (convTm-preserves-⟦-⟧ˢ (𝒪.!ˢ N ,ᵛ L) M) (⟦-⟧ᵛ-extensional (convTm M) λ{ (here refl) → refl ; (there (here refl)) → refl ; (there (there x)) → refl })

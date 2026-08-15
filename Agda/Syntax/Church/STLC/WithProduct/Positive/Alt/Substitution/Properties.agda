@@ -148,14 +148,12 @@ instance
                RawAppSub.forExE δ (RawAppSub.forExE γ ee) ≡ RawAppSub.forExE (δ ∘ᵛ γ) ee
 
       forEx δ γ (`# x)     = refl
-      forEx δ γ (`λ e)     = cong `λ_ (trans (forEx (qᵉ δ) (qᵉ γ) e) (sym (⟦-⟧ᵛ-extensional e (qᵉ-distrib-∘ᵛ δ _))))
+      forEx δ γ (`λ e)     = cong `λ_ (trans (forEx (qᵉ δ) (qᵉ γ) e) (sym (⟦-⟧ᵛ-extensional e (qᵛ-distrib-∘ᵛ δ γ))))
       forEx δ γ (e `, f)   = cong₂ _`,_ (forEx δ γ e) (forEx δ γ f)
       forEx δ γ (e `∷ᵉ ee) = cong₂ _`∷ᵉ_ (forEx δ γ e) (forExE δ γ ee)
 
       forExE δ γ (-`$ f)      = cong -`$_ (forEx δ γ f)
-      forExE δ γ (`let-`in f) = cong `let-`in_ (trans (forEx (qᵉ qᵉ δ) (qᵉ qᵉ γ) f) (sym (⟦-⟧ᵛ-extensional f (transᵛ (qᵛ-congᵛ (qᵉ-distrib-∘ᵛ δ _)) (qᵉ-distrib-∘ᵛ (qᵉ δ) _)))))
-
-qᵉ-distrib-∘ˢᵉ = qᵛ-distrib-∘ᵛ ⦃ ExtVarSub ⦄ ⦃ SubVarSub ⦄ ⦃ ExtVarSub ⦄ ⦃ SubVarSub ⦄
+      forExE δ γ (`let-`in f) = cong `let-`in_ (trans (forEx (qᵉ qᵉ δ) (qᵉ qᵉ γ) f) (sym (⟦-⟧ᵛ-extensional f (qᵛ⟦ _ ∷ _ ∷ [] ⟧-distrib-∘ᵛ δ γ))))
 
 instance
   SubAppExtCompositionalSub : VarSubAppCompositional ⦃ SubVarSub ⦄ ⦃ ExtVarSub ⦄ ⦃ SubVarSub ⦄
@@ -167,14 +165,12 @@ instance
                RawAppSub.forExE σ (RawAppSub.forExE δ ee) ≡ RawAppSub.forExE (σ ∘ᵛ δ) ee
 
       forEx σ δ (`# x)     = refl
-      forEx σ δ (`λ e)     = cong `λ_ (trans (forEx (qᵉ σ) (qᵉ δ) e) (sym (⟦-⟧ᵛ-extensional e (qᵉ-distrib-∘ˢᵉ σ _))))
+      forEx σ δ (`λ e)     = cong `λ_ (trans (forEx (qᵉ σ) (qᵉ δ) e) (sym (⟦-⟧ᵛ-extensional e (qᵛ-distrib-∘ᵛ σ δ))))
       forEx σ δ (e `, f)   = cong₂ _`,_ (forEx σ δ e) (forEx σ δ f)
       forEx σ δ (e `∷ᵉ ee) = cong₂ _`∷ᵉ_ (forEx σ δ e) (forExE σ δ ee)
 
       forExE σ δ (-`$ f)      = cong -`$_ (forEx σ δ f)
-      forExE σ δ (`let-`in f) = cong `let-`in_ (trans (forEx (qᵉ qᵉ σ) (qᵉ qᵉ δ) f) (sym (⟦-⟧ᵛ-extensional f (transᵛ (qᵛ-congᵛ (qᵉ-distrib-∘ˢᵉ σ _)) (qᵉ-distrib-∘ˢᵉ (qᵉ σ) _)))))
-
-qᵉ-distrib-∘ᵉˢ = qᵛ-distrib-∘ᵛ ⦃ ExtVarSub ⦄ ⦃ ExtVarSub ⦄ ⦃ SubVarSub ⦄ ⦃ SubVarSub ⦄
+      forExE σ δ (`let-`in f) = cong `let-`in_ (trans (forEx (qᵉ qᵉ σ) (qᵉ qᵉ δ) f) (sym (⟦-⟧ᵛ-extensional f (qᵛ⟦ _ ∷ _ ∷ [] ⟧-distrib-∘ᵛ σ δ))))
 
 instance
   ExtAppSubCompositionalSub : VarSubAppCompositional ⦃ ExtVarSub ⦄ ⦃ SubVarSub ⦄ ⦃ SubVarSub ⦄
@@ -186,14 +182,12 @@ instance
                RawAppSub.forExE δ (RawAppSub.forExE σ ee) ≡ RawAppSub.forExE (δ ∘ᵛ σ) ee
 
       forEx δ σ (`# x)     = refl
-      forEx δ σ (`λ e)     = cong `λ_ (trans (forEx (qᵉ δ) (qᵉ σ) e) (sym (⟦-⟧ᵛ-extensional e (qᵉ-distrib-∘ᵉˢ _ σ))))
+      forEx δ σ (`λ e)     = cong `λ_ (trans (forEx (qᵉ δ) (qᵉ σ) e) (sym (⟦-⟧ᵛ-extensional e (qᵛ-distrib-∘ᵛ δ σ))))
       forEx δ σ (e `, f)   = cong₂ _`,_ (forEx δ σ e) (forEx δ σ f)
       forEx δ σ (e `∷ᵉ ee) = cong₂ _`∷ᵉ_ (forEx δ σ e) (forExE δ σ ee)
 
       forExE δ σ (-`$ f)      = cong -`$_ (forEx δ σ f)
-      forExE δ σ (`let-`in f) = cong `let-`in_ (trans (forEx (qᵉ qᵉ δ) (qᵉ qᵉ σ) f) (sym (⟦-⟧ᵛ-extensional f (transᵛ (qᵛ-congᵛ (qᵉ-distrib-∘ᵉˢ _ σ)) (qᵉ-distrib-∘ᵉˢ _ (qᵉ σ))))))
-
-qᵉ-distrib-∘ˢ = qᵛ-distrib-∘ᵛ ⦃ ExtVarSub ⦄ ⦃ SubVarSub ⦄ ⦃ SubVarSub ⦄ ⦃ SubVarSub ⦄
+      forExE δ σ (`let-`in f) = cong `let-`in_ (trans (forEx (qᵉ qᵉ δ) (qᵉ qᵉ σ) f) (sym (⟦-⟧ᵛ-extensional f (qᵛ⟦ _ ∷ _ ∷ [] ⟧-distrib-∘ᵛ δ σ))))
 
 instance
   SubAppSubCompositionalSub : VarSubAppCompositional ⦃ SubVarSub ⦄ ⦃ SubVarSub ⦄ ⦃ SubVarSub ⦄
@@ -205,12 +199,12 @@ instance
                RawAppSub.forExE σ (RawAppSub.forExE τ ee) ≡ RawAppSub.forExE (σ ∘ᵛ τ) ee
 
       forEx σ τ (`# x)     = refl
-      forEx σ τ (`λ e)     = cong `λ_ (trans (forEx (qᵉ σ) (qᵉ τ) e) (sym (⟦-⟧ᵛ-extensional e (qᵉ-distrib-∘ˢ _ τ))))
+      forEx σ τ (`λ e)     = cong `λ_ (trans (forEx (qᵉ σ) (qᵉ τ) e) (sym (⟦-⟧ᵛ-extensional e (qᵛ-distrib-∘ᵛ σ τ))))
       forEx σ τ (e `, f)   = cong₂ _`,_ (forEx σ τ e) (forEx σ τ f)
       forEx σ τ (e `∷ᵉ ee) = cong₂ _`∷ᵉ_ (forEx σ τ e) (forExE σ τ ee)
 
       forExE σ τ (-`$ f)      = cong -`$_ (forEx σ τ f)
-      forExE σ τ (`let-`in f) = cong `let-`in_ (trans (forEx (qᵉ qᵉ σ) (qᵉ qᵉ τ) f) (sym (⟦-⟧ᵛ-extensional f (transᵛ (qᵛ-congᵛ (qᵉ-distrib-∘ˢ _ τ)) (qᵉ-distrib-∘ˢ _ (qᵉ τ))))))
+      forExE σ τ (`let-`in f) = cong `let-`in_ (trans (forEx (qᵉ qᵉ σ) (qᵉ qᵉ τ) f) (sym (⟦-⟧ᵛ-extensional f (qᵛ⟦ _ ∷ _ ∷ [] ⟧-distrib-∘ᵛ σ τ))))
 
 ----------------------------------------------------------
 -- Other Useful Properties for Extensions/Substitutions
@@ -426,26 +420,44 @@ forExE-qᵉ²-forExE-Wkᵛ²≡forExE-Wkᵛ²-forExE δ (`let-`in e) = cong `let
   where
     open ≡-Reasoning
 
-⟦qᵉ!ˢ-⟧ᵛ⟦qᵉWkᵛ⟧ᵛ≡id : ∀ (e : Ex Γ A) (f : Ex (B ∷ Γ) C) →
-                      ⟦ qᵉ !ˢ e ⟧ᵛ ⟦ qᵉᵉ Wkᵛ ⟧ᵛ f ≡ f
-⟦qᵉ!ˢ-⟧ᵛ⟦qᵉWkᵛ⟧ᵛ≡id e f =
-  begin _ ≡⟨ ⟦-⟧ᵛ-compositional _ (qᵉᵉ Wkᵛ) f ⟩
-        _ ≡˘⟨ ⟦-⟧ᵛ-extensional f (qᵉ-distrib-∘ˢᵉ (!ˢ e) Wkᵛ) ⟩
-        _ ≡⟨ ⟦-⟧ᵛ-extensional f qᵛ-preserves-Idᵛ ⟩
-        _ ≡⟨ ⟦Idᵛ⟧ᵛ≡liftᵛ f ⟩
+⟦!ˢ-,ᵛ-⟧ᵛ⟦Wkᵛ²⟧ᵛ≡id : ∀ (e : Ex Γ A) (f : Ex Γ B) (g : Ex Γ C) →
+                      ⟦ !ˢ e ,ᵛ f ⟧ᵛ ⟦ Wkᵛ ∘ᵛ Wkᵛ ⟧ᵛ g ≡ g
+⟦!ˢ-,ᵛ-⟧ᵛ⟦Wkᵛ²⟧ᵛ≡id e f g =
+  begin _ ≡⟨ ⟦-⟧ᵛ-compositional _ (Wkᵛ ∘ᵛ Wkᵛ) g ⟩
+        _ ≡⟨ ⟦Idᵛ⟧ᵛ≡liftᵛ g ⟩
         _ ∎
   where
     open ≡-Reasoning
+
+-- ⟦qᵉ!ˢ-⟧ᵛ⟦qᵉWkᵛ⟧ᵛ≡id : ∀ (e : Ex Γ A) (f : Ex (B ∷ Γ) C) →
+--                       ⟦ qᵉ !ˢ e ⟧ᵛ ⟦ qᵉᵉ Wkᵛ ⟧ᵛ f ≡ f
+-- ⟦qᵉ!ˢ-⟧ᵛ⟦qᵉWkᵛ⟧ᵛ≡id e f =
+--   begin _ ≡⟨ ⟦-⟧ᵛ-compositional _ (qᵉᵉ Wkᵛ) f ⟩
+--         _ ≡˘⟨ ⟦-⟧ᵛ-extensional f (qᵛ-distrib-∘ᵛ (!ˢ e) Wkᵛ) ⟩
+--         _ ≡⟨ ⟦-⟧ᵛ-extensional f qᵛ-preserves-Idᵛ ⟩
+--         _ ≡⟨ ⟦Idᵛ⟧ᵛ≡liftᵛ f ⟩
+--         _ ∎
+--   where
+--     open ≡-Reasoning
 
 ⟦qᵉ²!ˢ-⟧ᵛ⟦qᵉ²Wkᵛ⟧ᵛ≡id : ∀ (e : Ex Γ A) (f : Ex (C ∷ B ∷ Γ) D) →
                           ⟦ qᵉ qᵉ !ˢ e ⟧ᵛ ⟦ qᵉᵉ qᵉᵉ Wkᵛ ⟧ᵛ f ≡ f
 ⟦qᵉ²!ˢ-⟧ᵛ⟦qᵉ²Wkᵛ⟧ᵛ≡id e f =
   begin _ ≡⟨ ⟦-⟧ᵛ-compositional _ (qᵉᵉ qᵉᵉ Wkᵛ) f ⟩
-        _ ≡˘⟨ ⟦-⟧ᵛ-extensional f (qᵉ-distrib-∘ˢᵉ (qᵉ !ˢ e) (qᵉ Wkᵛ)) ⟩
-        _ ≡˘⟨ ⟦-⟧ᵛ-extensional f (qᵛ-congᵛ (qᵉ-distrib-∘ˢᵉ (!ˢ e) Wkᵛ)) ⟩
-        _ ≡⟨ ⟦-⟧ᵛ-extensional f (qᵛ-congᵛ qᵛ-preserves-Idᵛ) ⟩
-        _ ≡⟨ ⟦-⟧ᵛ-extensional f qᵛ-preserves-Idᵛ ⟩
+        _ ≡˘⟨ ⟦-⟧ᵛ-extensional f (qᵛ⟦ _ ∷ _ ∷ [] ⟧-distrib-∘ᵛ (!ˢ e) Wkᵛ) ⟩
+        _ ≡⟨ ⟦-⟧ᵛ-extensional f qᵛ⟦ _ ∷ _ ∷ [] ⟧-preserves-Idᵛ ⟩
         _ ≡⟨ ⟦Idᵛ⟧ᵛ≡liftᵛ f ⟩
+        _ ∎
+  where
+    open ≡-Reasoning
+
+⟦qᵉ²!ˢ-,ᵛ-⟧ᵛ⟦qᵉ²Wkᵛ²⟧ᵛ≡id : ∀ (e : Ex Γ A) (f : Ex Γ B) (g : Ex (D ∷ C ∷ Γ) E) →
+                            ⟦ qᵉ qᵉ (!ˢ e ,ᵛ f) ⟧ᵛ ⟦ qᵉᵉ qᵉᵉ (Wkᵛ ∘ᵛ Wkᵛ) ⟧ᵛ g ≡ g
+⟦qᵉ²!ˢ-,ᵛ-⟧ᵛ⟦qᵉ²Wkᵛ²⟧ᵛ≡id e f g =
+  begin _ ≡⟨ ⟦-⟧ᵛ-compositional _ (qᵉᵉ qᵉᵉ (Wkᵛ ∘ᵛ Wkᵛ)) g ⟩
+        _ ≡˘⟨ ⟦-⟧ᵛ-extensional g (qᵛ⟦ _ ∷ _ ∷ [] ⟧-distrib-∘ᵛ (!ˢ e ,ᵛ f) (Wkᵛ ∘ᵛ Wkᵛ)) ⟩
+        _ ≡⟨ ⟦-⟧ᵛ-extensional g qᵛ⟦ _ ∷ _ ∷ [] ⟧-preserves-Idᵛ ⟩
+        _ ≡⟨ ⟦Idᵛ⟧ᵛ≡liftᵛ g ⟩
         _ ∎
   where
     open ≡-Reasoning
@@ -454,3 +466,8 @@ forExE-!ˢ-forExE-Wkᵛ≡id : ∀ (e : Ex Γ A) (ee : ExE Γ B C) →
                           RawAppSub.forExE (!ˢ e) (RawAppSub.forExE Wkᵛ ee) ≡ ee
 forExE-!ˢ-forExE-Wkᵛ≡id e (-`$ f)      = cong -`$_ (⟦!ˢ-⟧ᵛ⟦Wkᵛ⟧ᵛ≡id e f)
 forExE-!ˢ-forExE-Wkᵛ≡id e (`let-`in f) = cong `let-`in_ (⟦qᵉ²!ˢ-⟧ᵛ⟦qᵉ²Wkᵛ⟧ᵛ≡id e f)
+
+forExE-!ˢ-,ᵛ-forExE-Wkᵛ²≡id : ∀ (e : Ex Γ A) (f : Ex Γ B) (ee : ExE Γ C D) →
+                              RawAppSub.forExE (!ˢ e ,ᵛ f) (RawAppSub.forExE (Wkᵛ ∘ᵛ Wkᵛ) ee) ≡ ee
+forExE-!ˢ-,ᵛ-forExE-Wkᵛ²≡id e f (-`$ g)      = cong -`$_ (⟦!ˢ-,ᵛ-⟧ᵛ⟦Wkᵛ²⟧ᵛ≡id e f g)
+forExE-!ˢ-,ᵛ-forExE-Wkᵛ²≡id e f (`let-`in g) = cong `let-`in_ (⟦qᵉ²!ˢ-,ᵛ-⟧ᵛ⟦qᵉ²Wkᵛ²⟧ᵛ≡id e f g)

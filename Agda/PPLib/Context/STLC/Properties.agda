@@ -403,8 +403,40 @@ module _
   ⦃ varSub₁ : VarSubBase R₁ ⦄
   ⦃ varSub₂ : VarSubBase R₂ ⦄
   ⦃ varSub₃ : VarSubBase R₃ ⦄ where
-  open VarSubBase varSub₂ using () renaming (VarSub to VarSub₂)
+  open VarSubBase varSub₂ using () renaming (VarSub to VarSub₂; _≈ᵛ_ to _≈ᵛ₂_)
   open VarSubBase varSub₃ using () renaming (VarSub to VarSub₃; _≈ᵛ_ to _≈ᵛ₃_)
+
+  module _
+    ⦃ _ : RawVarSubId ⦃ varSub₁ ⦄ ⦄
+    ⦃ _ : RawVarSubId ⦃ varSub₂ ⦄ ⦄
+    ⦃ _ : RawVarSubId ⦃ varSub₃ ⦄ ⦄
+    ⦃ _ : RawVarSubWk ⦃ varSub₁ ⦄ ⦄
+    ⦃ _ : RawVarSubLift ⦃ varSub₂ ⦄ ⦃ varSub₃ ⦄ ⦄
+    ⦃ _ : RawVarSubApp ⦃ varSub₂ ⦄ ⦃ varSub₁ ⦄ ⦃ varSub₃ ⦄ ⦄
+    ⦃ _ : RawVarSubApp ⦃ varSub₁ ⦄ ⦃ varSub₂ ⦄ ⦃ varSub₃ ⦄ ⦄
+    ⦃ _ : RawVarSubApp ⦃ varSub₂ ⦄ ⦃ varSub₃ ⦄ ⦃ varSub₂ ⦄ ⦄
+    ⦃ _ : RawVarSubApp ⦃ varSub₃ ⦄ ⦃ varSub₂ ⦄ ⦃ varSub₂ ⦄ ⦄
+    ⦃ _ : VarSubWkSpec ⦃ varSub₁ ⦄ ⦄
+    ⦃ _ : VarSubLiftId ⦃ varSub₂ ⦄ ⦃ varSub₃ ⦄ ⦄
+    ⦃ _ : VarSubIdNoOpˡ ⦃ varSub₃ ⦄ ⦃ varSub₂ ⦄ ⦃ varSub₂ ⦄ ⦄
+    ⦃ _ : VarSubIdNoOpʳ ⦃ varSub₂ ⦄ ⦃ varSub₁ ⦄ ⦃ varSub₃ ⦄ ⦄
+    ⦃ _ : VarSubIdNoOpʳ ⦃ varSub₂ ⦄ ⦃ varSub₃ ⦄ ⦃ varSub₂ ⦄ ⦄
+    ⦃ _ : VarSubAppCompositional ⦃ varSub₂ ⦄ ⦃ varSub₁ ⦄ ⦃ varSub₂ ⦄ ⦄
+    ⦃ _ : VarSubAppExtensional ⦃ varSub₃ ⦄ ⦃ varSub₂ ⦄ ⦃ varSub₂ ⦄ ⦄ where
+    opaque
+      !ᵛ-∘ᵛ-!ᵛ : ∀ (M : R₂ Γ A) (N : R₂ Γ B) →
+                 ------------------------------------
+                 !ᵛ M ∘ᵛ !ᵛ ⟦ Wkᵛ ⟧ᵛ N ≈ᵛ₂ !ᵛ M ,ᵛ N
+      !ᵛ-∘ᵛ-!ᵛ M N =
+        begin !ᵛ M ∘ᵛ !ᵛ ⟦ Wkᵛ ⟧ᵛ N                 ≈⟨ ∘ᵛ-distrib-,ᵛ (⟦ Wkᵛ ⟧ᵛ N) ⟩
+              (!ᵛ M ∘ᵛ Idᵛ) ,ᵛ ⟦ !ᵛ M ⟧ᵛ ⟦ Wkᵛ ⟧ᵛ N ≈⟨ ,ᵛ-congᵛ (Idᵛ-idʳ (!ᵛ M)) (⟦-⟧ᵛ-compositional (!ᵛ M) Wkᵛ N) ⟩
+              !ᵛ M ,ᵛ ⟦ !ᵛ M ∘ᵛ Wkᵛ ⟧ᵛ N            ≈⟨ ,ᵛ-congᵛʳ (!ᵛ M)
+                                                         (trans
+                                                           (⟦-⟧ᵛ-extensional N (transᵛ (∘ᵛWkᵛ-cancel-,ᵛ Idᵛ M) liftᵛ-preserves-Idᵛ))
+                                                           (⟦Idᵛ⟧ᵛ≡liftᵛ N)) ⟩
+              !ᵛ M ,ᵛ N ∎
+        where
+          open VarSub-Reasoning ⦃ varSub₂ ⦄ _ _
 
   module _
     ⦃ _ : RawVarSubId ⦃ varSub₁ ⦄ ⦄
