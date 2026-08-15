@@ -74,8 +74,8 @@ module OpSem where
                     ------------------------------------------------------------
                     (`case M `of Nₗ `/ Nᵣ) `$ L
                       ⟶ `case M
-                          `of (Nₗ `$ ⟦ Wkᵛ ⦃ ExtVarSub ⦄ ⟧ᵛ L)
-                           `/ (Nᵣ `$ ⟦ Wkᵛ ⦃ ExtVarSub ⦄ ⟧ᵛ L)
+                          `of (Nₗ `$ ⟦ Wkᵛ ⟧ᵛ L)
+                           `/ (Nᵣ `$ ⟦ Wkᵛ ⟧ᵛ L)
 
     `+χ`+         : ∀ {M : Tm Γ (A `+ B)}
                       {Nₗ : Tm (A ∷ Γ) (C `+ D)} {Nᵣ : Tm (B ∷ Γ) (C `+ D)}

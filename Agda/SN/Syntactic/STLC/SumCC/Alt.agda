@@ -443,10 +443,8 @@ module AccessibilitySN where
     ∈sn-commuting-expansion : ∀ {e : Ex Γ (A `+ B)} {fₗ : Ex (A ∷ Γ) C} {fᵣ : Ex (B ∷ Γ) C}
                                 (ee : ExE Γ C D) (es : ExEs Γ D E) →
                               e ∈ne$ →
-                              e `∷ᵉ `case-`of (fₗ `∷ᵉ RawAppSub.forExE Wkᵛ ee)
-                                           `/ (fᵣ `∷ᵉ RawAppSub.forExE Wkᵛ ee)
-                                `++ˢ es ∈sn →
-                              -----------------------------------------------------------------
+                              e `∷ᵉ `+χ-result fₗ fᵣ ee `++ˢ es ∈sn →
+                              --------------------------------------------------------------
                               e `∷ᵉ `case-`of fₗ `/ fᵣ `∷ᵉ ee `++ˢ es ∈sn
     ∈sn-commuting-expansion = λ ee es ene$ efₗeefᵣeesn → acc (go {es = es} ene$ (<-wellFounded _) (TransClosure.accessible _⟵_ efₗeefᵣeesn))
       where
@@ -456,7 +454,7 @@ module AccessibilitySN where
         go : ∀ {e : Ex Γ (A `+ B)} {fₗ : Ex (A ∷ Γ) C} {fᵣ : Ex (B ∷ Γ) C} {ee : ExE Γ C D} {es : ExEs Γ D E} →
              e ∈ne$ →
              Acc _<_ (lengthˢ es) →
-             e `∷ᵉ `case-`of (fₗ `∷ᵉ RawAppSub.forExE Wkᵛ ee) `/ (fᵣ `∷ᵉ RawAppSub.forExE Wkᵛ ee) `++ˢ es ∈sn+ →
+             e `∷ᵉ `+χ-result fₗ fᵣ ee `++ˢ es ∈sn+ →
              WfRec _⟵_ _∈sn (e `∷ᵉ `case-`of fₗ `/ fᵣ `∷ᵉ ee `++ˢ es)
         go {es = es} ene$ (acc esrec) (acc efₗeefᵣeerec) efₗfᵣeees⟶
           with `++ˢ-⟶-cases _ es efₗfᵣeees⟶
