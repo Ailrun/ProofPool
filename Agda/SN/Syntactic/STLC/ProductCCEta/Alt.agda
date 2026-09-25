@@ -100,6 +100,11 @@ module OpSem where
                 ---------------------------
                 `let-`in f ⟶′ᵉ `let-`in f′
 
+  infix   4 _⟶′*_
+  _⟶′*_ : Rel (Ex Γ A) _
+  _⟶′*_ = Star _⟶′_
+
+  infix   4 _⟶ᶜ_
   _⟶ᶜ_ : Rel (Ex Γ A) lzero
   _⟶ᶜ_ = β._⟶_ ∪ _⟶′_
 
